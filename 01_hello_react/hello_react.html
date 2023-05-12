@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="app"></div>
+  <!-- 先引入react核心库 react-dom操作dom库 babel,jsx转换js库  -->
+  <script type="text/javascript" src="../lib/16.8.4/react.development.js"></script>
+  <script type="text/javascript" src="../lib/16.8.4/react-dom.development.js"></script>
+  <script type="text/javascript" src="../lib/16.8.4/babel.min.js"></script>
+
+  <!-- text/babel 写的是jsx，让babel进行编译转译为js -->
+  <script type="text/babel">
+    // 1.创建虚拟dom
+    const VDOM = <h1>hello,React</h1>/* 此处不需要写引号，不是字符串 */
+    // 2.渲染虚拟dom到页面 ReactDOM函数 (VDom, 选自器)
+    ReactDOM.render(VDOM, document.getElementById('app'))
+  </script>
+</body>
+</html>
