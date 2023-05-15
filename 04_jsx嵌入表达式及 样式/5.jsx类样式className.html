@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="./index.css">
+</head>
+<body>
+  <div id="app"></div>
+  <!-- 先引入react核心库 react-dom操作dom库 babel,jsx转换js库  -->
+  <script type="text/javascript" src="../lib/16.8.4/react.development.js"></script>
+  <script type="text/javascript" src="../lib/16.8.4/react-dom.development.js"></script>
+  <script type="text/javascript" src="../lib/16.8.4/babel.min.js"></script>
+
+  <!-- text/babel 写的是jsx，让babel进行编译转译为js -->
+  <script type="text/babel">
+    const isActive = true // 是否被选中
+    const VDOM = (
+      <div>
+        {/* jsx中添加内样式className={} 添加一个button类样式 */}
+        <span className={ `button ${isActive? 'active': '' }` }>button</span>
+      </div>
+    )
+
+    // 如果是多个类名的变化呢？
+    // vue 中绑定类名的时候使用 {类名:布尔} 用布尔值决定是否加上这个类名 { btn: true, 't-btn': true }
+    const isActiveT = false
+    const isBlocked = false
+
+    // 类名对象，即像vue中在class="{btn: true'}"
+    const classObject = { // key属性
+      button: true,
+      active: isActiveT,
+      block: isBlocked
+    }
+    const className = (classObj) => {
+      return Object.keys(classObj)
+      .filter(key => classObj[key]) // 将属性名为true，过滤出来形成数组
+      .join(' ') // 再将数组每个元素进行拼接，返回成字符串
+    }
+    
+    const VDOM2 = (
+      <div>
+        {VDOM}
+        <hr />
+        <span className={ className(classObject) }>按钮2</span>
+      </div>
+    )
+    
+    ReactDOM.render(VDOM2, document.getElementById('app'))
+  </script>
+</body>
+</html>

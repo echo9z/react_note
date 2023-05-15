@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="app"></div>
+  <!-- 先引入react核心库 react-dom操作dom库 babel,jsx转换js库  -->
+  <script type="text/javascript" src="../lib/16.8.4/react.development.js"></script>
+  <script type="text/javascript" src="../lib/16.8.4/react-dom.development.js"></script>
+  <script type="text/javascript" src="../lib/16.8.4/babel.min.js"></script>
+
+  <script type="text/babel">
+    // 对象数据
+    const data = {
+      name: 'test1',
+      age: 18
+    }
+    // 函数
+    const toUpper = (str) => {
+      return str.toUpperCase();
+    }
+    // jsx表达式
+    const list = (
+      <ul>
+        <li>jack</li>
+        <li>tony</li>
+      </ul>
+    );
+    const VDOM = (
+      <div>
+        {/* 1. 使用数据  注释推荐快键键(ctrl+/)  */}
+        <div>
+          <span>姓名：{data.name}</span>
+          <span>年龄：{data.age}</span>
+        </div>
+        {/* 2. 使用运算 */}
+        <div>明年几岁：{data.age + 1}</div>
+        {/* 3. 使用三元 */}
+        <div>是否成年：{data.age > 16 ? '是' : '否'}</div>
+        {/* 4. 使用函数 */}
+        <div>姓名大写：{toUpper(data.name)}</div>
+        {/* 5. 使用JSX(jsx也是表达式) */}
+        <div>朋友：{list}</div>
+      </div>
+    )
+    // 2.渲染虚拟dom到页面 ReactDOM函数 (VDom, 选自器)
+    ReactDOM.render(VDOM, document.getElementById('app'))
+  </script>
+</body>
+</html>
