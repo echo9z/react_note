@@ -3,7 +3,7 @@ const Input = (props) => { // => const Input = ({ onChangeHandler }) 结构props
   console.log(props);
   const { onChangeHandler } = props
   return (
-    <input type="search"
+    <input type="search" placeholder="Search"
       onChange={ onChangeHandler } />
   )
 }

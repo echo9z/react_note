@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .box {
+      height: 200px;
+      width: 200px;
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <!-- 先引入react核心库 react-dom操作dom库 babel,jsx转换js库  -->
+  <script type="text/javascript" src="../lib/16.8.4/react.development.js"></script>
+  <script type="text/javascript" src="../lib/16.8.4/react-dom.development.js"></script>
+  <script type="text/javascript" src="../lib/16.8.4/babel.min.js"></script>
+
+  <!-- text/babel 写的是jsx，让babel进行编译转译为js -->
+  <script type="text/babel">
+    const id = 'teXT'
+    const data = 'hELLo,ReaCT!'
+
+    /*
+      className htmlFor 特殊属性写法
+        <div className = "box" ></div>
+        <label id="myLabel" for="male">Male</label>
+      没有内容的节点可以使用 单标签
+        <span className="icon-edit" />
+    */
+    const sy = {
+      color: 'pink',
+      backgroundColor: '#000',
+      fontWeight: 'bold',
+    }
+    const VDOM1 = ( // jsx多行 使用()包裹
+      // 必须要有根节点
+      <React.Fragment>
+        <div className = "box" >
+          <label id="myLabel" htmlFor="male">Male</label>
+          <span className="icon-edit" />
+          <p style= { sy } >hello</p>
+          <div style={ {width: 50, height: 50, backgroundColor: 'skyblue'} }> 文本内容 </div>
+        </div>
+        <test>test</test>
+        <Good >123</Good>
+      </React.Fragment>
+    )
+
+    // 1.创建虚拟dom
+    const VDOM = ( /* 此处不需要写引号，不是字符串 */
+      <div>
+        <h2 id={ id.toLocaleLowerCase() }>
+          <span>{ data.toLocaleLowerCase() }</span>
+        </h2>
+        <input type="text" />
+        { VDOM1 }
+      </div>
+    )
+
+    // 2.渲染虚拟dom到页面 ReactDOM函数 (VDom, 选自器)
+    ReactDOM.render(VDOM, document.getElementById('app'))
+
+    /**
+     * jsx语法规则：
+     *  1.定义虚拟dom时，不要写引号 
+     *  2.标签中混入js表达式 要使用{}，不能写js代码比如 if(a==c){} for(i=1;i<10;i++){}
+     *  3.样式类名指定，不要使用class，使用className
+     *  4.内联样式，要用style={ {key:value} } 形式
+     *  5.jsx中必须使用根标签包裹 <React.Fragment></React.Fragment> <></>
+     *  6.单个标签必须闭合 <span className="icon-edit" /> 或者 <span className="icon-edit"></span>
+     *  7.标签首字母
+     *    (1)若小写字母开头，则转换为html标签中的同名元素。如 <span></span>，如果没有同名对应的html标签，则报错比如<good></good>
+     *    (2)若大写字母开头，react就去渲染对应的组件，若没有则全局报错，影响视图渲染<Good></Good>
+     */
+  </script>
+</body>
+</html>
