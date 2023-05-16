@@ -87,6 +87,8 @@ root.render(<h1>123456</h1>)
 
 - js创建虚拟dom
 
+`<h1 class='t-ty' > <span>hello,react</span> </h1>`
+
 ```js
   <div id="app"></div>
   <!-- 先引入react核心库 react-dom操作dom库 babel,jsx转换js库  -->
@@ -103,6 +105,35 @@ root.render(<h1>123456</h1>)
     ReactDOM.render(VDOM, document.getElementById('app'))
   </script>
 ```
+
+- 使用 react 创建如下元素
+
+```html
+<div class="list">
+  <h1>水果</h1>
+  <ul>
+    <li>苹果</li>
+    <li>橘子</li>
+  </ul>
+</div>
+```
+
+```jsx
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+const element = React.createElement('div', { className: 'list' }, [
+  React.createElement('h1', null, '水果'),
+  React.createElement('ul', null, [
+    React.createElement('li', null, '苹果'),
+    React.createElement('li', null, '橘子'),
+  ]),
+]);
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(element)
+```
+
+**总结：** 使用 `createElement` 创建元素非常麻烦、可读性差、不优雅，开发中推荐使用 JSX 来声明 UI。
 
 ### 真实dom 与 虚拟dom
 
@@ -138,7 +169,7 @@ root.render(<h1>123456</h1>)
   </script>
 ```
 
-### jsx 语法规则
+### JSX 语法规则
 
 - 1.全称: JavaScript XML
 
@@ -687,3 +718,63 @@ ReactDOM.render(element, document.getElementById("root"))
 ```
 
 **总结：** 推荐以后开发项目中使用第三方的库来解决`className`的值绑定问题
+
+## React 组件
+
+- 组件允许你将 UI 拆分为独立可复用的代码片段，并对每个片段进行独立构思。
+
+React 创建组件：
+
+1. 使用函数 `function`
+2. 使用类 `class`
+
+### 1.函数组件
+
+具体内容：
+
+1）什么是函数组件？
+
+- 使用 JS 函数（普通，箭头）创建的组件
+
+2）定义函数组件
+
+- 语法约定
+  - 函数名称`首字母必需大写`，React 据此来区分组件和 HTML 元素
+  - 函数`必须有返回值`，表示该组件的 UI 结构，如果不渲染任何内容可返回`null`
+
+3）使用组件
+
+函数的名称就是组件名称，使用组件就是把组件名称当标签使用即可。
+
+```jsx
+import ReactDom from 'react-dom/client';
+
+// 普通函数
+function Header() {
+  return <div>头部组件</div>;
+}
+
+// 箭头函数
+const Footer = () => {
+  return <div>底部组件</div>;
+};
+
+// 加载组件，不渲染内容
+const Loading = () => {
+  const loading = false;
+  return loading ? <div>正在加载...</div> : null;
+};
+
+// 根组件
+const App = () => {
+  return (
+    <>
+      <Header />
+      <Loading />
+      <Footer />
+    </>
+  );
+};
+const root = ReactDom.createRoot(document.getElementById('root'))
+root.render(<App />);
+```
