@@ -631,3 +631,59 @@ root.render(element);
 ```
 
 **总结：** 使用 `JS` 原生的能力处理多个类名的动态绑定，当然这样的需求已经有 `classnames` 库给我们解决了
+
+### JSX 样式-classnames 库
+
+> 掌握使用 `classnames` 库来完成 `className` 属性值的动态绑定
+
+知识内容：
+
+- 如何安装导入 `classnames` 库
+- `classnames` 的 `API` 认识
+- 使用 `classnames` 处理 `className` 属性值动态绑定
+
+演示过程：
+
+- 安装导入 `classnames` [文档](https://www.npmjs.com/package/classnames#usage-with-reactjs)
+
+```shell
+# 安装 npm i classnames
+yarn add classnames
+```
+
+- 认识 `classnames` API
+
+```js
+// 1. 使用字符串
+classNames('foo', 'bar'); // foo bar
+// 2. 使用对象
+classNames({ foo: true, bar: true }); // foo bar
+// 3. 使用数组
+classNames(['foo', 'bar']); // foo bar
+// 4. 混合使用
+classNames('foo', { bar: true }); // foo bar
+```
+
+- 需求：在元素 `button`上根据 `isActive` 数据的值添加 `active` 类名，`isBlock` 数据的值添加 `block` 类名
+
+```jsx
+import ReactDom from 'react-dom';
+// 1. 导入classnames
+import classNames from 'classnames';
+import './index.css';
+
+// 2. 数据
+const isActive = true;
+const isBlock = true;
+
+// 3. 产生类名
+const className = classNames('button', {
+  active: isActive,
+  block: isBlock,
+});
+
+const element = <span className={className}>按钮</span>;
+ReactDOM.render(element, document.getElementById("root"))
+```
+
+**总结：** 推荐以后开发项目中使用第三方的库来解决`className`的值绑定问题
