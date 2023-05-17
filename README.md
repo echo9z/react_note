@@ -514,8 +514,6 @@ const element = (
 
 - 使用以下数据，渲染无序列表，显示姓名和是否成年
 
-
-
 ### JSX 样式-style 方式
 
 > 掌握使用 style 属性设置样式
@@ -651,13 +649,13 @@ root.render(element);
       .filter(key => classObj[key]) // 将属性名为true，过滤出来形成数组
       .join(' ') // 再将数组每个元素进行拼接，返回成字符串
     }
-    
+
     const VDOM2 = (
       <div>
         <span className={ className(classObject) }>按钮2</span>
       </div>
     )
-    
+
     ReactDOM.render(VDOM2, document.getElementById('app'))
 ```
 
@@ -730,8 +728,6 @@ React 创建组件：
 
 ### 1.函数组件
 
-具体内容：
-
 1）什么是函数组件？
 
 - 使用 JS 函数（普通，箭头）创建的组件
@@ -756,7 +752,7 @@ function Header() {
 
 // 箭头函数
 const Footer = () => {
-  return <div>底部组件</div>;
+  return <div>底组件</div>;
 };
 
 // 加载组件，不渲染内容
@@ -777,4 +773,291 @@ const App = () => {
 };
 const root = ReactDom.createRoot(document.getElementById('root'))
 root.render(<App />);
+
 ```
+
+```js
+  <script type="text/babel">
+    // 1.创建函数组件
+    // 函数名称首字母必需大写，React 据此来区分组件和 HTML 元素
+    // 函数必须有返回值，表示该组件的 UI 结构，如果不渲染任何内容可返回null
+    function Header() {
+      const [str, setStr] = React.useState('这是一段文字')
+      console.log(this); // 此处this是undefined，进过babel编译后开启严格模式，禁止this指向window
+
+      const onChangeStr = () => {
+        setStr('1515151')
+      }
+
+      return (
+        <div onClick={onChangeStr} >函数定义组件 {str} </div>
+      )
+    }
+
+    // 箭头函数
+    const Footer = () => {
+      console.log(this); 
+      return <div>底部组件</div>;
+    }
+    // 加载组件，不渲染内容 返回值为null，不渲染组件
+    const Loading = () => {
+      const loading = false;
+      return loading ? <div>正在加载...</div> : null
+    }
+    const VDOM = (
+      <React.Fragment>
+        {/* 渲染Header组件到视图 */}
+        <Header />
+        <Loading />
+        <Footer />
+      </React.Fragment>
+    )
+    // 2.组件渲染到页面
+    ReactDOM.render(VDOM, document.getElementById('app'))
+    // ReactDOM.render(<Header />, document.getElementById('app')) 发生了什么
+    //  1.react解析组件标签，找到Header组件
+    //  2.发现组件时函数定义，调用该函数，将虚拟dom转换为真实dom，渲染在页面上
+  </script>
+```
+
+### 2.类组件-基本使用步骤
+
+> 掌握 React 的类组件写法
+
+1. 什么是类组件？
+   
+   - 使用`class`语法创建的组件就是类组件
+
+2. 定义类组件
+   
+   - 约定：类名首字母必需大写
+   - 约定：必须继承`React.Component`父类
+   - 约定：必需有`render`函数，返回 UI 结构，无渲染可返回 null
+
+```js
+  <script type="text/babel">
+    class MyComponent extends React.Component {
+      constructor(popos) {
+        super()
+        // TODO: 调用的react.component中state属性
+        this.state = {
+          text: 'Hello'
+        }
+      }
+
+      onChange () {
+        return () => this.setState({ text: 'ok'})
+      }
+      // render函数放在 MyComponent 的原型对象上，供创建实例使用
+      // render中的this是谁？MyComponent的实例对象 或者 组件实例对象
+      render () {
+        console.log('render的this', this);
+        // return <div onClick={ this.onChange.bind(this) } >{ this.state.text }</div>;
+        // return <div onClick={ () => this.onChange() } >{ this.state.text }</div>;
+        return <div onClick={ this.onChange() } >{ this.state.text }</div>;
+      }
+    }
+    const VDOM = (
+      <React.Fragment>
+        {/* 渲染组件到页面 */}
+        <MyComponent />
+      </React.Fragment>
+    )
+    // 2.组件渲染到页面
+    ReactDOM.render(VDOM, document.getElementById('app'))
+    // ReactDOM.render(<Header />, document.getElementById('app')) 发生了什么
+    //  1.react解析组件标签，找到Header组件
+    //  2.发现组件是 类定义的，随后new出当前实例对象，并通过该实例调用原型上的render方法
+    //  3.将虚拟dom转换为真实dom，渲染在页面上
+  </script>
+```
+
+### 3.类组件-组件抽离
+
+> 理解组件抽离目的，掌握抽离组件方式。
+
+- 抽离组件
+  - 定义一个`js`或者`jsx`文件定义组件默认导出
+  - 使用组件导入即可，当作标签使用。
+
+具体操作：
+
+1. 新建 `src/components/Header.jsx` 类组件，新建 `src/components/Footer.jsx` 函数组件
+
+```jsx
+// src/components/Header.jsx
+import { Component } from 'react';
+class Header extends Component {
+  render() {
+    return <div>头部组件</div>;
+  }
+}
+export default Header;
+```
+
+```jsx
+// src/components/Footer.jsx
+const Footer = () => {
+  return <div>头部组件</div>;
+};
+export default Footer;
+```
+
+2. 新建 `src/App.jsx` 组件, 导入`Header` `Footer`组件使用。
+
+```jsx
+import { Component } from 'react';
+import Header from './components/Header.jsx';
+import Footer from './components/Footer.jsx';
+class App extends Component {
+  render() {
+    return (
+      <>
+        <Header />
+        内容
+        <Footer />
+      </>
+    );
+  }
+}
+```
+
+3. `index.js` 使用 `App` 根组件
+
+```jsx
+import ReactDom from 'react-dom';
+import App from './App.jsx';
+ReactDom.render(<App />, document.getElementById('root'));
+```
+
+### 4.无状态组件和有状态组件和
+
+> 理解无状态组件和有状态组件概念
+
+简单的理解：class有状态组件 function无状态组件
+
+具体内容：
+
+1. 无状态组件
+   
+   - 组件本身不定义状态，没有组件生命周期，只负责 UI 渲染。
+   - `React16.8`之前的函数组件都是无状态组件，`Hooks` 出现后函数组件也可以有状态。
+
+2. 有状态组件
+   
+   - 组件本身有独立数据，拥有组件生命周期，存在交互行为。
+   - `class` 组件可以定义组件自己的状态，拥有组件生命周期，它是有状态组件。
+
+3. 它们的区别
+   
+   - 无状态组件由于没有维护状态只做渲染，性能较好。有状态组件提供数据和生命周期，能力更强。
+
+4. 如何去选择
+   
+   - `React16.8`之前，组件不需要维护数据只渲染就使用`函数组件`，有数据和交互使用`类组件`。你需要去判断，有心智负担。
+   - `React16.8`之后，`Hooks`出现给函数提供状态，建议使用函数组件即可。
+
+![](./img/iShot_2023-05-18_01.58.28.png)
+
+**总结：**
+
+- 组件本身没有状态就是无状态组件，组件本身提供状态就是有状态组件。
+- 16.8 之前，无状态组件使用函数组件，有状态组件使用类组件。16.8 之后，统一可使用函数组件。
+- React 没有说完全取代类组件，老项目中还是类组件居多，我们有必要学习下它的具体用法。
+
+
+
+### 5. 类组件-定义状态
+
+> 掌握类组件中状态的定义与使用
+
+大致步骤：
+
+- 定义`state`属性定义组件状态，属于组件自己的数据，它的值是个对象。
+- 使用`state`的时候通过`this`去访问即可，例如：`this.state.xxx`。
+- 数据发生变化，驱动视图更新。
+
+```jsx
+import { Component } from 'react';
+
+class App extends Component {
+  // 状态
+  state = {
+    title: '数码产品',
+    list: ['电脑', '手机', '相机'],
+  };
+  render() {
+    return (
+      <>
+        <h3>{this.state.title}</h3>
+        <ul>
+          {this.state.list.map((item) => {
+            return <li key={item}>{item}</li>;
+          })}
+        </ul>
+      </>
+    );
+  }
+}
+export default App;
+```
+
+数据驱动视图演示：
+
+![](./img/01.85c18e5c.gif)
+
+**总结**：定义`state`属性，值是对象存储数据，`this.state.xxx`使用数据
+
+
+
+### 6.类组件-绑定事件
+
+> 掌握类组件中绑定事件的方式，和获取事件对象的方式。
+
+大致步骤：
+
+- 在类中声明事件处理函数，在标签上使用`on+事件名称={处理函数}`的方式绑定事件，事件名称需要遵循`大驼峰`规则。
+- 处理函数默认的参数就是事件对象，可以使用事件对象处理默认行为和事件冒泡。
+
+```jsx
+import { Component } from 'react';
+
+class App extends Component {
+  // 状态
+  state = {
+    count: 0,
+  };
+  // 事件处理函数
+  handleClick(e) {
+    // 默认行为
+    e.preventDefault();
+    // 事件冒泡
+    e.stopPropagation();
+    console.log(e.target)
+    console.log('handleClick');
+  }
+  handleMouseEnter() {
+    console.log('handleMouseEnter');
+  }
+  render() {
+    return (
+      <>
+        <div onMouseEnter={this.handleMouseEnter}>
+          计数器：{this.state.count}
+        </div>
+        <div>
+          <a href="http://www.itcast.cn" onClick={this.handleClick}>
+            按钮
+          </a>
+        </div>
+      </>
+    );
+  }
+}
+export default App;
+```
+
+**总结：**
+
+- 绑定事件的方式和原生的方式一致，使用 `on+事件名称={处理函数}` 方式绑定
+- 事件名称使用`大驼峰`规则，例如：`onClick` `onMouseEnter`、`onChange`, 处理函数默认传参为事件对象。

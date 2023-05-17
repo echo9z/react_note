@@ -19,9 +19,15 @@
     // 函数名称首字母必需大写，React 据此来区分组件和 HTML 元素
     // 函数必须有返回值，表示该组件的 UI 结构，如果不渲染任何内容可返回null
     function Header() {
+      const [str, setStr] = React.useState('这是一段文字')
       console.log(this); // 此处this是undefined，进过babel编译后开启严格模式，禁止this指向window
+
+      const onChangeStr = () => {
+        setStr('1515151')
+      }
+
       return (
-        <div>函数定义组件</div>
+        <div onClick={onChangeStr} >函数定义组件 {str} </div>
       )
     }
 
