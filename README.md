@@ -1,6 +1,6 @@
 # React
 
-## React 介绍 、JSX介绍
+## React 介绍
 
 - 1.采用组件化模式，声明式编码，提高开发效率以及组件复用率
 - 2.RN 可以使用react语法进行移动端开发
@@ -169,7 +169,7 @@ root.render(element)
   </script>
 ```
 
-### JSX 语法规则
+## React JSX 语法规则
 
 - 1.全称: JavaScript XML
 
@@ -717,6 +717,8 @@ ReactDOM.render(element, document.getElementById("root"))
 
 **总结：** 推荐以后开发项目中使用第三方的库来解决`className`的值绑定问题
 
+
+
 ## React 组件
 
 - 组件允许你将 UI 拆分为独立可复用的代码片段，并对每个片段进行独立构思。
@@ -773,7 +775,6 @@ const App = () => {
 };
 const root = ReactDom.createRoot(document.getElementById('root'))
 root.render(<App />);
-
 ```
 
 ```js
@@ -930,11 +931,9 @@ import App from './App.jsx';
 ReactDom.render(<App />, document.getElementById('root'));
 ```
 
-### 4.无状态组件和有状态组件和
+### 4.无状态组件和有状态组件
 
 > 理解无状态组件和有状态组件概念
-
-简单的理解：class有状态组件 function无状态组件
 
 具体内容：
 
@@ -965,8 +964,6 @@ ReactDom.render(<App />, document.getElementById('root'));
 - 16.8 之前，无状态组件使用函数组件，有状态组件使用类组件。16.8 之后，统一可使用函数组件。
 - React 没有说完全取代类组件，老项目中还是类组件居多，我们有必要学习下它的具体用法。
 
-
-
 ### 5. 类组件-定义状态
 
 > 掌握类组件中状态的定义与使用
@@ -975,7 +972,7 @@ ReactDom.render(<App />, document.getElementById('root'));
 
 - 定义`state`属性定义组件状态，属于组件自己的数据，它的值是个对象。
 - 使用`state`的时候通过`this`去访问即可，例如：`this.state.xxx`。
-- 数据发生变化，驱动视图更新。
+- 数据发生变化，驱动视图更新。****
 
 ```jsx
 import { Component } from 'react';
@@ -1007,8 +1004,6 @@ export default App;
 ![](./img/01.85c18e5c.gif)
 
 **总结**：定义`state`属性，值是对象存储数据，`this.state.xxx`使用数据
-
-
 
 ### 6.类组件-绑定事件
 
@@ -1046,7 +1041,7 @@ class App extends Component {
           计数器：{this.state.count}
         </div>
         <div>
-          <a href="http://www.itcast.cn" onClick={this.handleClick}>
+          <a href="#" onClick={this.handleClick}>
             按钮
           </a>
         </div>
@@ -1061,3 +1056,356 @@ export default App;
 
 - 绑定事件的方式和原生的方式一致，使用 `on+事件名称={处理函数}` 方式绑定
 - 事件名称使用`大驼峰`规则，例如：`onClick` `onMouseEnter`、`onChange`, 处理函数默认传参为事件对象。
+
+
+
+### 7.类组件中this 指向问题
+
+> 发现事件处理函数中 this 获取不到问题和原因
+
+大致步骤：
+
+- 在事件处理函数中打印 `this.state.count` 发现报错，this 是个`undefined`。
+- 演示函数调用对 this 指向的影响，得出函数谁调 this 就执行谁。
+- 找出原因：处理函数不是通过组件去调用的，导致出现 this 不是组件问题。
+
+具体代码：
+
+1. 发现`this`是`undefined`
+
+```jsx
+import { Component } from 'react';
+
+class App extends Component {
+  // 状态
+  state = {
+    count: 0,
+  };
+  // 事件处理函数
+  handleClick(e) {
+    console.log(e);
+    // Uncaught TypeError: Cannot read properties of undefined (reading 'state')
+    console.log(this.state.count);
+  }
+  render() {
+    return (
+      <>
+        <div>计数器：{this.state.count}</div>
+        <div>
+          <button onClick={this.handleClick}>按钮</button>
+        </div>
+      </>
+    );
+  }
+}
+export default App;
+```
+
+2. 演示处理函数调用对 this 的影响
+
+```js
+    class Person {
+      constructor(name,age){
+        this.name = name;
+        this.age = age;
+      }
+      // class中定义的函数，局部默认是use strict模式
+      study() {
+        // study 方法是来类的原型对象上，供实例对象使用
+        // 通过Person实例调用study时，study的this就是Person的实例对象
+        console.log(this);
+      }
+    }
+    const p1 = new Person()
+    p1.study(); // 通过实例调用study
+
+    const fnStudy = p1.study;
+    fnStudy()  // 直接调用，为啥this是undefined，而不是window呢，原因是在class中定义的函数，局部默认是use strict模式，所有this是undefined
+
+    function test() {
+      'use strict';
+      console.log(this); // undefined
+    }
+    test()
+```
+
+3. 问题原因
+   - 类组件声明的处理函数，赋值给 `on+事件名称` 属性，调用的时候不是通过组件调用的。
+
+### 8.类组件-处理 this 问题
+
+> 掌握通过 绑定箭头函数 bind 声明箭头函数 五种方式解决 this 问题  
+
+解决方式
+
+```jsx
+import { Component } from 'react';
+
+class App extends Component {
+  constructor() {
+    super()
+    this.state = {
+      count: 0,
+    }
+    // 先调用App 原型上的handleClick，通过bind返回新的函数，在当前new App()实例对象上添加一个handleClick方法
+    this.handleClick = this.handleClick.bind(this)
+  }
+  
+  // 事件处理函数
+  handleClick(e) {
+    console.log(e);
+    console.log(this.state.count);
+  }
+  render() {
+    return (
+      <>
+        <div>计数器：{this.state.count}</div>
+        <div>
+          <button onClick={this.handleClick}>按钮</button>
+        </div>
+      </>
+    );
+  }
+}
+export default App;
+```
+
+
+
+#### 1.高阶函数(柯里化)
+
+高阶函数：通过 this 来直接**调用** handleClick 并返回箭头函数。  
+柯里化：通过函数调用继续返回函数的形式，实现多次接收参数最后统一处理的函数编码形式。  
+
+```text
+export default class user extends Component {
+  state = {
+    cound:0
+  }
+  //this的指向是什么就是看谁调用的
+  addEvent() {
+    return () => {
+      console.log(this);
+    }
+  }
+  render() {
+    return (
+      <button onClick={this.addEvent()}></button>
+    )
+  }
+}
+```
+
+#### 2.包裹一层箭头函数。
+
+箭头函数中的 this 指向“外部”，即 render 函数，而 render 函数中的 this 正是组件实例。
+
+```text
+export default class user extends Component {
+  state = {
+    cound:0
+  }
+  addEvent() {
+      console.log(this);
+  }
+  render() {
+    return (
+      <button onClick={() => this.addEvent()}></button>
+    )
+  }
+}
+```
+
+#### 3.使用bind
+
+```text
+export default class user extends Component {
+  state = {
+    cound:0
+  }
+  addEvent() {
+      console.log(this);
+  }
+  render() {
+    return (
+      <button onClick={this.addEvent.bind(this)}></button>
+    )
+  }
+}
+```
+
+#### 4.通过赋值语句往实例上面添加一个箭头函数。
+
+```text
+export default class user extends Component {
+  state = {
+    cound:0
+  }
+  addEvent = () => {
+      console.log(this);
+  }
+  render() {
+    return (
+      <button onClick={this.addEvent.bind(this)}></button>
+    )
+  }
+}
+```
+
+#### 5.在构造函数中再创建一个实例方法，和原型方法公用一个函数体。
+
+```text
+class App extends React.Component {
+  constructor() {
+      super()
+      this.state = {
+          count: 0,
+      }
+      this.addClick = this.addClick.bind(this)
+  }
+  addClick() {
+      console.log(this)
+  }
+  render() {
+      return (
+          <div>
+              <button onClick={this.addClick}>+1</button>
+          </div>
+      )
+  }
+}
+```
+
+### 9.类组件-setState 使用
+
+> 掌握使用 setState 函数修改组件状态
+
+大致步骤：
+
+- React 类组件提供一个函数`setState({需修改数据})`，可以更新数据和视图。
+- 直接修改 state 中的数据是不会更新视图，演示简单数据，数组，对象的正确修改方式。
+
+具体代码：
+
+1. 通过`setState`的来修改数据更新视图
+
+```jsx
+class MyComponent extends React.Component {
+  // 构造器调用几次？ 1次
+  constructor(props) {
+    super(props)
+    // TODO: 调用的react.component中state状态属性
+    this.state = {
+      isHot: true,
+      wind: '微风'
+    }
+  }
+  /**
+   * 为啥指定的this会是undefined？类中的方法默认开启局部严格模式，所以onChange中的this是 undefine
+   * */
+
+  // 普通函数在严格模式下是没有上下文的，所有调用是使用bind apply call传递this
+  // 箭头函数，this取决于上下文，本身没有this、使用call，apply等无法改变this指向
+  onChange (e) {
+    console.log(e);
+    // onChange方法，放在MyComponent的原型对象上，供实例对象使用
+    // 由于onChange方法，是作为onClick的回调函数，不是通过实例调用，而是直接调用
+    // 类中的方法默认开启局部严格模式，所以onChange中的this是 undefined。
+    console.log(this);
+    // react更改状态state，不能直接赋值更改 this.state.isHot = true;
+    // 通过this.setState({ isHot: true })
+    this.setState({ isHot: !this.state.isHot }, () => console.log('修改了isHot'));
+  }
+
+  // render调用几次？1+n次，1次是组件初始化时调用render() n次每次state中的数据发送变化时调用render()
+  render () {
+    console.log('render的this', this);
+    /*
+    处理this指向问题：
+    1.将class 中的onChange改为箭头函数；onChange = (e) => {} 箭头函数this指向取决于上下文
+    2.将class 中的onChange改为 function onChange (e){ return () => console.log(this) }
+    
+    3.通过 bind() 函数会创建一个新的绑定函数，改变绑定中this指向，返回一个新的函数
+    return <div onClick={ this.onChange.bind(this) } >{ this.state.text }</div>;
+
+    4.通过 call 或者 apply
+    call() 方式改变函数中的this执行，并立即调用该函数
+    return <div onClick={ () => this.onChange.call(this) } >{ this.state.text }</div>;
+
+    5.onClick返回一个箭头函数：onClick={ () => this.onChange() }，这里的this就是同组件实例调用
+      return <div onClick={ () => this.onChange() } >{ this.state.text }</div>;
+    */
+    return (
+      <div onClick={ this.onChange.bind(this) } >
+        今天天气很{ this.state.isHot ? '炎热':'凉爽' }，{ this.state.wind }
+      </div>
+    )
+  }
+}
+const VDOM = (
+  <React.Fragment>
+    {/* 渲染组件到页面 */}
+    <MyComponent />
+  </React.Fragment>
+)
+// 2.组件渲染到页面
+ReactDOM.render(VDOM, document.getElementById('app'))
+```
+
+2.修改数组和修改对象的正确姿势
+
+```jsx
+import { Component } from 'react';
+
+class App extends Component {
+  state = {
+    count: 0,
+    user: {
+      name: 'jack',
+      age: 18,
+    },
+    list: ['电脑', '手机'],
+  };
+  handleClick = () => {
+    // 修改数据
+    this.setState({
+      // key是要修改的数据名称，value是对应的新值
+      count: this.state.count + 1,
+    });
+  };
+  updateList = () => {
+    // 修改列表
+    this.setState({
+      list: [...this.state.list, '相机'],
+    });
+  };
+  updateUser = () => {
+    // 修改对象
+    this.setState({
+      user: {
+        ...this.state.user,
+        name: 'tony',
+      },
+    });
+  };
+  render() {
+    return (
+      <>
+        <div>计数器：{this.state.count}</div>
+        <div>
+          <button onClick={this.handleClick}>按钮</button>
+        </div>
+        <hr />
+        <div>商品：{this.state.list.join(',')}</div>
+        <button onClick={this.updateList}>改数组</button>
+        <hr />
+        <div>
+          姓名：{this.state.user.name}，年龄：{this.state.user.age}
+        </div>
+        <button onClick={this.updateUser}>改对象</button>
+      </>
+    );
+  }
+}
+export default App;
+```

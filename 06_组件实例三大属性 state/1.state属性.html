@@ -16,31 +16,53 @@
   <!-- text/babel 写的是jsx，让babel进行编译转译为js -->
   <script type="text/babel">
     class MyComponent extends React.Component {
+      // 构造器调用几次？ 1次
       constructor(props) {
         super(props)
         // TODO: 调用的react.component中state状态属性
         this.state = {
-          isHot: true
+          isHot: true,
+          wind: '微风'
         }
       }
+      /**
+       * 为啥指定的this会是undefined，类中的方法默认开启局部严格模式，所以onChange中的this是 undefine
+       * */
 
       // 普通函数在严格模式下是没有上下文的，所有调用是使用bind apply call传递this
       // 箭头函数，this取决于上下文，本身没有this、使用call，apply等无法改变this指向
       onChange (e) {
         console.log(e);
+        // onChange方法，放在MyComponent的原型对象上，供实例对象使用
+        // 由于onChange方法，是作为onClick的回调函数，不是通过实例调用，而是直接调用
+        // 类中的方法默认开启局部严格模式，所以onChange中的this是 undefined。
         console.log(this);
-        this.setState({ isHot: !this.state.isHot })
+        // react更改状态state，不能直接赋值更改 this.state.isHot = true;
+        // 通过this.setState({ isHot: true })
+        this.setState({ isHot: !this.state.isHot }, () => console.log('修改了isHot'));
       }
 
+      // render调用几次？1+n次，1次是组件初始化时调用render() n次每次state中的数据发送变化时调用render()
       render () {
         console.log('render的this', this);
-        // return <div onClick={ this.onChange.bind(this) } >{ this.state.text }</div>;
-        // call方式改变函数中的this执行，并返回为一个新函数
-        // return <div onClick={ () => this.onChange.call(this) } >{ this.state.text }</div>;
-        // return <div onClick={ () => this.onChange() } >{ this.state.text }</div>;
+        /*
+        处理this指向问题：
+        1.将class 中的onChange改为箭头函数；onChange = (e) => {} 箭头函数this指向取决于上下文
+        2.将class 中的onChange改为 function onChange (e){ return () => console.log(this) }
+        
+        3.通过 bind() 函数会创建一个新的绑定函数，改变绑定中this指向，返回一个新的函数
+        return <div onClick={ this.onChange.bind(this) } >{ this.state.text }</div>;
+
+        4.通过 call 或者 apply
+        call() 方式改变函数中的this执行，并立即调用该函数
+        return <div onClick={ () => this.onChange.call(this) } >{ this.state.text }</div>;
+
+        5.onClick返回一个箭头函数：onClick={ () => this.onChange() }，这里的this就是同组件实例调用
+          return <div onClick={ () => this.onChange() } >{ this.state.text }</div>;
+        */
         return (
           <div onClick={ this.onChange.bind(this) } >
-            今天天气很{ this.state.isHot ? '炎热':'凉爽' }
+            今天天气很{ this.state.isHot ? '炎热':'凉爽' }，{ this.state.wind }
           </div>
         )
       }

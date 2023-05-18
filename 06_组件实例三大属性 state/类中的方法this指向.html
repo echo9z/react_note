@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script type="text/javascript">
+    class Person {
+      constructor(name,age){
+        this.name = name;
+        this.age = age;
+      }
+
+      study() {
+        // study 方法是来类的原型对象上，供实例对象使用
+        // 通过Person实例调用study时，study的this就是Person的实例对象
+        console.log(this);
+      }
+    }
+    const p1 = new Person()
+    p1.study(); // 通过实例调用study
+
+    const fnStudy = p1.study;
+    fnStudy()  // 直接调用，为啥this是undefined，而不是window呢，原因是在class中定义的函数，局部默认是use strict模式，所有this是undefined
+
+    function test() {
+      'use strict';
+      console.log(this); // undefined
+    }
+    test()
+
+
+  </script>
+</body>
+</html>
