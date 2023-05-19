@@ -717,8 +717,6 @@ ReactDOM.render(element, document.getElementById("root"))
 
 **总结：** 推荐以后开发项目中使用第三方的库来解决`className`的值绑定问题
 
-
-
 ## React 组件
 
 - 组件允许你将 UI 拆分为独立可复用的代码片段，并对每个片段进行独立构思。
@@ -1057,8 +1055,6 @@ export default App;
 - 绑定事件的方式和原生的方式一致，使用 `on+事件名称={处理函数}` 方式绑定
 - 事件名称使用`大驼峰`规则，例如：`onClick` `onMouseEnter`、`onChange`, 处理函数默认传参为事件对象。
 
-
-
 ### 7.类组件中this 指向问题
 
 > 发现事件处理函数中 this 获取不到问题和原因
@@ -1150,7 +1146,7 @@ class App extends Component {
     // 先调用App 原型上的handleClick，通过bind返回新的函数，在当前new App()实例对象上添加一个handleClick方法
     this.handleClick = this.handleClick.bind(this)
   }
-  
+
   // 事件处理函数
   handleClick(e) {
     console.log(e);
@@ -1169,8 +1165,6 @@ class App extends Component {
 }
 export default App;
 ```
-
-
 
 #### 1.高阶函数(柯里化)
 
@@ -1324,7 +1318,7 @@ class MyComponent extends React.Component {
     处理this指向问题：
     1.将class 中的onChange改为箭头函数；onChange = (e) => {} 箭头函数this指向取决于上下文
     2.将class 中的onChange改为 function onChange (e){ return () => console.log(this) }
-    
+
     3.通过 bind() 函数会创建一个新的绑定函数，改变绑定中this指向，返回一个新的函数
     return <div onClick={ this.onChange.bind(this) } >{ this.state.text }</div>;
 
@@ -1408,4 +1402,119 @@ class App extends Component {
   }
 }
 export default App;
+```
+
+### 10.类组件-受控组件
+
+> 理解受控组件概念，掌握动态绑定表单元素。
+
+具体内容：
+
+1. 什么事受控组件
+   
+   - 表单元素的值被 React 中`state`控制，这个表单元素就是受控组件。
+
+2. 如何绑定表单元素，如：`input:text` `input:checkbox`
+
+```jsx
+import { Component } from 'react';
+
+class App extends Component {
+  state = {
+    mobile: '13811112222',
+    isAgree: true,
+  };
+
+  changeMobile = (e) => {
+    this.setState({ mobile: e.target.value });
+  };
+
+  changeAgree = (e) => {
+    this.setState({ isAgree: e.target.checked });
+  };
+
+  render() {
+    return (
+      <>
+        <div>
+          <input
+            value={this.state.mobile}
+            onChange={this.changeMobile}
+            type="text"
+            placeholder="请输入手机号"
+          />
+        </div>
+        <div>
+          <input
+            checked={this.state.isAgree}
+            onChange={this.changeAgree}
+            type="checkbox"
+          />
+          同意用户协议和隐私条款
+        </div>
+      </>
+    );
+  }
+}
+export default App;
+```
+
+**总结：**
+
+- 使用`state`的数据赋值给表单原生，通过`onChange`监听值改变修改 state 数据，完成表单元素的绑定。
+- 这种表单元素称为受控组件。
+
+### 11.类组件-非受控组件
+
+> 理解非受控组件概念，掌握通过 ref 获取元素。
+
+具体内容：
+
+1. 什么是非受控组件？
+   
+   - 没有通过 state 控制的表单元素，它自己控制自身的值，就是非受控组件
+
+2. 通过 ref 获取表单元素获取非受控组件的值
+
+```jsx
+class MyComponent extends React.Component {
+  /*
+  获取非受控组件的值 - 类似于vue中 <input ref='mobile' /> const mobile = ref(null)
+    1. 通过createRef 创建一个ref对象
+    2. 给元素绑定ref属性值为创建的ref对象
+    3. 通过ref对象的current获取元素，再获取它的值
+  */
+  mobileRef = React.createRef();
+  mainRef = React.createRef();
+
+  changeMobile() {
+    console.log(this);
+    // 获取mobileRef input组件值
+    console.log(this.mobileRef.current.value);
+  }
+
+  onClick() {
+    // 获取的main dom元素
+    console.log(this.mainRef.current);
+    // 获取 main 中标签值
+    console.log(this.mainRef.current.innerHTML);
+  }
+  // 什么是非受控组件？没有通过 state 控制的表单元素，它自己控制自身的值，就是非受控组件
+  // 一般都是受控组件state 用的多
+  render () {
+    return (
+      <div >
+        {/* 没有被state控制的表单原生认为是非受控组件 */}
+        <input 
+          ref={this.mobileRef}
+          onChange={this.changeMobile.bind(this)}
+          type="number" placeholder="请输入手机号" />
+
+        <main ref={this.mainRef} >123456</main>
+        <button onClick={() => this.onClick()}>获取main</button>
+      </div>
+    )
+  }
+}
+ReactDOM.render(<MyComponent />, document.getElementById('app'))
 ```
