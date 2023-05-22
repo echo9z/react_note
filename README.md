@@ -1537,3 +1537,38 @@ ReactDOM.render(<MyComponent />, document.getElementById('app'))
 **总结：**
 
 - 组件状态是独立的，组件化之后涉及状态同步，需要进行组件通讯
+
+### 2. 组件通讯-props 基本使用
+
+传递数据和接收数据的过程
+
+- 使用组件的时候通过属性绑定数据，在组件内部通过 props 获取即可。
+1. 函数组件使用 props
+
+```jsx
+// 使用组件
+<Hello name="jack" age="20" />
+```
+
+```jsx
+// 定义组件 props包含{name:'jack',age:'20'}
+function Hello(props) {
+  return <div>接收到数据:{props.name}</div>;
+}
+```
+
+2. 类组件使用 props
+
+```jsx
+// 使用组件
+<Hello name="jack" age="20" />
+```
+
+```jsx
+// 定义组件 props包含{name:'jack',age:'20'}
+class Hello extends Component {
+  render() {
+    return <div>接收到的数据:{this.props.age}</div>;
+  }
+}
+```
