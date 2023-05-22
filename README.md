@@ -1171,7 +1171,7 @@ export default App;
 高阶函数：通过 this 来直接**调用** handleClick 并返回箭头函数。  
 柯里化：通过函数调用继续返回函数的形式，实现多次接收参数最后统一处理的函数编码形式。  
 
-```text
+```jsx
 export default class user extends Component {
   state = {
     cound:0
@@ -1194,7 +1194,7 @@ export default class user extends Component {
 
 箭头函数中的 this 指向“外部”，即 render 函数，而 render 函数中的 this 正是组件实例。
 
-```text
+```jsx
 export default class user extends Component {
   state = {
     cound:0
@@ -1212,7 +1212,7 @@ export default class user extends Component {
 
 #### 3.使用bind
 
-```text
+```jsx
 export default class user extends Component {
   state = {
     cound:0
@@ -1230,7 +1230,7 @@ export default class user extends Component {
 
 #### 4.通过赋值语句往实例上面添加一个箭头函数。
 
-```text
+```jsx
 export default class user extends Component {
   state = {
     cound:0
@@ -1248,7 +1248,7 @@ export default class user extends Component {
 
 #### 5.在构造函数中再创建一个实例方法，和原型方法公用一个函数体。
 
-```text
+```jsx
 class App extends React.Component {
   constructor() {
       super()
@@ -1631,3 +1631,71 @@ eg：
    - 父组件传递数据给子组件，父组件更新数据子组件自动接收更新后数据，当是子组件是不能修改数据的。
 2. props 可以传递什么数据？`任意`
    - 字符串、数字、布尔、数组、对象、函数、JSX （插槽）
+
+### 4. props-类型校验
+
+> 校验接收的props的数据类型，增加组件的稳健性
+
+1. props都是外来的，在使用的时候如果数据类型不对，很容易造成组件内部逻辑出错
+
+```jsx
+// 创建的组件
+const List = props => {
+  const arr = props.colors
+  const list = arr.map((item, index) => <li key={index}>{item.name}</li>)
+	return (
+		<ul>{list}</ul>
+	)
+}
+
+// 使用组件 传递一个数值
+<List colors={19} />
+```
+
+报错：`TypeError: arr.map is not a function`
+
+2. 通过 prop-types 可以在创建组件的时候进行类型检查，更合理的使用组件避免错误
+   - 安装 `yarn add prop-types`
+   - 导入 `import PropTypes from 'prop-types'`
+   - 使用 `组件名.propTypes = { 'props属性':'props校验规则' }` 进行类型约定，`PropTypes` 包含各种规则
+
+```jsx
+import PropTypes from 'prop-types'
+
+const List = (props) => {
+  const arr = props.colors
+  const lis = arr.map((item, index) => <li key={index}>{item.name}</li>)
+  return <ul>{lis}</ul>
+}
+
+List.propTypes = {
+  // props属性：校验规则
+  colors: PropTypes.array
+}
+```
+
+### 5. props-类型校验常见类型
+
+- 常见的校验规则
+1. 常见类型：array、bool、func、number、object、string
+2. React元素类型：element
+3. 必填项：isRequired
+4. 特定结构的对象：shape({})
+- 演示校验规则的使用
+
+```jsx
+const Demo = (props) => {
+  return <div>Demo组件</div>
+}
+Demo.propTypes = {
+  // 常见类型
+  optionalFunc: PropTypes.func,
+  // 常见类型+必填
+  requiredFunc: PropTypes.func.isRequired,
+  // 特定结构的对象 必须
+  optionalObjectWithShape: PropTypes.shape({
+    color: PropTypes.string,
+    fontSize: PropTypes.number
+  })
+}
+```

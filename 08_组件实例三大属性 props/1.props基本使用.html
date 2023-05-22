@@ -31,7 +31,7 @@
             <ul>
               <li>name：{name}</li>
               <li>gender：{gender}</li>
-              <li>age：{age}</li>
+              <li>age：{age+1}</li>
             </ul>
             <button onClick={ () => this.btnClick() }>按钮</button>
           </div>
@@ -41,26 +41,26 @@
     const propsBase = (
       <div> {
         Array.from({ length: 3 }).map((item, index) => {
-          {/* 在组上添加属性 */}
-            return <MyComponent key={index} name='tom' gender='woman' age='18' />
+          {/* 在组上添加属性 age={18} 传递number类型 */}
+            return <MyComponent key={index} name='tom' gender='woman' age={18} />
           })
       }</div>
     )
-
+    
+    const p = { name: 'tomsss', age:15, gender: 'woman' }
     // 批量传递props数据
     const propsArr = (
-      <div> {
-        Array.from({ length: 3 }).map((item, index) => {
-          {/* 在组上添加属性 */}
-            return <MyComponent key={index} name='tom' gender='woman' age='18' />
-          })
-      }</div>
+      <div>
+        {/* props传入批量数据，在react的标签中运行...p展开对象，仅仅在标签中使用 */}
+        <MyComponent { ...p } />
+      </div>
     )
 
     // 函数组件
     const VDOM = (
       <React.Fragment>
         { propsBase }
+        { propsArr }
       </React.Fragment>
     )
     // 在组件上，添加标签属性 key:value 传入值
