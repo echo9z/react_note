@@ -1572,3 +1572,62 @@ class Hello extends Component {
   }
 }
 ```
+
+eg：
+
+```js
+  <!-- text/babel 写的是jsx，让babel进行编译转译为js -->
+  <script type="text/babel">
+    // 类组件
+    class MyComponent extends React.Component {
+      btnClick(){
+        console.log(this.props);
+        const { age } = this.props;
+        // this.props.age = 15 // react中禁止直接修改props传入值，只读属性Cannot assign to read only property 'age' of object '#<Object>'
+      }
+
+      render () {
+        // 通过组件实例上props属性
+        const { name, gender, age } = this.props;
+        return (
+          <div>
+            <ul>
+              <li>name：{name}</li>
+              <li>gender：{gender}</li>
+              <li>age：{age}</li>
+            </ul>
+            <button onClick={ () => this.btnClick() }>按钮</button>
+          </div>
+        )
+      }
+    }
+    // 函数组件
+    const VDOM = (
+      <React.Fragment>
+        {
+          Array.from({ length: 3 }).map((item, index) => {
+            {/* 在组上添加属性 */}
+            return <MyComponent key={index} name='tom' gender='woman' age='18' />
+          })
+        }
+      </React.Fragment>
+    )
+    // 在组件上，添加标签属性 key:value 传入值
+    ReactDOM.render(VDOM, document.getElementById('app'))
+  </script>
+```
+
+**总结：**
+
+- props 是实现组件通讯的关键，它通过使用组件绑定属性，组件内部使用 props 来传值。
+
+### 3. 件通讯-props 注意事项
+
+> 知道 props 是单项数据流只读，但是可以传递任意数据。
+
+1. 什么是`单向数据流`？
+   - 单向数据流，是从上到下的，`自顶而下`的，数据流。
+   - 好比：河流，瀑布，只能从上往下流动，上游污染下游受影响，但是下游不能影响上游。
+   - 父组件传递数据给子组件，父组件更新数据子组件自动接收更新后数据，当是子组件是不能修改数据的。
+2. props 可以传递什么数据？`任意`
+   - 字符串、数字、布尔、数组、对象、函数、JSX （插槽）

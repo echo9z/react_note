@@ -15,7 +15,7 @@
 
   <!-- text/babel 写的是jsx，让babel进行编译转译为js -->
   <script type="text/babel">
-    // 
+    // 类组件
     class MyComponent extends React.Component {
       btnClick(){
         console.log(this.props);
@@ -38,15 +38,29 @@
         )
       }
     }
+    const propsBase = (
+      <div> {
+        Array.from({ length: 3 }).map((item, index) => {
+          {/* 在组上添加属性 */}
+            return <MyComponent key={index} name='tom' gender='woman' age='18' />
+          })
+      }</div>
+    )
+
+    // 批量传递props数据
+    const propsArr = (
+      <div> {
+        Array.from({ length: 3 }).map((item, index) => {
+          {/* 在组上添加属性 */}
+            return <MyComponent key={index} name='tom' gender='woman' age='18' />
+          })
+      }</div>
+    )
+
     // 函数组件
     const VDOM = (
       <React.Fragment>
-        {
-          Array.from({ length: 3 }).map((item, index) => {
-            {/* 在组上添加属性 */}
-            return <MyComponent key={index} name='tom' gender='woman' age='18' />
-          })
-        }
+        { propsBase }
       </React.Fragment>
     )
     // 在组件上，添加标签属性 key:value 传入值
