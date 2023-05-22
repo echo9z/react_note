@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script type="text/javascript" >
+    /**
+     * Promise.all() 处理并发处理异步任务的能力
+     * 最大问题就是如果其中某个promise任务出现异常reject，所有任务都会失败
+     * 
+     * 场景：在页面上有三个请求，分别请求不同数据，如果一个接口服务异常
+     * 使用Promise.all()整个任务都会失败，都无法渲染数据
+     */
+    const p1 = new Promise((res,rej) => {
+      setTimeout(() => {
+        res('p1');
+      },3000)
+    })
+
+    const p2 = new Promise((res,rej) => {
+      setTimeout(() => {
+        rej('reject p2');
+      },1000)
+    })
+
+    const p3 = new Promise((res,rej) => {
+      setTimeout(() => {
+        res('p3');
+      },2000)
+    })
+
+    // Promise.all() 
+    Promise.all([p1, p2, p3])
+      .then(res => {
+        console.log(res);
+      })
+      .catch(err => console.log('error', err)); // 上面数组中有一个promise出现异常直接返回
+    // 场景上面三个请求，分别请求不同数据，如果一个接口出现服务异常，无论任务正常或异常，都返回对应的状态
+    // 处理方式：第一次将每个promise对象进行catch异常捕获处理
+    Promise.all([p1, p2, p3].map(item => {
+      return item.catch(e => {
+        console.log('error', e)
+        return e
+      })
+    })).then(res => console.log('res', res))
+      .catch(err => console.log('error', err));
+    // 处理方式二：allSettled
+    Promise.allSettled([p1, p2, p3])
+      .then(res => console.log('allSettled', res))
+      .catch(err => console.log('error', err));
+    
+  </script>
+</body>
+</html>
