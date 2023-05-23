@@ -1573,48 +1573,71 @@ class Hello extends Component {
 }
 ```
 
-eg：
+3. props是只读属性，是无法修改Cannot assign to read only property 
 
 ```js
-  <!-- text/babel 写的是jsx，让babel进行编译转译为js -->
-  <script type="text/babel">
-    // 类组件
-    class MyComponent extends React.Component {
-      btnClick(){
-        console.log(this.props);
-        const { age } = this.props;
-        // this.props.age = 15 // react中禁止直接修改props传入值，只读属性Cannot assign to read only property 'age' of object '#<Object>'
-      }
+// 类组件
+class MyComponent extends React.Component {
+  constructor(props) {
+    super(props);
+    // 构造器中获取 props属性
+    console.log(props);
+    // 如果想要通过实例获取props，如this.props，必须通过super(props)
+    console.log('实例访问', this.props);
+  }
+  btnClick(){
+    console.log(this.props);
+    const { age } = this.props;
+    // this.props.age = 15 // react中禁止直接修改props传入值，只读属性Cannot assign to read only property 'age' of object '#<Object>'
+  }
 
-      render () {
-        // 通过组件实例上props属性
-        const { name, gender, age } = this.props;
-        return (
-          <div>
-            <ul>
-              <li>name：{name}</li>
-              <li>gender：{gender}</li>
-              <li>age：{age}</li>
-            </ul>
-            <button onClick={ () => this.btnClick() }>按钮</button>
-          </div>
-        )
-      }
-    }
-    // 函数组件
-    const VDOM = (
-      <React.Fragment>
-        {
-          Array.from({ length: 3 }).map((item, index) => {
-            {/* 在组上添加属性 */}
-            return <MyComponent key={index} name='tom' gender='woman' age='18' />
-          })
-        }
-      </React.Fragment>
+  render () {
+    // 通过组件实例上props属性
+    const { name, gender, age } = this.props;
+    return (
+      <div>
+        <ul>
+          <li>name：{name}</li>
+          <li>gender：{gender}</li>
+          <li>age：{age+1}</li>
+        </ul>
+        <button onClick={ () => this.btnClick() }>按钮</button>
+      </div>
     )
-    // 在组件上，添加标签属性 key:value 传入值
-    ReactDOM.render(VDOM, document.getElementById('app'))
-  </script>
+  }
+}
+
+// 限制props 传递的数据约束
+// 组件添加.propTypes 属性，对象中添加限制规则，react就是帮助添加限制
+// 在15.*版本是可以propTypes使用，在16.*之后就弃用了，原因是直接在React实例上挂载属性限制
+// 15.* 用name: React.propTypes.string 进行约束
+// 16.* 用引入 prop-types 库进行约束 PropTypes.string
+MyComponent.propTypes = {
+  name: PropTypes.string.isRequired, // 限制name必传 字符串
+  gender: PropTypes.string,
+  age: PropTypes.number,
+  talk: PropTypes.func,
+  bobby: PropTypes.shape({
+    color: PropTypes.string, // 限制对象字段的类型
+    fontSize: PropTypes.number
+  })
+}
+// 设置props默认值
+MyComponent.defaultProps = {
+  gender: 'man', // 性别默认值
+  age: 18
+}
+// 函数
+const talk = () => {
+  console.log('说话');
+}
+
+// 在组件上，添加标签属性 key:value 传入值
+ReactDOM.render(<MyComponent name='tom1' age={18} gender='man' talk={talk} />, document.getElementById('app'))
+ReactDOM.render(<MyComponent name='tom2' age={19} gender='man' />, document.getElementById('app2'))
+
+const p = { name: 'tomsss', age:15, gender: 'woman', bobby: { color: 'red', fontSize: 18 } }
+ReactDOM.render(<MyComponent { ...p } />, document.getElementById('app3'))
 ```
 
 **总结：**
@@ -1623,7 +1646,7 @@ eg：
 
 ### 3. 件通讯-props 注意事项
 
-> 知道 props 是单项数据流只读，但是可以传递任意数据。
+> props 是单项数据流只读，但是可以传递任意数据。
 
 1. 什么是`单向数据流`？
    - 单向数据流，是从上到下的，`自顶而下`的，数据流。
@@ -1643,9 +1666,9 @@ eg：
 const List = props => {
   const arr = props.colors
   const list = arr.map((item, index) => <li key={index}>{item.name}</li>)
-	return (
-		<ul>{list}</ul>
-	)
+    return (
+        <ul>{list}</ul>
+    )
 }
 
 // 使用组件 传递一个数值
@@ -1699,3 +1722,60 @@ Demo.propTypes = {
   })
 }
 ```
+
+### 6. props-默认值
+
+> 给组件的props提供默认值
+
+1. `defaultProps` 的作用
+   
+   - 给组件的props设置默认值，在未传入props的时候生效
+
+```jsx
+// 函数组件 分页组件
+const Pagination = (props) => {
+  return <div> pageSize的默认值：{props.pageSize}</div>
+}
+// 设置默认值
+Pagination.defaultProps = {
+	pageSize: 10
+}
+// 使用组件
+<Pagination />
+```
+
+```jsx
+// 新版react推荐使用参数默认值来实现
+// 分页组件
+const Pagination = ({pageSize = 10}) => {
+  return <div> pageSize的默认值：{pageSize}</div>
+}
+// 使用组件
+<Pagination />
+```
+
+- `组件名称.defaultProps` 可以设置props属性默认值，未传的时候使用
+- 新版 react 更推荐 `参数默认值` 来实现
+
+### 7. props-类组件 静态属性 定义效验和默认值
+
+- 类组件中 `propTypes` `defaultProps` 的使用
+
+```jsx
+class Demo extends Component {
+  // 校验
+  static propTypes = {
+    colors: PropTypes.array,
+    gender: PropTypes.oneOf(['男', '女']).isRequired
+  }
+  // 默认值
+  static defaultProps = {
+	gender: '男'
+  }
+  render() {
+    return <div>Demo组件</div>
+  }
+}
+```
+
+**总结：** 在类组件中通过 `static propTypes = {}` 定义props校验规则 `static defaultProps = {}` 定义props默认值

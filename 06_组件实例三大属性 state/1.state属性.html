@@ -24,6 +24,8 @@
           isHot: true,
           wind: '微风'
         }
+        // 解决onChange 中的this指向问题
+        this.onChange = this.onChange.bind(this)
       }
       /**
        * 为啥指定的this会是undefined，类中的方法默认开启局部严格模式，所以onChange中的this是 undefine
