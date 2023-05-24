@@ -946,6 +946,7 @@ ReactDom.render(<App />, document.getElementById('root'));
 1. 无状态组件
    
    - 组件本身不定义状态，没有组件生命周期，只负责 UI 渲染。
+   
    - `React16.8`之前的函数组件都是无状态组件，`Hooks` 出现后函数组件也可以有状态。
      
      ```jsx
@@ -957,27 +958,27 @@ ReactDom.render(<App />, document.getElementById('root'));
 2. 有状态组件
    
    - 组件本身有独立数据，拥有组件生命周期，存在交互行为。
+   
    - `class` 组件可以定义组件自己的状态，拥有组件生命周期，它是有状态组件。
      
      ```jsx
      class Welcome extends React.Component {
        state = {
-     		name: ‘tori’,
+             name: ‘tori’,
        }
        componentDidMount() {
-     		fetch(…);
-     		…
-     	}
+             fetch(…);
+             …
+         }
        render() {
          return (
-     		<>
-     			<h1>Hello, {this.state.name}</h1>
-     			<button onClick={() => this.setState({name: ‘007’})}>改名</button>
-     		</>
-     	  );
+             <>
+                 <h1>Hello, {this.state.name}</h1>
+                 <button onClick={() => this.setState({name: ‘007’})}>改名</button>
+             </>
+           );
        }
      }
-     
      ```
 
 3. 它们的区别
@@ -1815,8 +1816,6 @@ class Demo extends Component {
 
 **总结：** 在类组件中通过 `static propTypes = {}` 定义props校验规则 `static defaultProps = {}` 定义props默认值
 
-
-
 ### 3. 组件refs
 
 > 通过 ref 获取元素，相当于document.queryById('id')
@@ -1943,7 +1942,6 @@ class MyComponent extends React.Component {
       </div>
     )
   }
-
 ```
 
 #### 3.createRef() 获取对象
