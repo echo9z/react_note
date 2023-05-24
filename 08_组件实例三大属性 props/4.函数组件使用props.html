@@ -89,15 +89,15 @@
     }
 
     FnComponent.propTypes = {
-        name: PropTypes.string.isRequired, // 限制name必传 字符串
-        gender: PropTypes.string,
-        age: PropTypes.number,
-        talk: PropTypes.func,
-        bobby: PropTypes.shape({
-          color: PropTypes.string, // 限制对象字段的类型
-          fontSize: PropTypes.number
-        })
-      }
+      name: PropTypes.string.isRequired, // 限制name必传 字符串
+      gender: PropTypes.string,
+      age: PropTypes.number,
+      talk: PropTypes.func,
+      bobby: PropTypes.shape({
+        color: PropTypes.string, // 限制对象字段的类型
+        fontSize: PropTypes.number
+      })
+    }
 
       // 设对标签属性 props默认值
       FnComponent.defaultProps = {

@@ -962,7 +962,7 @@ ReactDom.render(<App />, document.getElementById('root'));
 - 16.8 之前，无状态组件使用函数组件，有状态组件使用类组件。16.8 之后，统一可使用函数组件。
 - React 没有说完全取代类组件，老项目中还是类组件居多，我们有必要学习下它的具体用法。
 
-### 5. 类组件-定义状态
+### 5. 类组件-state定义状态
 
 > 掌握类组件中状态的定义与使用
 
@@ -1644,7 +1644,7 @@ ReactDOM.render(<MyComponent { ...p } />, document.getElementById('app3'))
 
 - props 是实现组件通讯的关键，它通过使用组件绑定属性，组件内部使用 props 来传值。
 
-### 3. 件通讯-props 注意事项
+#### 1. 件通讯-props 注意事项
 
 > props 是单项数据流只读，但是可以传递任意数据。
 
@@ -1655,7 +1655,7 @@ ReactDOM.render(<MyComponent { ...p } />, document.getElementById('app3'))
 2. props 可以传递什么数据？`任意`
    - 字符串、数字、布尔、数组、对象、函数、JSX （插槽）
 
-### 4. props-类型校验
+#### 2. prop-types 类型校验
 
 > 校验接收的props的数据类型，增加组件的稳健性
 
@@ -1697,7 +1697,7 @@ List.propTypes = {
 }
 ```
 
-### 5. props-类型校验常见类型
+#### 3. props-类型校验常见类型
 
 - 常见的校验规则
 1. 常见类型：array、bool、func、number、object、string
@@ -1723,7 +1723,7 @@ Demo.propTypes = {
 }
 ```
 
-### 6. props-默认值
+#### 4. props-默认值
 
 > 给组件的props提供默认值
 
@@ -1738,7 +1738,7 @@ const Pagination = (props) => {
 }
 // 设置默认值
 Pagination.defaultProps = {
-	pageSize: 10
+    pageSize: 10
 }
 // 使用组件
 <Pagination />
@@ -1757,7 +1757,7 @@ const Pagination = ({pageSize = 10}) => {
 - `组件名称.defaultProps` 可以设置props属性默认值，未传的时候使用
 - 新版 react 更推荐 `参数默认值` 来实现
 
-### 7. props-类组件 静态属性 定义效验和默认值
+#### 5. props-类组件 静态属性 定义效验和默认值
 
 - 类组件中 `propTypes` `defaultProps` 的使用
 
@@ -1770,7 +1770,7 @@ class Demo extends Component {
   }
   // 默认值
   static defaultProps = {
-	gender: '男'
+    gender: '男'
   }
   render() {
     return <div>Demo组件</div>
@@ -1779,3 +1779,158 @@ class Demo extends Component {
 ```
 
 **总结：** 在类组件中通过 `static propTypes = {}` 定义props校验规则 `static defaultProps = {}` 定义props默认值
+
+
+
+### 3. 组件refs
+
+> 通过 ref 获取元素，相当于document.queryById('id')
+
+#### 1.字符串形式ref 获取dom元素 （过时api 已弃用)
+
+> <div ref='dv1'></div>  获取 this.refs.dv1.innerHTML
+
+```jsx
+class MyComponent extends React.Component {
+  // 通过this.refs['标签属性值'].value 获取元素
+  onBlur(){
+    console.log(this.refs.blur) // 获取ref绑定的元素对象
+    console.log(this.refs.blur.value);
+  }
+  render () {
+    return  <input ref='blur' onBlur={() => this.onBlur() } type="text" placeholder='失去焦点提示数据' />
+  }
+}
+```
+
+#### 2.回调形式ref
+
+> ref回调的方式，回调参数就是当前dom，this.textRef在当前实例组件上挂载一个属性进行赋值
+
+```jsx
+react会帮你调用ref中的回调函数
+<input type="text" ref={(currentNode) => this.textRef = currentNode} placeholder='点击按钮提示数据' />
+
+btnClick = () => console.log(this.textRef.value);
+```
+
+```jsx
+// 类组件中 props
+class MyComponent extends React.Component {
+  // ref回调的方式，绑定dom元素
+  btnClick(){
+    console.log(this.textRef)
+    console.log(this.textRef.value);
+  }
+  onBlur(){
+    console.log(this.blur.value);
+  }
+
+  render () {
+    return (
+      <div>
+        {/* ref回调的方式，回调参数就是当前dom，this.textRef在当前实例组件上挂载一个属性进行赋值 */}
+        <input type="text" ref={(currentNode) => this.textRef = currentNode} placeholder='点击按钮提示数据' />
+        <button onClick={ () => this.btnClick() }>按钮</button>
+        <input ref={(c) => this.blur = c} onBlur={ () => this.onBlur() } type="text" placeholder='失去焦点提示数据' />
+      </div>
+    )
+  }
+}
+
+ReactDOM.render(<MyComponent />, document.getElementById('app'))
+```
+
+ref回调的方式，存在调用次数问题？
+
+<img title="" src="./img/2023-05-24 19.44.10.gif" alt="" data-align="center">
+
+ref回调被定义为内联函数，它将在更新期间被调用两次，首先是null，然后是DOM元素。
+
+state状态更新时触发render函数
+
+`ref={(currentNode) => this.textRef = currentNode`
+
+第一次调用 ref回调函数传入 null参数
+
+第二次调用 ref回调函数传入 当前绑定dom元素
+
+```jsx
+class MyComponent extends React.Component {
+  state = { count: 0 }
+  // ref回调的方式，绑定dom元素
+  btnClick(){
+    console.log(this.textRef.value);
+    this.setState({count: ++this.state.count});
+  }
+
+  render () {
+    return (
+      <div>
+        {/* ref回调的方式，存在调用次数问题？
+          ref回调被定义为内联函数，它将在更新期间被调用两次，首先是null，然后是DOM元素。
+        */}
+        <input type="text" ref={(currentNode) => {
+          this.textRef = currentNode
+          console.log('@', currentNode);
+        }} placeholder='点击按钮提示数据' />
+        <button onClick={ () => this.btnClick() }>更新状态：{this.state.count}</button>
+      </div>
+    )
+  }
+}
+
+ReactDOM.render(<MyComponent />, document.getElementById('app'))
+```
+
+解决上述问题：写为函数的方式，在大多数情况下，这应该不重要。
+
+```jsx
+class MyComponent extends React.Component {
+  state = {
+    count: 0
+  }
+  // ref回调的方式，绑定dom元素
+  btnClick(){
+    console.log(this.textRef.value);
+    this.setState({count: ++this.state.count});
+  }
+  saveInput =(c) =>{
+    this.textRef = c
+    console.log('@', c);
+  }
+  render () {
+    return (
+      <div>
+        {/* ref回调定义为类上的绑定方法 */}
+        <input type="text" ref={this.saveInput} placeholder='点击按钮提示数据' />
+        <button onClick={ () => this.btnClick() }>更新状态：{this.state.count}</button>
+      </div>
+    )
+  }
+
+```
+
+#### 4.createRef() 获取对象
+
+> createRef创建ref容器.  this.textRef.current 获取dom
+
+```jsx
+class MyComponent extends React.Component {
+  // React.createRef返回一个容器，该容器存储 被ref所标识的dom节点
+  textRef = React.createRef()
+  btnClick(){
+    console.log(this.textRef)
+    console.log(this.textRef.current.value);
+  }
+
+  render () {
+    return (
+      <div>
+        <input type="text" ref={this.textRef} placeholder='点击按钮提示数据' />
+        <button onClick={ () => this.btnClick() }>按钮</button>
+      </div>
+    )
+  }
+}
+```

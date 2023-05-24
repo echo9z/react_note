@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="app2"></div>
+  <div id="app3"></div>
+  <!-- 先引入react核心库 react-dom操作dom库 babel, jsx转换js库  -->
+  <script type="text/javascript" src="../lib/16.8.4/react.development.js"></script>
+  <script type="text/javascript" src="../lib/16.8.4/react-dom.development.js"></script>
+  <script type="text/javascript" src="../lib/16.8.4/babel.min.js"></script>
+  <!-- 引入prop-types 对组件标签属性传递的值进行限制 全局对象PropTypes -->
+  <script type="text/javascript" src="../lib/16.8.4/prop-types.js"></script>
+  <!-- text/babel 写的是jsx，让babel进行编译转译为js -->
+  <script type="text/babel">
+    class MyComponent extends React.Component {
+      state = {
+        count: 0
+      }
+      // ref回调的方式，绑定dom元素
+      btnClick(){
+        console.log(this.textRef.value);
+        this.setState({count: ++this.state.count});
+      }
+
+      saveInput =(c) =>{
+        this.textRef = c
+        console.log('@', c);
+      }
+
+      render () {
+        return (
+          <div>
+            {/* ref回调的方式，存在调用次数问题？
+              ref回调被定义为内联函数，它将在更新期间被调用两次，首先是null，然后是DOM元素。
+              state状态更新时触发render函数，
+                ref ref={(currentNode) => this.textRef = currentNode
+                第一次调用 ref回调函数传入 null参数
+                第二次调用 ref回调函数传入 当前绑定dom元素
+            */}
+            {/*<input type="text" ref={(c) => { 
+              this.textRef = c;
+              console.log('@', c);}
+            } placeholder='点击按钮提示数据' />*/}
+            <input type="text" ref={this.saveInput} placeholder='点击按钮提示数据' />
+            <button onClick={ () => this.btnClick() }>更新状态：{this.state.count}</button>
+          </div>
+        )
+      }
+    }
+  
+    ReactDOM.render(<MyComponent />, document.getElementById('app'))
+  </script>
+</body>
+</html>

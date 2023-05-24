@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="app2"></div>
+  <div id="app3"></div>
+  <!-- 先引入react核心库 react-dom操作dom库 babel, jsx转换js库  -->
+  <script type="text/javascript" src="../lib/16.8.4/react.development.js"></script>
+  <script type="text/javascript" src="../lib/16.8.4/react-dom.development.js"></script>
+  <script type="text/javascript" src="../lib/16.8.4/babel.min.js"></script>
+  <!-- 引入prop-types 对组件标签属性传递的值进行限制 全局对象PropTypes -->
+  <script type="text/javascript" src="../lib/16.8.4/prop-types.js"></script>
+  <!-- text/babel 写的是jsx，让babel进行编译转译为js -->
+  <script type="text/babel">
+    // 类组件中 props
+    class MyComponent extends React.Component {
+      // ref回调的方式，绑定dom元素
+      btnClick(){
+        console.log(this.textRef)
+        console.log(this.textRef.value);
+      }
+      
+      onBlur(){
+        console.log(this.blur.value);
+      }
+
+      render () {
+        return (
+          <div>
+            {/* ref回调的方式，回调参数就是当前dom，this.textRef在当前实例组件上挂载一个属性进行赋值 */}
+            <input type="text" ref={(currentNode) => this.textRef = currentNode} placeholder='点击按钮提示数据' />
+            <button onClick={ () => this.btnClick() }>按钮</button>
+            <input ref={(c) => this.blur = c} onBlur={ () => this.onBlur() } type="text" placeholder='失去焦点提示数据' />
+          </div>
+        )
+      }
+    }
+  
+    ReactDOM.render(<MyComponent />, document.getElementById('app'))
+  </script>
+</body>
+</html>
