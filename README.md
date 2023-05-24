@@ -6,6 +6,14 @@
 - 2.RN 可以使用react语法进行移动端开发
 - 3.使用虚拟dom+diff算法，减少真实DOM的交互
 
+小记：
+
+- react 发展16.8之前无状态组件和有状态组件=>16.8之后hooks/自定hooks => 官方的redux/React-Redux => react-router => 组件复用 minx废弃 => 高阶组件HOC => render-props
+
+- vue2 option api => vuex/vue-router => minx
+
+- vue3 composition api => pina/vue-router => 自定hooks
+
 ### 原生js实现
 
 ![原生js](./img/iShot_2023-05-12_18.05.08.png)
@@ -939,11 +947,38 @@ ReactDom.render(<App />, document.getElementById('root'));
    
    - 组件本身不定义状态，没有组件生命周期，只负责 UI 渲染。
    - `React16.8`之前的函数组件都是无状态组件，`Hooks` 出现后函数组件也可以有状态。
+     
+     ```jsx
+     function Welcome(props) {
+       return <h1>Hello, {props.name}</h1>;
+     }
+     ```
 
 2. 有状态组件
    
    - 组件本身有独立数据，拥有组件生命周期，存在交互行为。
    - `class` 组件可以定义组件自己的状态，拥有组件生命周期，它是有状态组件。
+     
+     ```jsx
+     class Welcome extends React.Component {
+       state = {
+     		name: ‘tori’,
+       }
+       componentDidMount() {
+     		fetch(…);
+     		…
+     	}
+       render() {
+         return (
+     		<>
+     			<h1>Hello, {this.state.name}</h1>
+     			<button onClick={() => this.setState({name: ‘007’})}>改名</button>
+     		</>
+     	  );
+       }
+     }
+     
+     ```
 
 3. 它们的区别
    
@@ -1911,7 +1946,7 @@ class MyComponent extends React.Component {
 
 ```
 
-#### 4.createRef() 获取对象
+#### 3.createRef() 获取对象
 
 > createRef创建ref容器.  this.textRef.current 获取dom
 
@@ -1923,7 +1958,6 @@ class MyComponent extends React.Component {
     console.log(this.textRef)
     console.log(this.textRef.current.value);
   }
-
   render () {
     return (
       <div>
