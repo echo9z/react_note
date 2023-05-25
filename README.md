@@ -10,9 +10,9 @@
 
 - react 发展16.8之前无状态组件和有状态组件=>16.8之后hooks/自定hooks => 官方的redux/React-Redux => react-router => 组件复用 minx废弃 => 高阶组件HOC => render-props
 
-- vue2 option api => vuex/vue-router => minx
+- vue2 option api => vuex/vue-router => minx复用
 
-- vue3 composition api => pina/vue-router => 自定hooks
+- vue3 composition api => pina/vue-router => 自定hooks复用
 
 ### 原生js实现
 
@@ -998,7 +998,7 @@ ReactDom.render(<App />, document.getElementById('root'));
 - 16.8 之前，无状态组件使用函数组件，有状态组件使用类组件。16.8 之后，统一可使用函数组件。
 - React 没有说完全取代类组件，老项目中还是类组件居多，我们有必要学习下它的具体用法。
 
-### 5. 类组件-state定义状态
+### 5. 类组件state定义状态
 
 > 掌握类组件中状态的定义与使用
 
@@ -1510,7 +1510,7 @@ export default App;
    
    - 没有通过 state 控制的表单元素，它自己控制自身的值，就是非受控组件
 
-2. 通过 ref 获取表单元素获取非受控组件的值j
+2. 通过 ref 获取表单元素获取非受控组件的值
 
 ```jsx
 class MyComponent extends React.Component {
@@ -1966,3 +1966,147 @@ class MyComponent extends React.Component {
   }
 }
 ```
+
+### 4. 事件处理
+
+1) 通过onXxx属性指定事件处理函数(注意大小写)
+   
+   - React使用的是自定义(合成)事件, 而不是使用的原生DOM事件
+   
+   - React中的事件是通过事件委托方式处理的(委托给组件最外层的元素)
+2. 通过event.target得到发生事件的DOM元素对象
+
+```jsx
+class MyComponent extends React.Component {
+  textRef = React.createRef()
+  btnClick(e){
+    console.log(e);
+    console.log(this.textRef)
+    console.log(this.textRef.current.value);
+  }
+  onBlur(e) {
+    console.log(e);
+    console.log(e.target);
+    console.log(e.target.value);
+  }
+  onChange = (e) =>{
+    console.log(e.target.value);
+  }
+
+  render () {
+    return (
+      <div>
+        <input type="text" onChange={this.onChange} ref={this.textRef} placeholder='点击按钮提示数据' />
+        <button onClick={ (e) => this.btnClick(e) }>按钮</button>
+        <input onBlur={ this.onBlur.bind(this) } type="text" placeholder='失去焦点提示数据' />
+      </div>
+    )
+  }
+}
+```
+
+### 5. 组件通讯-父传子方式
+
+> 通过 props 将父组件的数据传递给子组
+
+- 父组件提供要传递的 state 数据
+- 给子组件标签添加属性，值为 state 中的数据
+- 子组件中通过 props 接收父组件中传递的数据
+1. 给子组件标签添加属性，值为 state 中的数据
+
+```jsx
+class Parent extends React.Component {
+  state = { count: 0, }
+  onClick = () => {
+    this.setState({count: ++this.state.count})
+  }
+  render () {
+    return (
+      <div>
+        <h1>父组件：{this.state.count}</h1>
+        <button onClick={ this.onClick } >btn</button>
+        {/* 向子组件传递数据 */}
+        <Child count={this.state.count} />
+        <Son count={this.state.count} />
+      </div>
+    )
+  }
+}
+```
+
+2. 子组件中通过 props 接收父组件中传递的数据
+
+```jsx
+function Child(props) {
+  return <h2>子组件：{props.count}</h2>
+}
+class Son extends React.Component {
+  constructor(props) { super(props) }
+  render() {
+    return <h2>{this.props.count}</h2>
+  }
+}
+```
+
+**总结**：父组件声明`state`,在子组件标签通过`属性绑定`，在子组件中通过`props`使用。
+
+### 6. 组件通讯-子传父方式
+
+> 通过 props 将子组件的数据传递给父组件
+
+- 父组件提供回调函数，通过 props 传递给子组件
+- 子组件调用 props 中的回调函数，函数可传参
+- 父组件函数的参数就是子组件传递的数据
+
+父组件：
+
+```jsx
+class Parent extends React.Component {
+  state = { count: 0, }
+  onClick = () => {
+    this.setState({ count: ++this.state.count })
+  }
+  // 回调函数
+  setCount = (num) => {
+    this.setState({ count: this.state.count + num })
+  }
+  render () {
+    return (
+      <div>
+        <h1>父组件：{this.state.count}</h1>
+        <button onClick={ this.onClick } >btn</button>
+        {/* 子向父传递数据，通过props传递父组件的回调函数，子组件中调用props函数 */}
+        <Child count={this.state.count} setCount={this.setCount} />
+      </div>
+    )
+  }
+}
+```
+
+子组件：
+
+```jsx
+function Child(props) {
+  // 将子组件中的数据，通过调用组件回调函数设置 父组件的count
+  const handlerClick = () => props.setCount(5000)
+  return (
+    <div>
+      <h2>子组件：{props.count}</h2>
+      <button onClick={ handlerClick }>子btn</button>
+    </div>
+  )
+}
+```
+
+### 7. 组件通讯-兄弟组件通讯
+
+> 通过状态提升思想完成兄弟组件数据通讯
+
+状态提升思想是什么？
+
+- 将共享状态提升到最近的公共父组件中，由公共父组件管理这个状态和修改状态的方法
+- 需要通讯的组件通过 props 接收状态和函数即可
+
+
+
+### 8.react如何实现vue中插槽类似功能

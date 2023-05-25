@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .parent {
+      width: 500px;
+      margin: 0 auto;
+    }
+    .parent h1 {
+      font-weight: normal;
+      margin: 0;
+      padding: 20px 0;
+    }
+    .child {
+      width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 10px;
+    }
+
+    .child h3 {
+      font-weight: normal;
+      color: #333;
+      margin: 0;
+      padding: 10px 0;
+    }
+    .child .detail {
+      font-size: 14px;
+      color: #999;
+    }
+    .child .detail span {
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <!-- 先引入react核心库 react-dom操作dom库 babel, jsx转换js库  -->
+  <script type="text/javascript" src="../lib/16.8.4/react.development.js"></script>
+  <script type="text/javascript" src="../lib/16.8.4/react-dom.development.js"></script>
+  <script type="text/javascript" src="../lib/16.8.4/babel.min.js"></script>
+  <!-- 引入prop-types 对组件标签属性传递的值进行限制 全局对象PropTypes -->
+  <script type="text/javascript" src="../lib/16.8.4/prop-types.js"></script>
+  <!-- text/babel 写的是jsx，让babel进行编译转译为js -->
+  <script type="text/babel">
+    function ListItem(props) {
+      const {title, detail} = props
+      return (
+        <div className='child'>
+          <h3>{title}</h3>
+          <div className='detail'>
+            <span>{detail.from}</span>  
+            <span>{detail.like}点赞</span>  
+          </div>
+        </div>
+      )
+    }
+    
+    class NewList extends React.Component {
+      state = {
+        list: [
+          {title: '坚定不移走中国特色社会主义法治道路', detail: {from: '新华社',like: 774}},
+          {title: '2021年度法治人物——倪伯苍', detail: {from: '新华社',like: 774}},
+          {title: '岁末年终 愿这份“温良”伴你乘风破浪', detail: {from: '新华社',like: 774}}
+        ]
+      }
+      render () {
+        return (
+          <div className='parent'>
+            {
+              this.state.list.map((item,i) => (
+                <ListItem key={i} title={item.title} detail={item.detail} />
+              ))
+            }
+          </div>
+        )
+      }
+    }
+    ReactDOM.render(<NewList />, document.getElementById('app'))
+  </script>
+</body>
+</html>
