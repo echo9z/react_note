@@ -315,7 +315,7 @@ jsx语法规则总结：
 
 * (2)若大写字母开头，react就去渲染对应的组件，若没有则全局报错，影响视图渲染`<Good></Good>`
 
-案例：动态展示下面列表
+案例：动态展示下面列表
 
 <img src="file:///Users/echo/Desktop/myblog/react/img/iShot_2023-05-15_02.12.28.png" title="" alt="iShot_2023-05-15_02.12.28.png" data-align="center">
 
@@ -2107,6 +2107,193 @@ function Child(props) {
 - 将共享状态提升到最近的公共父组件中，由公共父组件管理这个状态和修改状态的方法
 - 需要通讯的组件通过 props 接收状态和函数即可
 
+<img src="./img/iShot_2023-05-26_12.57.47.png" title="" alt="" data-align="center">
 
+```jsx
+import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 
-### 8.react如何实现vue中插槽类似功能
+// 导入两个子组件
+import Jack from './Jack';
+import Rose from './Rose';
+
+// App 是父组件
+class App extends Component {
+  // 1. 状态提升到父组件
+  state = {
+    msg: '',
+  };
+
+  changeMsg = (msg) => {
+    this.setState({ msg });
+  };
+
+  render() {
+    return (
+      <div>
+        <h1>我是App组件</h1>
+        {/* 兄弟组件 1 */}
+        <Jack changeMsg={this.changeMsg}></Jack>
+        {/* 兄弟组件 2 */}
+        <Rose msg={this.state.msg}></Rose>
+      </div>
+    );
+  }
+}
+
+// 渲染组件
+ReactDOM.render(<App />, document.getElementById('root'));
+```
+
+Jack
+
+```jsx
+import React, { Component } from 'react';
+export default class Jack extends Component {
+  say = () => {
+    // 修改数据
+    this.props.changeMsg('you jump i look');
+  };
+  render() {
+    return (
+      <div>
+        <h3>我是Jack组件</h3>
+        <button onClick={this.say}>说</button>
+      </div>
+    );
+  }
+}
+```
+
+Rose
+
+```jsx
+import React, { Component } from 'react';
+export default class Rose extends Component {
+  render() {
+    return (
+      <div>
+        <h3>我是Rose组件-{this.props.msg}</h3>
+      </div>
+    );
+  }
+}
+```
+
+兄弟组件数据通信，通过将数据属性定义在两个兄弟组件的父组件上，父级组件做桥梁
+
+### 8. 组件通讯-context 跨级组件通讯
+
+> 掌握使用 context 实现跨级组件通讯
+
+1. 什么是跨级组件通讯？
+   
+   - 组件间相隔多层，理解成叔侄，甚至更远的亲戚。
+
+2. context 怎么去理解
+   
+   - 理解：一个范围，只要在这个范围内，就可以跨级组件通讯。（不需要 props 层层传递）
+
+![](./img/iShot_2023-05-26_16.35.53.png)
+
+context使用了Provider和Customer模式，在顶层的Provider中传入value，在子孙级的Consumer中获取该值，并且能够传递函数，用来修改context
+
+> 层级关系：App -> Parent -> Child
+
+- createContext：用于创建context，需要一个defaultValue的参数，并返回一个包含Provider，以及Consumer的对象
+- Provider：顶层用于提供context的组件，包含一个value的props，value是实际的context数据
+- Consumer：底层用于获取context的组件，需要一个函数作为其子元素，该函数包含一个value的参数，该函数的参数就是上层所传递context value
+
+```jsx
+// 创建一个Context组件, 或者解构 {Provider, Consumer}
+const {Provider, Consumer} = React.createContext({
+  // 初始值- 即默认值传的值
+  theme: 'pink',
+  toggle: () => {}
+})
+```
+
+顶层组件`<Provider value={注入数据}></Provider>`
+
+```jsx
+class App extends React.Component {
+  state = {
+    count: 0,
+    theme: 'pink',
+    toggle: this.toggleState,
+  }
+  toggle = () => {
+    this.setState(state => {
+      return {
+        count: ++state.count,
+        theme: state.theme === 'pink' ? 'skyblue': 'pink',
+      }
+    })
+  }
+
+  render () {
+    return (
+      <div>
+        <h1>App根组件{this.state.count}</h1>
+        {/* 注入的state数据 */}
+        <Provider value={{
+          count: this.state.count,
+          theme: this.state.theme,
+          toggle: this.toggle
+        }}>
+          <Parent />
+        </Provider>
+      </div>
+    )
+  }
+}
+```
+
+```jsx
+// parent组件
+function Parent() {
+  return (
+    <div>
+      <h2>父组件</h2>
+      <Child />
+    </div>
+  );
+}
+```
+
+Consumer底层组件通过 { (value) => JSX }
+
+```jsx
+function Child() {
+  return (
+    <Consumer>
+      { /* 在Consumer组件中使用App 传递state数据 */
+        (context) => {
+          return (
+            <div>
+              <h3>child组件：{context.count}</h3>
+              <button onClick={context.toggle}
+                style={{backgroundColor: context.theme}} >
+                toggle
+              </button>
+            </div>)
+        }
+      }
+    </Consumer>
+  )
+}
+```
+
+**总结：**
+
+- 使用`creatContext()`创建一个上下文对象，包含：`Provider` `Consumer` 组件。
+- 使用 `Provider` 包裹组件，`value` 属性注入`状态，函数`，被包裹组件下的任何组件可以使用。
+- 使用 `Consumer` 消费 `Provider` 提供的数据和函数，语法`{value=>使用数据和函数}`
+
+### 9.react如何实现vue中插槽类似功能
+
+插槽可以决定某一块区域存放什么内容。在vue中通slot来完成。
+
+react对于需要插槽有非常灵活的实现方式，有两种：
+
+- 组件的children子元素
