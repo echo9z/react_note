@@ -2297,3 +2297,93 @@ function Child() {
 react对于需要插槽有非常灵活的实现方式，有两种：
 
 - 组件的children子元素
+
+- props属性传递React元素
+
+1.组件的this.props.children子元素
+
+![](./img/iShot_2023-05-27_02.21.50.png)
+
+```jsx
+// navbar 导航头，左中右分别放不同的组件内容
+class NavBar extends React.Component {
+  render() {
+    console.log(this.props);
+    console.log(this.props.children);
+    const {children} = this.props
+    return (
+      <div className="nav-bar">
+        <div className="left">{children[0]}</div>
+        <div className="center">{children[1]}</div>
+        <div className="right">{children[2]}</div>
+      </div>
+    )
+  }
+}
+```
+
+```jsx
+class App extends React.Component {
+  render() {
+    return (
+      <div style={{width: '100%'}} >
+        {/* NavBar中元素，通过this.props.children获取 */}
+        <NavBar msg='abc' >
+          <span>left</span>
+          <span>标题</span>
+          <span>right</span>
+        </NavBar>
+      </div>
+    )
+  }
+}
+```
+
+**弊端：**
+
+- 插槽传入的标签元素可能是一个元素 或者 多个元素，this.props.children获取到可能是一个元素对象 也可能是 一个Array
+
+- 取元素方式，通过数组的下标
+
+2.props属性传递React元素
+
+```jsx
+// navbar 导航头，左中右分别放不同的组件内容
+class NavBar extends React.Component {
+  render() {
+    console.log(this.props);
+    const {leftSlot, centerSlot, rightSlot} = this.props
+    return (
+      <div className="nav-bar">
+        <div className="left">{leftSlot}</div>
+        <div className="center">{centerSlot}</div>
+        <div className="right">{rightSlot}</div>
+      </div>
+    )
+  }
+}
+```
+
+
+
+```jsx
+class App extends React.Component {
+  render() {
+    return (
+      <div style={{width: '100%'}} >
+        {/* props传递 DOM元素 */}
+        <NavBar
+          leftSlot={<span>left</span>}
+          centerSlot={<span>center</span>}
+          rightSlot={<span>right</span>}
+        >
+        </NavBar>
+      </div>
+    )
+  }
+}
+```
+
+
+
+</details>
