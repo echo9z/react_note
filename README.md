@@ -2364,8 +2364,6 @@ class NavBar extends React.Component {
 }
 ```
 
-
-
 ```jsx
 class App extends React.Component {
   render() {
@@ -2383,7 +2381,3 @@ class App extends React.Component {
   }
 }
 ```
-
-
-
-</details>
