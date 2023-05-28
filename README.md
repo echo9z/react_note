@@ -2381,3 +2381,98 @@ class App extends React.Component {
   }
 }
 ```
+
+3.实现作用域插槽
+
+插入父元素组件中的内容，由子元素组件决定
+
+```jsx
+// 父组件 中插入子组件中位置比如是一个button，但按钮内容由子组件得到
+class App extends React.Component {
+  state ={
+    title: ['left', 'center','right'],
+  }
+
+  render() {
+    return (
+      <div style={{width: '100%'}} >
+        {/* props传递 DOM元素 */}
+        <NavBar
+          title={this.state.title}
+          /* 插入按钮的内容由子组件数据处理，所有传入一个回调函数 */
+          itemType={item => <button>{item}</button>}
+        >
+        </NavBar>
+      </div>
+    )
+  }
+}
+```
+
+```jsx
+class NavBar extends React.Component {
+  render() {
+    console.log(this.props);
+    const {title, itemType} = this.props
+    return (
+      <div className="nav-bar">
+        {
+          title.map((item,index) => {
+            return (
+              /* 调用父组件的回调 */
+              <div key={index}>{ itemType(item) }</div>
+            )
+          })
+        }
+      </div>
+    )
+  }
+}
+```
+
+### 10.高阶函数：
+
+**高阶函数**：如果一个函数符合下面2个规范中的任意一个，那么就是高阶函数
+
+- 1.若a函数，接收的参数是一个函数，那么a函数就是高阶函数
+
+- 2.若a函数，调用返回值依然是一个函数，那么a函数就是高阶函数
+
+   常见高阶函数有：Promise setTimeout arr.map()等等
+
+**函数柯里化**：通过函数调用继续返回函数的方式，实现多次接收参数最后统一处理的函数编码形式
+
+```jsx
+class Login extends React.Component {
+  state = {
+    username: '',
+    password: ''
+  }
+  // 函数柯里化
+  saveFormData(type) {
+    return (e) => { // 回调才是onchange函数
+      console.log({[type]: e.target.value});
+      this.setState({ [type]: e.target.value})
+    }
+  }
+  submit = (e) => {
+    e.preventDefault();
+    e.persist() // 合成事件对象实例, 在v16 介绍 https://www.jianshu.com/p/2639c71809e0
+    const {username, password} = this.state
+  }
+  render () {
+    const { username, password } = this.state
+    return (
+      <div>
+        <form action="./Demo.html" onSubmit={this.submit} >
+          用户：<input value={username} onChange ={this.saveFormData('username')} type="text" name="username" /> <br/>
+          密码：<input value={password} onChange ={this.saveFormData('password')} type="password" name="password" />
+          <button>登录</button>
+        </form>
+      </div>
+    )
+  }
+}
+```
+
+## React生命周期

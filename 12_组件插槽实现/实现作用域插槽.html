@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .nav-bar{
+      display: grid;
+      height: 40px;
+      grid-template-columns: 20% 1fr 20%;
+      text-align: center;
+      line-height: 40px;
+    }
+    .left, .right{
+      background-color: pink;
+      /* display: flex;
+      justify-self: center; */
+    }
+    .center {
+      background-color: skyblue;
+    }
+
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <!-- 先引入react核心库 react-dom操作dom库 babel, jsx转换js库  -->
+  <script type="text/javascript" src="../lib/16.8.4/react.development.js"></script>
+  <script type="text/javascript" src="../lib/16.8.4/react-dom.development.js"></script>
+  <script type="text/javascript" src="../lib/16.8.4/babel.min.js"></script>
+  <!-- 引入prop-types 对组件标签属性传递的值进行限制 全局对象PropTypes -->
+  <script type="text/javascript" src="../lib/16.8.4/prop-types.js"></script>
+  <!-- text/babel 写的是jsx，让babel进行编译转译为js -->
+  <script type="text/babel">
+    
+    // navbar 导航头，左中右分别放不同的组件内容
+    class NavBar extends React.Component {
+      render() {
+        console.log(this.props);
+        const {title, itemType} = this.props
+        return (
+          <div className="nav-bar">
+            {
+              title.map((item,index) => {
+                return (
+                  /*<div key={index}>{item}</div>*/
+                  /* 调用父组件的回调 */
+                  <div key={index}>{ itemType(item) }</div>
+                )
+              })
+            }
+          </div>
+        )
+      }
+    }
+
+    class App extends React.Component {
+      state ={
+        title: ['left', 'center','right'],
+      }
+      itemTypeFn(item) {
+        // 根据item的内容决定，插入子组件中内容
+        if (item === 'left') {
+          return <button>{item}</button>
+        } else if (item === 'right') {
+          return <i>{item}</i>
+        } else {
+          return <strong>{item}</strong>
+        }
+      }
+      render() {
+        return (
+          <div style={{width: '100%'}} >
+            {/* props传递 DOM元素 */}
+            <NavBar
+              title={this.state.title}
+              /*itemType={item => <button>{item}</button>}*/
+              /* 插入按钮的内容由子组件数据处理，所有传入一个回调函数 */
+              itemType={this.itemTypeFn}
+            >
+            </NavBar>
+          </div>
+        )
+      }
+    }
+    ReactDOM.render(<App />, document.getElementById('app'))
+
+
+    // var arr5 = [{id:10},{id:5},{id:6},{id:9},{id:2},{id:3}];
+    // arr5.sort(function(a,b){
+    //   console.log(a.id,b.id);
+    //   return b.id - a.id
+    // })
+    // console.log(arr5);
+  </script>
+</body>
+</html>
