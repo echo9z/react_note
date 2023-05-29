@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="app"></div>
+  <!-- 先引入react核心库 react-dom操作dom库 babel,jsx转换js库  -->
+  <script type="text/javascript" src="../lib/16.8.4/react.development.js"></script>
+  <script type="text/javascript" src="../lib/16.8.4/react-dom.development.js"></script>
+  <script type="text/javascript" src="../lib/16.8.4/babel.min.js"></script>
+
+  <script type="text/babel">
+
+    class Count extends React.Component {
+      // 1.构造器
+      constructor(props) {
+        console.log('count---constructor');
+        super(props);
+        // 初始化状态
+        this.state = {
+          count: 0
+        }
+      }
+
+      // 2.组件将要挂载时，执行钩子
+      componentWillMount() {
+        console.log('count挂载前 componentWillMount');
+      }
+
+      // 3.render 调用时机：初始化渲染，状态更新之后
+      render () {
+        console.log('count---render');
+        return (
+          <div>
+            <h2>count: {this.state.count}</h2>
+            <button onClick={this.onClick} >点我+1</button>
+            <button onClick={this.death} >卸载组件</button>
+            <button onClick={this.force} >不更改state数据，forceUpdate</button>
+          </div>
+        )
+      }
+
+      // 4.组件挂载完毕，立即执行componentDidMount函数
+      componentDidMount() {
+        console.log('count挂载后 componentDidMount');
+      }
+
+      // 5.组件卸载时，立即执行 componentWillUnmount函数
+      componentWillUnmount() {
+        console.log('count卸载后 componentWillUnmount');
+      }
+
+      // 应该是否进行组件的状态更新 控制组件更新阀门
+      // 返回 false，则不会调用 UNSAFE_componentWillUpdate()，render() 和 componentDidUpdate()
+      shouldComponentUpdate() {
+        console.log('count shouldComponentUpdate');
+        return true;
+      }
+
+      // 组件中的状态更新前，执行钩子
+      componentWillUpdate() {
+        console.log(this.state.count);
+        console.log('count状态更新前 componentWillUpdate');
+      }
+      
+      // 组件中的状态更新后，执行钩子
+      componentDidUpdate() {
+        console.log(this.state.count);
+        console.log('count状态更新后 componentDidUpdate');
+      }
+
+      death() {
+        // 卸载组件 unmountComponentAtNode(container):从DOM中删除已挂载的 React 组件并清理其事件处理程序和状态。返回boolean
+        ReactDOM.unmountComponentAtNode(document.getElementById("app"))
+      }
+      // 更新state
+      onClick = () => {
+        const { count } = this.state
+        this.setState({count: count+1})
+      }
+      // 强制更新
+      force = () =>{
+        this.forceUpdate()
+      }
+    }
+    
+    ReactDOM.render(<Count />, document.getElementById("app"))
+  </script>
+
+</body>
+</html>

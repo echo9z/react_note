@@ -2430,14 +2430,14 @@ class NavBar extends React.Component {
 }
 ```
 
-### 10.高阶函数：
+### 10.高阶函数与函数柯里化
 
 **高阶函数**：如果一个函数符合下面2个规范中的任意一个，那么就是高阶函数
 
 - 1.若a函数，接收的参数是一个函数，那么a函数就是高阶函数
 
 - 2.若a函数，调用返回值依然是一个函数，那么a函数就是高阶函数
-
+  
    常见高阶函数有：Promise setTimeout arr.map()等等
 
 **函数柯里化**：通过函数调用继续返回函数的方式，实现多次接收参数最后统一处理的函数编码形式
@@ -2476,3 +2476,186 @@ class Login extends React.Component {
 ```
 
 ## React生命周期
+
+React类组件的生命周期整体概览，组件从创建到消耗的过程
+
+### 16.0之前生命周期函数 （旧）
+
+<img title="" src="./img/2_react生命周期(旧).png" alt="" width="668" data-align="center">
+
+#### Intialization(初始化）
+
+在初始化阶段,我们会用到 `constructor()` 这个构造函数，如：
+
+```jsx
+constructor(props) { super(props); }
+```
+
+- super的作用 用来调用基类的构造方法( constructor() ), 也将父组件的props注入给子组件，供子组件读取 **(组件中props只读不可变，state可变)**
+- 初始化操作，定义this.state的初始内容
+- 只会执行一次
+
+#### Mounting(挂载）
+
+组件挂载：`constructor() => componentWillMount() => render() => componentDidMount()`
+
+constructor(){}: 初始化数据
+
+componentWillMount：**在组件挂载到DOM前调用**
+
+- 这里面的调用的this.setState不会引起组件的重新渲染，也可以把写在这边的内容提到constructor()，所以在项目中很少。
+- 只会调用一次
+
+render: **渲染**
+
+- **只要props和state发生改变（无两者的重传递和重赋值，论值是否有变化，都可以引起组件重新render），都会重新渲染render。**
+- return：是必须的，是一个React元素（UI，描述组件），不负责组件实际渲染工作，由React自身根据此元素去渲染出DOM。
+- render是**纯函数**（Pure function：返回的结果只依赖与参数，执行过程中没有副作用），不能执行this.setState。
+
+componentDidMount：**组件挂载到DOM后调用**
+
+- 调用一次
+
+#### Update(更新)
+
+1.更新setState()：`shouldComponentUpdate() => componentWillUpdate() => render() => componentDidUpdate()`
+
+2.强制更新forceUpdate()：`componentWillUpdate() => render() => componentDidUpdate()`
+
+- 跳过shouldComponentUpdate()
+
+3.props父组件传递子组件，props引起的组件更新过程中：`componentWillReceiveProps() => shouldComponentUpdate() => componentWillUpdate() => render() => componentDidUpdate()`
+
+- componentWillReceiveProps(nextProps)：**调用于props引起的组件更新过程中**
+  
+  - nextProps：父组件传给当前组件新的props
+  
+  - 可以用nextProps和this.props来查明重传props是否发生改变（原因：不能保证父组件重传的props有变化）
+  
+  - 只要props发生变化就会，引起调用
+
+- shouldComponentUpdate(nextProps, nextState)：**性能优化组件**
+  
+  - nextProps：当前组件的this.props
+  
+  - nextState：当前组件的this.state
+  
+  - 通过比较nextProps和nextState,来判断当前组件是否有必要继续执行更新过程。
+  
+  - 返回false：表示停止更新，用于减少组件的不必要渲染，优化性能
+  
+  - 返回true：继续执行更新
+  
+  - 像componentWillReceiveProps（）中执行了this.setState，更新了state，但在render前(如shouldComponentUpdate，componentWillUpdate)，this.state依然指向更新前的state，不然nextState及当前组件的this.state的对比就一直是true了
+
+- componentWillUpdate(nextProps, nextState)：**组件更新前调用**
+  
+  - 在render方法前执行
+  
+  - 由于组件更新就会调用，所以一般很少使用
+  
+  - render：重新渲染
+
+- componentDidUpdate(prevProps, prevState)：组件更新后被调用
+  
+  - prevProps：组件更新前的props
+  
+  - prevState：组件更新前的state
+
+- 可以操作组件更新的DOM
+
+#### Unmounting(卸载)
+
+componentWillUnmount：组件被卸载前调用
+
+- 可以在这里执行一些清理工作，比如清楚组件中使用的定时器，清楚componentDidMount中手动创建的DOM元素等，以避免引起内存泄漏
+
+### 16.4 之后生命周期函数 （新）
+
+[React组件生命周期](http://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/)
+
+![](./img/iShot_2023-05-29_18.11.28.png)
+
+生命周期的意义
+
+- 助于理解组件的运行方式、完成更复杂的组件功能、分析组件错误原因
+- 钩子函数为开发人员在不同阶段操作组件提供了时机
+
+挂载阶段
+
+当组件实例被创建并插入 DOM 中时，其生命周期调用顺序如下：
+
+- [**`constructor()`**](https://zh-hans.legacy.reactjs.org/docs/react-component.html#constructor)
+- [`static getDerivedStateFromProps()`](https://zh-hans.legacy.reactjs.org/docs/react-component.html#static-getderivedstatefromprops)
+- [**`render()`**](https://zh-hans.legacy.reactjs.org/docs/react-component.html#render)
+- [**`componentDidMount()`**](https://zh-hans.legacy.reactjs.org/docs/react-component.html#componentdidmount)
+
+更新阶段
+
+当组件的 props 或 state 发生变化时会触发更新。组件更新的生命周期调用顺序如下：
+
+- [`static getDerivedStateFromProps()`](https://zh-hans.legacy.reactjs.org/docs/react-component.html#static-getderivedstatefromprops)：会在调用 render 方法之前调用，并且在初始挂载及后续更新时都会被调用。它应返回一个对象来更新 state，如果返回 `null` 则不更新任何内容。
+- [`shouldComponentUpdate(nextProps, nextState)`](https://zh-hans.legacy.reactjs.org/docs/react-component.html#shouldcomponentupdate)：将 `this.props` 与 `nextProps` 以及 `this.state` 与`nextState` 进行比较，并返回 `false` 以告知 React 可以跳过更新。请注意，返回 `false` 并不会阻止子组件在 state 更改时重新渲染。
+- [**`render()`**](https://zh-hans.legacy.reactjs.org/docs/react-component.html#render)
+- [`getSnapshotBeforeUpdate()`](https://zh-hans.legacy.reactjs.org/docs/react-component.html#getsnapshotbeforeupdate)：在最近一次渲染输出（提交到 DOM 节点）之前调用。它使得组件能在发生更改之前从 DOM 中捕获一些信息（例如，滚动位置）
+- [**`componentDidUpdate()`**](https://zh-hans.legacy.reactjs.org/docs/react-component.html#componentdidupdate)
+
+卸载
+
+当组件从 DOM 中移除时会调用如下方法：
+
+- [**`componentWillUnmount()`**](https://zh-hans.legacy.reactjs.org/docs/react-component.html#componentwillunmount)
+
+错误处理
+
+当渲染过程，生命周期，或子组件的构造函数中抛出错误时，会调用如下方法：
+
+- [`static getDerivedStateFromError()`](https://zh-hans.legacy.reactjs.org/docs/react-component.html#static-getderivedstatefromerror)
+- [`componentDidCatch()`](https://zh-hans.legacy.reactjs.org/docs/react-component.html#componentdidcatch)
+
+基本使用
+
+```jsx
+// 生命周期回调函数 生命周期钩子函数 
+class Lift extends React.Component {
+  state = {
+    date: new Date()
+  }
+  death() {
+    // 卸载组件 unmountComponentAtNode(container):从DOM中删除已挂载的 React 组件并清理其事件处理程序和状态。返回boolean
+    ReactDOM.unmountComponentAtNode(document.getElementById("app"))
+  }
+
+  // 组件挂载完毕，立即执行componentDidMount函数
+  componentDidMount() {
+    console.log('componentDidMount');
+    let { date } = this.state
+    this.clearId = setInterval(() => {
+      date = new Date()
+      this.setState({ date })
+    }, 200)
+  }
+
+  // 组件卸载时，立即执行 componentWillUnmount函数
+  componentWillUnmount() {
+    clearInterval(this.clearId)
+    console.log('componentWillUnmount');
+  }
+
+  // render 调用时机：初始化渲染，状态更新之后
+  render () {
+    console.log('render');
+    return (
+      <div>
+        <h2>It is {this.state.date.toLocaleTimeString()}.</h2>
+        <button onClick={this.death} >卸载组件</button>
+      </div>
+    )
+  }
+}
+ReactDOM.render(<Lift />, document.getElementById("app"))
+```
+
+**总结：**
+
+- 只有类组件才有生命周期，分为 `挂载阶段` `更新阶段` `卸载阶段`
