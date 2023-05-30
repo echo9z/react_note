@@ -2524,7 +2524,7 @@ componentDidMount：**组件挂载到DOM后调用**
 
 - 跳过shouldComponentUpdate()
 
-3.props父组件传递子组件，props引起的组件更新过程中：`componentWillReceiveProps() => shouldComponentUpdate() => componentWillUpdate() => render() => componentDidUpdate()`
+3.props父组件传递子组件，传入props状态发送变化，父组件执行render，props引起的子组件更新过程中：`componentWillReceiveProps() => shouldComponentUpdate() => componentWillUpdate() => render() => componentDidUpdate()`
 
 - componentWillReceiveProps(nextProps)：**调用于props引起的组件更新过程中**
   
@@ -2570,7 +2570,111 @@ componentWillUnmount：组件被卸载前调用
 
 - 可以在这里执行一些清理工作，比如清楚组件中使用的定时器，清楚componentDidMount中手动创建的DOM元素等，以避免引起内存泄漏
 
+基本使用
+
+```jsx
+class Count extends React.Component {
+  // 1.构造器
+  constructor(props) {
+    console.log('count---constructor');
+    super(props);
+    // 初始化状态
+    this.state = {
+      count: 0
+    }
+  }
+
+  // 2.组件将要挂载时，执行钩子
+  UNSAFE_componentWillMount() {
+    console.log('count挂载前 componentWillMount');
+  }
+
+  // 3.render 调用时机：初始化渲染，状态更新之后
+  render () {
+    console.log('count---render');
+    return (
+      <div>
+        <h2>count: {this.state.count}</h2>
+        <button onClick={this.onClick} >点我+1</button>
+        <button onClick={this.death} >卸载组件</button>
+        <button onClick={this.force} >不更改state数据，forceUpdate</button>
+      </div>
+    )
+  }
+
+  // 4.组件挂载完毕，立即执行componentDidMount函数
+  componentDidMount() {
+    console.log('count挂载后 componentDidMount');
+  }
+
+  // 5.组件卸载时，立即执行 componentWillUnmount函数
+  componentWillUnmount() {
+    console.log('count卸载后 componentWillUnmount');
+  }
+
+  // 应该是否进行组件的状态更新 控制组件更新阀门
+  // 返回 false，则不会调用 UNSAFE_componentWillUpdate()，render() 和 componentDidUpdate()
+  shouldComponentUpdate() {
+    console.log('count shouldComponentUpdate');
+    return true;
+  }
+
+  // 组件中的状态更新前，执行钩子
+  UNSAFE_componentWillUpdate() {
+    console.log(this.state.count);
+    console.log('count状态更新前 componentWillUpdate');
+  }
+  
+  // 组件中的状态更新后，执行钩子
+  componentDidUpdate() {
+    console.log(this.state.count);
+    console.log('count状态更新后 componentDidUpdate');
+  }
+
+  death() {
+    // 卸载组件 unmountComponentAtNode(container):从DOM中删除已挂载的 React 组件并清理其事件处理程序和状态。返回boolean
+    ReactDOM.unmountComponentAtNode(document.getElementById("app"))
+  }
+  // 更新state
+  onClick = () => {
+    const { count } = this.state
+    this.setState({count: count+1})
+  }
+  // 强制更新
+  force = () =>{
+    this.forceUpdate()
+  }
+}
+```
+
+```jsx
+
+```
+
+总结：
+
+1. 初始化阶段: 由ReactDOM.render()触发--- 初次渲染
+   1.constructor()
+   2.componentWillMount()
+   3.render()
+   
+   4.componentDidMount()  --- 常用，一般在钩子中做一些初始化，开启定时器、发请求、订阅消息
+2. 更新阶段: 由组件内部this.setSate()或父组件重新render触发
+   
+   1.shouldComponentUpdate()
+   
+   2.componentWillUpdate()
+   3.render()
+   4.componentDidUpdate()
+3. 卸载组件: 由ReactDOM.unmountComponentAtNode()触发
+   
+   1.componentWillUnmount() --- 在这个钩子中做一些收尾事，关闭定时器，取消订阅
+
+
+
 ### 16.4 之后生命周期函数 （新）
+
+**17.0**：删除 `componentWillMount` 、 `componentWillReceiveProps` 和 `componentWillUpdate`，只有这些钩子函数前面加“UNSAFE_”生命周期名称才能工作
 
 [React组件生命周期](http://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/)
 
@@ -2581,7 +2685,7 @@ componentWillUnmount：组件被卸载前调用
 - 助于理解组件的运行方式、完成更复杂的组件功能、分析组件错误原因
 - 钩子函数为开发人员在不同阶段操作组件提供了时机
 
-挂载阶段
+#### mount挂载阶段
 
 当组件实例被创建并插入 DOM 中时，其生命周期调用顺序如下：
 
@@ -2590,7 +2694,7 @@ componentWillUnmount：组件被卸载前调用
 - [**`render()`**](https://zh-hans.legacy.reactjs.org/docs/react-component.html#render)
 - [**`componentDidMount()`**](https://zh-hans.legacy.reactjs.org/docs/react-component.html#componentdidmount)
 
-更新阶段
+#### update更新阶段
 
 当组件的 props 或 state 发生变化时会触发更新。组件更新的生命周期调用顺序如下：
 
@@ -2600,61 +2704,20 @@ componentWillUnmount：组件被卸载前调用
 - [`getSnapshotBeforeUpdate()`](https://zh-hans.legacy.reactjs.org/docs/react-component.html#getsnapshotbeforeupdate)：在最近一次渲染输出（提交到 DOM 节点）之前调用。它使得组件能在发生更改之前从 DOM 中捕获一些信息（例如，滚动位置）
 - [**`componentDidUpdate()`**](https://zh-hans.legacy.reactjs.org/docs/react-component.html#componentdidupdate)
 
-卸载
+#### unmount卸载
 
 当组件从 DOM 中移除时会调用如下方法：
 
 - [**`componentWillUnmount()`**](https://zh-hans.legacy.reactjs.org/docs/react-component.html#componentwillunmount)
 
-错误处理
+#### Error Handling错误处理
 
 当渲染过程，生命周期，或子组件的构造函数中抛出错误时，会调用如下方法：
 
 - [`static getDerivedStateFromError()`](https://zh-hans.legacy.reactjs.org/docs/react-component.html#static-getderivedstatefromerror)
 - [`componentDidCatch()`](https://zh-hans.legacy.reactjs.org/docs/react-component.html#componentdidcatch)
 
-基本使用
 
-```jsx
-// 生命周期回调函数 生命周期钩子函数 
-class Lift extends React.Component {
-  state = {
-    date: new Date()
-  }
-  death() {
-    // 卸载组件 unmountComponentAtNode(container):从DOM中删除已挂载的 React 组件并清理其事件处理程序和状态。返回boolean
-    ReactDOM.unmountComponentAtNode(document.getElementById("app"))
-  }
-
-  // 组件挂载完毕，立即执行componentDidMount函数
-  componentDidMount() {
-    console.log('componentDidMount');
-    let { date } = this.state
-    this.clearId = setInterval(() => {
-      date = new Date()
-      this.setState({ date })
-    }, 200)
-  }
-
-  // 组件卸载时，立即执行 componentWillUnmount函数
-  componentWillUnmount() {
-    clearInterval(this.clearId)
-    console.log('componentWillUnmount');
-  }
-
-  // render 调用时机：初始化渲染，状态更新之后
-  render () {
-    console.log('render');
-    return (
-      <div>
-        <h2>It is {this.state.date.toLocaleTimeString()}.</h2>
-        <button onClick={this.death} >卸载组件</button>
-      </div>
-    )
-  }
-}
-ReactDOM.render(<Lift />, document.getElementById("app"))
-```
 
 **总结：**
 
