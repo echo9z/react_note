@@ -5,6 +5,26 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
+  <style>
+    .list{
+      box-sizing: border-box;
+      height: 150px;
+      background-color: #060606;
+      border-radius: 16px;
+      color: rgb(208, 214, 224);
+      padding: 0px 16px;
+      overflow-y: auto;
+    }
+    .list-item{
+      box-sizing: border-box;
+      height: 30px;
+      border-radius: 6px;
+      border: 1px solid rgb(48, 50, 54);
+      background-color: rgb(28, 29, 31);
+      line-height: 30px;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
   <div id="app"></div>
@@ -15,13 +35,50 @@
 
   <script type="text/babel">
     class App extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          list: []
+        }
+        this.listRef = React.createRef()
+      }
+      // 这里的+= 当数据发送变化触发getSnapshot，对当前内容做快照高度30，componentDidMount数据更完毕dom也更新完毕加1条，高度为60，两个差值就是向上滚动高度
+      getSnapshotBeforeUpdate(prevProps, prevState) {
+        console.log('getSnapshotBeforeUpdate', prevProps, prevState);
+        if (prevState.list.length < this.state.list.length) { // 原数组变化，记录list滚动位置
+          const list = this.listRef.current;
+          return list.scrollHeight - list.scrollTop; // 快照记录 滚动位置 比如内容高度60-卷曲高度30=30
+        }
+        return null
+      }
+      componentDidUpdate(prevProps, prevState, snapshot) {
+        console.log('componentDidUpdate', prevProps, prevState, snapshot);
+        if (snapshot !== null) { // snapshot 有值，说明我们刚刚添加了新的 items
+          const list = this.listRef.current;
+          list.scrollTop = list.scrollHeight - snapshot // 获取更新后的内容高度比如90 - 快照记录滚动位置30，只需滚动60
+        }
+      }
+      // 组件挂载完毕
+      componentDidMount() {
+        let count = 1
+        const clearId = setInterval(() => {
+          const { list } = this.state
+          let newList = `new${list.length+1}`
+          this.setState({ list: [newList, ...list] })
+          ++count
+          if (count === 50) clearInterval(clearId)
+        }, 1000)
+      }
       render() {
+        const {list} = this.state
         return (
-          <div></div>
+          <div ref={this.listRef} className={'list'}>
+            {list.map(((listItem,i) => <div className='list-item' key={i}>{listItem}</div>))}
+          </div>
         )
       }
     }
-    ReactDOM.render(<Count count={18} />, document.getElementById("app"))
+    ReactDOM.render(<App />, document.getElementById("app"))
   </script>
 </body>
 </html>

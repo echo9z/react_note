@@ -67,8 +67,8 @@
 
       // 应该是否进行组件的状态更新 控制组件更新阀门
       // 返回 false，则不会调用 UNSAFE_componentWillUpdate()，render() 和 componentDidUpdate()
-      shouldComponentUpdate() {
-        console.log('count shouldComponentUpdate');
+      shouldComponentUpdate(nextProps, nextState) {
+        console.log('count shouldComponentUpdate', nextProps, nextState);
         return true;
       }
 
@@ -79,7 +79,7 @@
       // }
 
       // 最近一次渲染输出（提交到 DOM 节点）之前调用，即更新页面DOM之前
-      // getSnapshotBeforeUpdate()更新之前获取快照，保留更新之前的数据
+      // getSnapshotBeforeUpdate() 更新之前获取快照，保留更新之前的数据
       // prevProps: 更新之前props; prevState: 更新之前的state
       getSnapshotBeforeUpdate(prevProps, prevState) {
         console.log('返回更新之前的数据 getSnapshotBeforeUpdate', prevProps, prevState);
@@ -127,16 +127,23 @@
     class Child extends React.Component {
       // 组件将要接收新的props之前 执行钩子函数
       // 根据新的 props 值更新 state, 从版本 16.3 开始，更新 state 以响应 props 更改的建议方法是使用新的 static getDerivedStateFromProps 生命周期。
-      UNSAFE_componentWillReceiveProps() { // 名称沿用至React 17, 18改为UNSAFE_componentWillReceiveProps
-        console.log('Child---componentWillReceiveProps', this.props);
+      // UNSAFE_componentWillReceiveProps() { // 名称沿用至React 17, 18改为UNSAFE_componentWillReceiveProps
+      //   console.log('Child---componentWillReceiveProps', this.props);
+      // }
+      state = {}
+      // 父组件中props更新时
+      static getDerivedStateFromProps(props,state) {
+        console.log('Child---getDerivedStateFromProps', props, state);
+        return null
       }
-      shouldComponentUpdate () {
-        console.log('Child---shouldComponentUpdate');
+
+      shouldComponentUpdate (nextProps, nextState) {
+        console.log('Child---shouldComponentUpdate', nextProps, nextState);
         return true;
       }
-      UNSAFE_componentWillUpdate() {
-        console.log('Child---componentWillUpdate');
-      }
+      // UNSAFE_componentWillUpdate() {
+      //   console.log('Child---componentWillUpdate');
+      // }
       render() {
         console.log('Child---render');
         return (
@@ -146,11 +153,17 @@
           </div>
         )
       }
-      componentDidUpdate() {
-        console.log('Child---componentDidUpdate');
+      // 保留更新之前的数据
+      getSnapshotBeforeUpdate(prevProps, prevState) {
+        console.log('快照 getSnapshotBeforeUpdate', prevProps, prevState);
+        return null
+      }
+      componentDidUpdate(prevProps, prevState, snapshot) {
+        console.log('Child---componentDidUpdate',prevProps, prevState,snapshot);
       }
     }
-    ReactDOM.render(<Count count={18} />, document.getElementById("app"))
+    // ReactDOM.render(<Count count={18} />, document.getElementById("app"))
+    ReactDOM.render(<Parent />, document.getElementById("app"))
   </script>
 
 </body>

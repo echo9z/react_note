@@ -2723,10 +2723,10 @@ class Child extends React.Component {
 
 #### static getDerivedStateFromProps
 
-getDerivedStateFromProps(prevProps, prevState)：**组件创建和更新时调用的方法**
+getDerivedStateFromProps(props, state)：**组件创建和更新时调用的方法**
 
-- prevProps：组件更新前的props
-- prevState：组件更新前的state
+- props：组件更新的props
+- state：组件更新的state
 - 在React v16.3中，在创建和更新时，只能是由父组件引发props变化才会调用这个函数，在React v16.4改为无论是Mounting还是Updating，也无论是什么引起的Updating，全部都会调用。
 - 类似于componentWillReceiveProps，不同的是getDerivedStateFromProps是一个静态函数，也就是这个函数不能通过this访问到class的属性，当然也不推荐使用
 - 如果props传入的内容不需要影响到你的state，那么就需要返回一个null，这个返回值是必须的，所以尽量将其写到函数的末尾。
@@ -2741,18 +2741,69 @@ getSnapshotBeforeUpdate(prevProps,prevState):**Updating时的函数，在render�
 - 可以读取，但无法使用DOM的时候，在组件可以在可能更改之前从DOM捕获一些信息（例如滚动位置）
 - 返回的任何指都将作为参数传递给componentDidUpdate()
 
+getSnapshotBeforeUpdate运用场景
+
+```jsx
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      list: []
+    }
+    this.listRef = React.createRef()
+  }
+  // 这里的+= 当数据发送变化触发getSnapshot，对当前内容做快照高度30，componentDidMount数据更完毕dom也更新完毕加1条，高度为60，两个差值就是向上滚动高度
+  getSnapshotBeforeUpdate(prevProps, prevState) {
+    console.log('getSnapshotBeforeUpdate', prevProps, prevState);
+    if (prevState.list.length < this.state.list.length) { // 原数组变化，记录list滚动位置
+      const list = this.listRef.current;
+      return list.scrollHeight - list.scrollTop; // 快照记录 滚动位置 比如内容高度60-卷曲高度30=30
+    }
+    return null
+  }
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    console.log('componentDidUpdate', prevProps, prevState, snapshot);
+    if (snapshot !== null) { // snapshot 有值，说明我们刚刚添加了新的 items
+      const list = this.listRef.current;
+      list.scrollTop = list.scrollHeight - snapshot // 获取更新后的内容高度比如90 - 快照记录滚动位置30，只需滚动60
+    }
+  }
+  // 组件挂载完毕
+  componentDidMount() {
+    let count = 1
+    const clearId = setInterval(() => {
+      const { list } = this.state
+      let newList = `new${list.length+1}`
+      this.setState({ list: [newList, ...list] })
+      ++count
+      if (count === 50) clearInterval(clearId)
+    }, 1000)
+  }
+  render() {
+    const {list} = this.state
+    return (
+      <div ref={this.listRef} className={'list'}>
+        {list.map(((listItem,i) => <div className='list-item' key={i}>{listItem}</div>))}
+      </div>
+    )
+  }
+}
+```
+
 #### mount挂载阶段
 
 当组件实例被创建并插入 DOM 中时，其生命周期调用顺序如下：
 
-- [**`constructor()`**](https://zh-hans.legacy.reactjs.org/docs/react-component.html#constructor)
-- [`static getDerivedStateFromProps()`](https://zh-hans.legacy.reactjs.org/docs/react-component.html#static-getderivedstatefromprops)
-- [**`render()`**](https://zh-hans.legacy.reactjs.org/docs/react-component.html#render)
+- [**`constructor()`**](https://zh-hans.legacy.reactjs.org/docs/react-component.html#constructor) =>
+- [`static getDerivedStateFromProps()`](https://zh-hans.legacy.reactjs.org/docs/react-component.html#static-getderivedstatefromprops)=>
+- [**`render()`**](https://zh-hans.legacy.reactjs.org/docs/react-component.html#render)=>
 - [**`componentDidMount()`**](https://zh-hans.legacy.reactjs.org/docs/react-component.html#componentdidmount)
 
 #### update更新阶段
 
 当组件的 props 或 state 发生变化时会触发更新。组件更新的生命周期调用顺序如下：
+
+`getDerivedStateFromProps() => shouldComponentUpdate() => render => getSnapshotBeforeUpdate() => componentDidUpdate()`
 
 - [`static getDerivedStateFromProps(props, state)`](https://zh-hans.legacy.reactjs.org/docs/react-component.html#static-getderivedstatefromprops)：会在调用 render 方法之前调用，并且在初始挂载及后续更新时都会被调用。返回一个对象来更新 state，如果返回 null 则不更新任何内容。
 - [`shouldComponentUpdate(nextProps, nextState)`](https://zh-hans.legacy.reactjs.org/docs/react-component.html#shouldcomponentupdate)：将 `this.props` 与 `nextProps` 以及 `this.state` 与`nextState` 进行比较，并返回 `false` 以告知 React 可以跳过更新。请注意，返回 `false` 并不会阻止子组件在 state 更改时重新渲染。
@@ -2775,4 +2826,23 @@ getSnapshotBeforeUpdate(prevProps,prevState):**Updating时的函数，在render�
 
 **总结：**
 
-- 只有类组件才有生命周期，分为 `挂载阶段` `更新阶段` `卸载阶段`
+- 初始化阶段: 由ReactDOM.render()触发--- 初次渲染
+  1.constructor()
+  2.getDerivedStateFromProps()
+  3.render()
+  
+  4.componentDidMount() --- 常用，一般在钩子中做一些初始化，开启定时器、发请求、订阅消息
+
+- 更新阶段: 由组件内部this.setSate()或父组件重新render触发
+  
+  1.getDerivedStateFromProps()
+  
+  2.shouldComponentUpdate()
+  3.render()
+  
+  4.getSnapshotBeforeUpdate()
+  5.componentDidUpdate()
+
+- 卸载组件: 由ReactDOM.unmountComponentAtNode()触发
+  
+  1.componentWillUnmount() --- 在这个钩子中做一些收尾事，关闭定时器，取消订阅
