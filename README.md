@@ -2624,7 +2624,7 @@ class Count extends React.Component {
     console.log(this.state.count);
     console.log('count状态更新前 componentWillUpdate');
   }
-  
+
   // 组件中的状态更新后，执行钩子
   componentDidUpdate() {
     console.log(this.state.count);
@@ -2648,7 +2648,46 @@ class Count extends React.Component {
 ```
 
 ```jsx
-
+class Parent extends React.Component {
+  state = { msg: 'ok'}
+  changeMsg = () => this.state.msg ==='ok' ? this.setState({ msg: 'Change'}): this.setState({ msg: 'ok'}) 
+  render() {
+    console.log('Parent---render');
+    return (
+      <div>
+        <h2>Parent</h2>
+        <Child msg={this.state.msg} />
+        <button onClick={this.changeMsg} >msg</button>
+      </div>
+    )
+  }
+}
+class Child extends React.Component {
+  // 组件将要接收新的props之前 执行钩子函数
+  // 根据新的 props 值更新 state, 从版本 16.3 开始，更新 state 以响应 props 更改的建议方法是使用新的 static getDerivedStateFromProps 生命周期。
+  componentWillReceiveProps() { // 名称沿用至React 17, 18改为UNSAFE_componentWillReceiveProps
+    console.log('Child---componentWillReceiveProps', this.props);
+  }
+  shouldComponentUpdate () {
+    console.log('Child---shouldComponentUpdate');
+    return true;
+  }
+  componentWillUpdate() {
+    console.log('Child---componentWillUpdate');
+  }
+  render() {
+    console.log('Child---render');
+    return (
+      <div>
+        Child
+        <p>{this.props.msg}</p>
+      </div>
+    )
+  }
+  componentDidUpdate() {
+    console.log('Child---componentDidUpdate');
+  }
+}
 ```
 
 总结：
@@ -2659,6 +2698,7 @@ class Count extends React.Component {
    3.render()
    
    4.componentDidMount()  --- 常用，一般在钩子中做一些初始化，开启定时器、发请求、订阅消息
+
 2. 更新阶段: 由组件内部this.setSate()或父组件重新render触发
    
    1.shouldComponentUpdate()
@@ -2666,24 +2706,40 @@ class Count extends React.Component {
    2.componentWillUpdate()
    3.render()
    4.componentDidUpdate()
+
 3. 卸载组件: 由ReactDOM.unmountComponentAtNode()触发
    
    1.componentWillUnmount() --- 在这个钩子中做一些收尾事，关闭定时器，取消订阅
-
-
 
 ### 16.4 之后生命周期函数 （新）
 
 **17.0**：删除 `componentWillMount` 、 `componentWillReceiveProps` 和 `componentWillUpdate`，只有这些钩子函数前面加“UNSAFE_”生命周期名称才能工作
 
+添加`getDerivedStateFromProps`、`getSnapshotBeforeUpdate`生命钩子
+
 [React组件生命周期](http://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/)
 
 ![](./img/iShot_2023-05-29_18.11.28.png)
 
-生命周期的意义
+#### static getDerivedStateFromProps
 
-- 助于理解组件的运行方式、完成更复杂的组件功能、分析组件错误原因
-- 钩子函数为开发人员在不同阶段操作组件提供了时机
+getDerivedStateFromProps(prevProps, prevState)：**组件创建和更新时调用的方法**
+
+- prevProps：组件更新前的props
+- prevState：组件更新前的state
+- 在React v16.3中，在创建和更新时，只能是由父组件引发props变化才会调用这个函数，在React v16.4改为无论是Mounting还是Updating，也无论是什么引起的Updating，全部都会调用。
+- 类似于componentWillReceiveProps，不同的是getDerivedStateFromProps是一个静态函数，也就是这个函数不能通过this访问到class的属性，当然也不推荐使用
+- 如果props传入的内容不需要影响到你的state，那么就需要返回一个null，这个返回值是必须的，所以尽量将其写到函数的末尾。
+- 在组件创建时和更新时的render方法之前调用，它应该返回一个对象来更新状态，或者返回null来不更新任何内容。
+
+#### getSnapshotBeforeUpdate
+
+getSnapshotBeforeUpdate(prevProps,prevState):**Updating时的函数，在render之后调用**
+
+- prevProps：组件更新前的props
+- prevState：组件更新前的state
+- 可以读取，但无法使用DOM的时候，在组件可以在可能更改之前从DOM捕获一些信息（例如滚动位置）
+- 返回的任何指都将作为参数传递给componentDidUpdate()
 
 #### mount挂载阶段
 
@@ -2698,10 +2754,10 @@ class Count extends React.Component {
 
 当组件的 props 或 state 发生变化时会触发更新。组件更新的生命周期调用顺序如下：
 
-- [`static getDerivedStateFromProps()`](https://zh-hans.legacy.reactjs.org/docs/react-component.html#static-getderivedstatefromprops)：会在调用 render 方法之前调用，并且在初始挂载及后续更新时都会被调用。它应返回一个对象来更新 state，如果返回 `null` 则不更新任何内容。
+- [`static getDerivedStateFromProps(props, state)`](https://zh-hans.legacy.reactjs.org/docs/react-component.html#static-getderivedstatefromprops)：会在调用 render 方法之前调用，并且在初始挂载及后续更新时都会被调用。返回一个对象来更新 state，如果返回 null 则不更新任何内容。
 - [`shouldComponentUpdate(nextProps, nextState)`](https://zh-hans.legacy.reactjs.org/docs/react-component.html#shouldcomponentupdate)：将 `this.props` 与 `nextProps` 以及 `this.state` 与`nextState` 进行比较，并返回 `false` 以告知 React 可以跳过更新。请注意，返回 `false` 并不会阻止子组件在 state 更改时重新渲染。
 - [**`render()`**](https://zh-hans.legacy.reactjs.org/docs/react-component.html#render)
-- [`getSnapshotBeforeUpdate()`](https://zh-hans.legacy.reactjs.org/docs/react-component.html#getsnapshotbeforeupdate)：在最近一次渲染输出（提交到 DOM 节点）之前调用。它使得组件能在发生更改之前从 DOM 中捕获一些信息（例如，滚动位置）
+- [`getSnapshotBeforeUpdate()`](https://zh-hans.legacy.reactjs.org/docs/react-component.html#getsnapshotbeforeupdate)：**在render之后调用**，在最近一次渲染输出（提交到 DOM 节点）之前调用。它使得组件能在发生更改之前从 DOM 中捕获一些信息（例如，滚动位置）
 - [**`componentDidUpdate()`**](https://zh-hans.legacy.reactjs.org/docs/react-component.html#componentdidupdate)
 
 #### unmount卸载
@@ -2716,8 +2772,6 @@ class Count extends React.Component {
 
 - [`static getDerivedStateFromError()`](https://zh-hans.legacy.reactjs.org/docs/react-component.html#static-getderivedstatefromerror)
 - [`componentDidCatch()`](https://zh-hans.legacy.reactjs.org/docs/react-component.html#componentdidcatch)
-
-
 
 **总结：**
 

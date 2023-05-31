@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="app"></div>
+  <!-- 先引入react核心库 react-dom操作dom库 babel,jsx转换js库  -->
+  <script type="text/javascript" src="../lib/17.0.2/react.development.js"></script>
+  <script type="text/javascript" src="../lib/17.0.2/react-dom.development.js"></script>
+  <script type="text/javascript" src="../lib/17.0.2/babel.min.js"></script>
+
+  <script type="text/babel">
+    class App extends React.Component {
+      render() {
+        return (
+          <div></div>
+        )
+      }
+    }
+    ReactDOM.render(<Count count={18} />, document.getElementById("app"))
+  </script>
+</body>
+</html>

@@ -22,21 +22,32 @@
         super(props);
         // 初始化状态
         this.state = {
-          count: 0
+          count: 0,
+          msg: 'ok'
         }
       }
 
-      // 2.组件将要挂载时，执行钩子
-      UNSAFE_componentWillMount() {
-        console.log('count挂载前 componentWillMount');
+      // 2.getDerivedStateFromProps返回一个派生的状态，返回一个对象来更新 state，如果返回 null 则不更新任何内容
+      static getDerivedStateFromProps(props, state) {
+        console.log('getDerivedStateFromProps',props, state);
+        // 比如组件传递props数据，将props直接返回，在任何时候state值都取决于props
+        // 返回 null 表示无需更新 state。
+        // return {count: 15}
+        return null
+        // return props
       }
+
+      /* // 2.组件将要挂载时，执行钩子
+      componentWillMount() {
+        console.log('count挂载前 componentWillMount');
+      } */
 
       // 3.render 调用时机：初始化渲染，状态更新之后
       render () {
         console.log('count---render');
         return (
           <div>
-            <h2>count: {this.state.count}</h2>
+            <h2>count: {this.state.count}，msg: {this.state.msg}</h2>
             <button onClick={this.onClick} >点我+1</button>
             <button onClick={this.death} >卸载组件</button>
             <button onClick={this.force} >不更改state数据，forceUpdate</button>
@@ -61,16 +72,26 @@
         return true;
       }
 
-      // 组件中的状态更新前，执行钩子
-      UNSAFE_componentWillUpdate() {
-        console.log(this.state.count);
-        console.log('count状态更新前 componentWillUpdate');
+      // // 组件中的状态更新前，执行钩子
+      // UNSAFE_componentWillUpdate() {
+      //   console.log(this.state.count);
+      //   console.log('count状态更新前 componentWillUpdate');
+      // }
+
+      // 最近一次渲染输出（提交到 DOM 节点）之前调用，即更新页面DOM之前
+      // getSnapshotBeforeUpdate()更新之前获取快照，保留更新之前的数据
+      // prevProps: 更新之前props; prevState: 更新之前的state
+      getSnapshotBeforeUpdate(prevProps, prevState) {
+        console.log('返回更新之前的数据 getSnapshotBeforeUpdate', prevProps, prevState);
+        return 1 // 返回值将作为参数传递给 componentDidUpdate() 
       }
       
       // 组件中的状态更新后，执行钩子
-      componentDidUpdate() {
-        console.log(this.state.count);
-        console.log('count状态更新后 componentDidUpdate');
+      // prevProps: 更新之前props; prevState: 更新之前的state
+      // snapshot: getSnapshotBeforeUpdate返回的值
+      componentDidUpdate(prevProps, prevState, snapshot) {
+        console.log('count值：' + this.state.count);
+        console.log('count状态更新后 componentDidUpdate', prevProps, prevState, snapshot);
       }
 
       death() {
@@ -81,6 +102,7 @@
       onClick = () => {
         const { count } = this.state
         this.setState({count: count+1})
+        this.setState({msg: 'ok yeah'})
       }
       // 强制更新
       force = () =>{
@@ -128,7 +150,7 @@
         console.log('Child---componentDidUpdate');
       }
     }
-    ReactDOM.render(<Parent />, document.getElementById("app"))
+    ReactDOM.render(<Count count={18} />, document.getElementById("app"))
   </script>
 
 </body>
