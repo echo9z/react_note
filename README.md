@@ -2828,7 +2828,9 @@ class App extends React.Component {
 
 - 初始化阶段: 由ReactDOM.render()触发--- 初次渲染
   1.constructor()
+  
   2.getDerivedStateFromProps()
+  
   3.render()
   
   4.componentDidMount() --- 常用，一般在钩子中做一些初始化，开启定时器、发请求、订阅消息
@@ -2838,11 +2840,17 @@ class App extends React.Component {
   1.getDerivedStateFromProps()
   
   2.shouldComponentUpdate()
+  
   3.render()
   
   4.getSnapshotBeforeUpdate()
+  
   5.componentDidUpdate()
 
 - 卸载组件: 由ReactDOM.unmountComponentAtNode()触发
   
   1.componentWillUnmount() --- 在这个钩子中做一些收尾事，关闭定时器，取消订阅
+
+## React diff算法
+
+![](./img/diff.png)

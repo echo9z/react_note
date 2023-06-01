@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="app"></div>
+  <!-- 先引入react核心库 react-dom操作dom库 babel,jsx转换js库  -->
+  <script type="text/javascript" src="../lib/16.8.4/react.development.js"></script>
+  <script type="text/javascript" src="../lib/16.8.4/react-dom.development.js"></script>
+  <script type="text/javascript" src="../lib/16.8.4/babel.min.js"></script>
+
+  <script type="text/babel">
+    /**
+      1). react/vue中的key有什么作用？（key的内部原理是什么？）
+      2). 为什么遍历列表时，key最好不要用index?
+      
+			1. 虚拟DOM中key的作用：
+					1). 简单的说: key是虚拟DOM对象的标识, 在更新显示时key起着极其重要的作用。
+					2). 详细的说: 当状态中的数据发生变化时，react会根据【新数据】生成【新的虚拟DOM】, 
+												随后React进行【新虚拟DOM】与【旧虚拟DOM】的diff比较，比较规则如下：
+
+									a. 旧虚拟DOM中找到了与新虚拟DOM相同的key：
+												(1).若虚拟DOM中内容没变, 直接使用之前的真实DOM
+												(2).若虚拟DOM中内容变了, 则生成新的真实DOM，随后替换掉页面中之前的真实DOM
+
+									b. 旧虚拟DOM中未找到与新虚拟DOM相同的key
+												根据数据创建新的真实DOM，随后渲染到到页面
+									
+			2. 用index作为key可能会引发的问题：
+								1. 若对数据进行：逆序添加、逆序删除等破坏顺序操作:
+												会产生没有必要的真实DOM更新 ==> 界面效果没问题, 但效率低。
+
+								2. 如果结构中还包含输入类的DOM：
+												会产生错误DOM更新 ==> 界面有问题。
+												
+								3. 注意！如果不存在对数据的逆序添加、逆序删除等破坏顺序操作，
+									仅用于渲染列表用于展示，使用index作为key是没有问题的。
+					
+			3. 开发中如何选择key?:
+								1.最好使用每条数据的唯一标识作为key, 比如id、手机号、身份证号、学号等唯一值。
+								2.如果确定只是简单的展示数据，用index也是可以的。
+     */
+
+    /*
+      使用index索引值做唯一标识key
+      初始数据：{id:1, name: '小李', age: 20},
+              {id: 2, name: '小王', age: 18}
+      初始虚拟dom：
+            <li key=1>小李---20 <input type="text" /></li>
+            <li key=2>小王---18 <input type="text" /></li>
+      
+      更新后的数据：
+          {id:3, name: '李逵', age: 15},
+          {id:1, name: '小李', age: 20},
+          {id:2, name: '小王', age: 18}
+      更新后的DOM：
+          <li key=0>李逵---15 <input type="text" /></li>
+          <li key=1>小李---20 <input type="text" /></li>
+          <li key=2>小王---18 <input type="text" /></li>
+
+      ----------------------------------------------------------------
+      使用id做唯一标识key
+      初始数据：{id:1, name: '小李', age: 20},
+              {id: 2, name: '小王', age: 18}
+      初始虚拟dom：
+            <li key=1>小李---20</li>
+            <li key=2>小王---18</li>
+      
+      更新后的数据：
+          {id:3, name: '李逵', age: 15},
+          {id:1, name: '小李', age: 20},
+          {id:2, name: '小王', age: 18}
+      更新后的DOM：
+          <li key=3>李逵---15</li>
+          <li key=1>小李---20</li>
+          <li key=2>小王---18</li>
+
+    */
+    class Person extends React.Component {
+      state = {
+        users: [{id:1, name: '小李', age: 20},
+              {id:2, name: '小王', age: 18}]
+      }
+      death() {
+        ReactDOM.unmountComponentAtNode(document.getElementById("app"))
+      }
+
+      // 组件挂载完毕，立即执行componentDidMount函数
+      componentDidMount() {
+        console.log('componentDidMount');
+        // let { date } = this.state
+        // this.clearId = setInterval(() => {
+        //   date = new Date()
+        //   this.setState({ date })
+        // }, 1000)
+      }
+
+      // 组件卸载时，立即执行 componentWillUnmount函数
+      componentWillUnmount() {
+        // clearInterval(this.clearId)
+        console.log('componentWillUnmount');
+      }
+
+      addUser = () => {
+        const { users } = this.state
+        const user = { id:users.length+1 ,name: '李雷', age:15 }
+        this.setState({ users: [user, ...users] })
+      }
+
+      // render 调用时机：初始化渲染，状态更新之后
+      render () {
+        console.log('render');
+        console.log(this.state.users);
+        return (
+          <div>
+            <h2>index索引值做key</h2>
+            <button onClick={this.addUser}>添加用户信息</button>
+            {/* index索引值做唯一标识 */}
+            <ul>
+              {this.state.users.map((item, idx) => <li key={idx} >{item.name}---{item.age} <input type="text" /> </li>)}
+            </ul>
+            <hr />
+
+            <h2>id的唯一标识做key</h2>
+            <button onClick={this.addUser}>添加用户信息</button>
+            {/* 数据的id做唯一标识 */}
+            <ul>
+              {this.state.users.map(item => <li key={item.id} >{item.name}---{item.age} <input type="text" /></li>)}
+            </ul>
+          </div>
+        )
+      }
+    }
+    ReactDOM.render(<Person />, document.getElementById("app"))
+  </script>
+
+</body>
+</html>
