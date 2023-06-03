@@ -11,7 +11,8 @@ export class TodoApp extends Component {
     todos: [
       {id:1, content:"Taste JavaScript", done:true},
       {id:2, content:"Buy a unicorn", done:false}
-    ]
+    ],
+    type: 'all' // todo状态
   }
   // 修改输入的文本框
   changeNewTodo (newTodo) {
@@ -78,11 +79,18 @@ export class TodoApp extends Component {
     this.setState(prevState => ({ todos: prevState.todos.filter(item => !item.done) }))
   }
 
+  todoActiveAndCompleted(type){
+    // console.log(type);
+    this.setState({type})
+  }
+
   render() {
     const {
       todos, // list数据
       newTodo, // 创建新todo
+      type
     } = this.state
+
     return (
       <div>
         <section className="todoapp">
@@ -98,12 +106,15 @@ export class TodoApp extends Component {
           }}>
             <TodoList list={todos}
               toggle={this.toggle()}
-              changeToggle={this.changeToggle.bind(this)} />
+              changeToggle={this.changeToggle.bind(this)}
+              type={type} />
           </TodoContext.Provider>
           <TodoFooter
             todoCount={this.todoCount()}
             showClearCompleted={this.showClearCompleted()}
-            clearDoneTodo={this.clearDoneTodo.bind(this)} />
+            clearDoneTodo={this.clearDoneTodo.bind(this)}
+            type={type}
+            todoStatus={this.todoActiveAndCompleted.bind(this)} />
         </section>
       </div>
     )

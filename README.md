@@ -1502,8 +1502,6 @@ class MyComponent extends React.Component {
 
 - “异步” 更新，或者做延时更新，为了等所有操作结束后去更新
 - 合并更新，是将多次setState合并，然后进行更新
-  
-  
 
 #### setState扩展-异步
 

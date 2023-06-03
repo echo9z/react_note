@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 
 export class TodoFooter extends Component {
   render() {
-    const {todoCount, showClearCompleted, clearDoneTodo} = this.props
+    const {todoCount, showClearCompleted, clearDoneTodo, todoStatus, type} = this.props
     return (
       // {/* <!-- This footer should be hidden by default and shown when there are todos --> */}
       <footer className="footer">
@@ -11,13 +11,13 @@ export class TodoFooter extends Component {
         {/* <!-- Remove this if you don't implement routing --> */}
         <ul className="filters">
           <li>
-            <a className="selected" href="#/">All</a>
+            <a className={ type === 'all'? `selected`: ''} href="#/" onClick={e => todoStatus('all')}>All</a>
           </li>
           <li>
-            <a href="#/active">Active</a>
+            <a className={ type === 'active'? `selected`: ''} href="#/active" onClick={e => todoStatus('active')} >Active</a>
           </li>
           <li>
-            <a href="#/completed">Completed</a>
+            <a className={ type === 'completed'? `selected`: ''} href="#/completed" onClick={e => todoStatus('completed')}>Completed</a>
           </li>
         </ul>
         {/* <!-- Hidden if no completed items are left ↓ --> */}

@@ -8,7 +8,16 @@ export class TodoList extends Component {
   }
 
   render() {
-    const {list, toggle} = this.props
+    const {list, toggle, type} = this.props
+    let newList = []
+    console.log(type);
+    if (type === 'active') {
+      newList = list.filter(todo => !todo.done)
+    } else if (type === 'completed') {
+      newList = list.filter(todo => todo.done)
+    } else {
+      newList = list
+    }
     return (
       <section className="main">
         <input id="toggle-all" className="toggle-all" type="checkbox" checked={toggle} onChange={this.toggleAllChange.bind(this)} />
@@ -17,7 +26,7 @@ export class TodoList extends Component {
         <ul className="todo-list">
           {/* <!-- These are here just to show the structure of the list items --> */}
           {/* <!-- List items should get the className `editing` when editing and `completed` when marked as completed --> */}
-          {list.map(listItem => {
+          {newList.map(listItem => {
             return <TodoListItem key={listItem.id} item={listItem} />
           })}
         </ul>
