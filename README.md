@@ -1440,7 +1440,85 @@ class App extends Component {
 export default App;
 ```
 
-### 10.类组件-受控组件
+### 10.setState扩展-发现问题
+
+> 发现setState是“异步”的，多次setState会合并。
+
+1. 理解setState是“异步”的，setState会合并更新
+   - 调用 setState 时，将要更新的状态对象，放到一个更新队列中暂存起来（没有立即更新）
+   - 如果多次调用 setState 更新状态，**状态会进行合并，后面覆盖前面**
+   - 等到所有的操作都执行完毕，React 会拿到最终的状态，然后触发组件更新
+
+```jsx
+class MyComponent extends React.Component {
+  state = {
+    count: 0,
+  }
+
+  onClickHandler() {
+    const {count} = this.state
+    this.setState({count: count+1})
+    this.setState({count: count+1})
+    this.setState({count: count+1})
+    // 多次调用 setState 更新状态，状态会进行合并，后面覆盖前面
+    // 仅影响 this.state 从下一次render开始返回的内容，比如修改state状态，但未进行render渲染，所有还是当前状态
+    console.log(this.state.count); // 0
+  }
+
+  render () {
+    return (
+      <div>
+        Count: {this.state.count}<br/>
+        <button onClick={() => this.onClickHandler()}>体现“异步”合并+3? 结果+1</button>
+      </div>
+    )
+  }
+}
+```
+
+通过回调函数在同一事件期间 多次更新状态`setState((prevState) =>{}, callback)`
+
+```jsx
+      addHandler() {
+        const {count} = this.state
+        this.setState(prevState => { 
+          return {count: prevState.count+1}
+        }, () => {
+          // 等等render重新渲染完毕，获取最新的state值
+          console.log('更新后：', this.state.count)  // 打印：2
+        })
+        this.setState(prevState => { 
+          return {count: prevState.count+1}
+        })
+        // 多次调用 setState 更新状态，通过回调函数在同一事件期间 多次更新状态
+        console.log('未更新：', this.state.count)  // 打印：0
+      }
+```
+
+- 使用 `setState((prevState) => {})` 语法，可以解决多次调用状态依赖问题
+- 使用 `setState(updater[, callback])` 语法，在状态更新（页面完成重新渲染）后立即执行某个操作
+
+好处是什么？
+
+- “异步” 更新，或者做延时更新，为了等所有操作结束后去更新
+- 合并更新，是将多次setState合并，然后进行更新
+  
+  
+
+#### setState扩展-异步
+
+> 能够说出setState到底是同步的还是异步
+
+具体内容：
+
+- setState本身并不是一个异步方法，其之所以会表现出一种“异步”的形式，是因为react框架本身的一个性能优化机制
+- React会将多个setState的调用合并为一个来执行，也就是说，当执行setState的时候，state中的数据并不会马上更新
+
+**总结：**
+
+- 在react类组件中，多次的setState并不会立刻执行，而是合并成一个来执行。
+
+### 11.类组件-受控组件
 
 > 理解受控组件概念，掌握动态绑定表单元素。
 
@@ -1500,7 +1578,7 @@ export default App;
 - 使用`state`的数据赋值给表单原生，通过`onChange`监听值改变修改 state 数据，完成表单元素的绑定。
 - 这种表单元素称为受控组件。
 
-### 11.类组件-非受控组件
+### 12.类组件-非受控组件
 
 > 理解非受控组件概念，掌握通过 ref 获取元素。
 

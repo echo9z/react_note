@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="app"></div>
+  <!-- 先引入react核心库 react-dom操作dom库 babel,jsx转换js库  -->
+  <script type="text/javascript" src="../lib/16.8.4/react.development.js"></script>
+  <script type="text/javascript" src="../lib/16.8.4/react-dom.development.js"></script>
+  <script type="text/javascript" src="../lib/16.8.4/babel.min.js"></script>
+
+  <!-- text/babel 写的是jsx，让babel进行编译转译为js -->
+  <script type="text/babel">
+    class MyComponent extends React.Component {
+      state = {
+        count: 0,
+      }
+
+      onClickHandler() {
+        const {count} = this.state
+        this.setState({count: count+1})
+        this.setState({count: count+1})
+        this.setState({count: count+1})
+        // 多次调用 setState 更新状态，状态会进行合并，后面覆盖前面
+        // 仅影响 this.state 从下一次render开始返回的内容，比如修改state状态，但未进行render渲染，所有还是当前状态
+        console.log(this.state.count); // 0
+      }
+
+      addHandler() {
+        const {count} = this.state
+        this.setState(prevState => { 
+          return {count: prevState.count+1}
+        }, () => {
+          // 获取最新的state值
+          console.log(this.state.count);
+        })
+        this.setState(prevState => { 
+          return {count: prevState.count+1}
+        })
+        // 多次调用 setState 更新状态，通过回调函数在同一事件期间 多次更新状态
+        console.log(this.state.count); // 0
+      }
+
+      render () {
+        return (
+          <div>
+            Count: {this.state.count}<br/>
+            <button onClick={() => this.onClickHandler()}>体现“异步”合并+3? 结果+1</button>
+            <button onClick={() => this.addHandler()}>回调形式+2</button>
+          </div>
+        )
+      }
+    }
+    const VDOM = (
+      <React.Fragment>
+        {/* 渲染组件到页面 */}
+        <MyComponent />
+      </React.Fragment>
+    )
+    ReactDOM.render(VDOM, document.getElementById('app'))
+  </script>
+</body>
+</html>

@@ -109,6 +109,13 @@ class ComponentList extends Component {
     console.log(newList);
     return newList
   }
+  componentDidUpdate() {
+    localStorage.setItem('comments', JSON.stringify(this.state.comments));
+  }
+  componentDidMount() {
+    const comments = JSON.parse(localStorage.getItem('comments') || '[]')
+    this.setState({ comments})
+  }
 
   render() {
     const { user, content, comments, active } = this.state;
