@@ -2,11 +2,10 @@ import React, { Component } from 'react'
 
 export class TodoHeader extends Component {
   onEnter(e) {
+    if (e.keyCode !== 13) return
     // 回车
-    if(e.keyCode === 13) {
-      const {addTodo} = this.props
-      addTodo(e.target.value)
-    };
+    const {addTodo} = this.props
+    addTodo(e.target.value)
   }
   onChange(e) {
     const {change} = this.props

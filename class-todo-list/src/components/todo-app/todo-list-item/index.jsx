@@ -12,7 +12,11 @@ export class TodoListItem extends Component {
     })
     // setTimeout(() => {this.editRef.current.focus()}, 10)
   }
-  onBlur() {
+  onBlur(e) {
+    this.setState(prevState => ({editing: false}))
+  }
+  onEnter(e) {
+    if (e.keyCode !== 13) return;
     this.setState(prevState => ({editing: false}))
   }
   render() {
@@ -33,6 +37,7 @@ export class TodoListItem extends Component {
               </div>
               <input className="edit" ref={this.editRef}
                 onBlur={this.onBlur.bind(this)}
+                onKeyUp={this.onEnter.bind(this)}
                 onChange={(e) => context.changeTodo(item.id, e.target.value)}
                 value={item.content} />
             </li>

@@ -2366,6 +2366,67 @@ function Child() {
 - 使用 `Provider` 包裹组件，`value` 属性注入`状态，函数`，被包裹组件下的任何组件可以使用。
 - 使用 `Consumer` 消费 `Provider` 提供的数据和函数，语法`{value=>使用数据和函数}`
 
+### react EventBus事件总线传参 非父子组件通讯
+
+emit/on 触发和监听
+
+定义一个事件中心
+
+```js
+import { EventEmitter } from "events";
+const eventBus = new EventEmitter();
+
+export default eventBus;
+```
+
+```jsx
+import React from "react";
+import eventBus from '@/eventBus'
+
+export class ChildOne extends Component {
+    const toEmit = () => {
+        eventBus.emit('type', )
+    };
+ 
+    return (
+        <div className="child" >
+            <h3>兄弟ChildOne组件</h3>
+            <button onClick={() => toEmit('all')}>传递数据</button>
+        </div>
+    )
+}
+```
+
+兄弟组件two
+
+```jsx
+import React from "react";
+import eventBus from '@/eventBus'
+
+export class ChildTwo extends Component {
+    state = { type: '' }
+    componentDidMount() {
+        eventBus.on('type', type => this.setState({type}))
+    }
+    componentWillUnmount() {
+        // 销毁监听事件
+        eventBus.off('type', () => {})
+    }
+ 
+    render() {
+        return (
+            <div className="child" >
+                <h3>兄弟ChildTwo组件 type: {this.state.type}</h3>
+            </div>
+        )
+    } 
+}
+```
+
+
+
+
+
 ### 9.react如何实现vue中插槽类似功能
 
 插槽可以决定某一块区域存放什么内容。在vue中通slot来完成。

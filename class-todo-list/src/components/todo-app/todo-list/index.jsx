@@ -1,19 +1,30 @@
 import React, { Component } from 'react'
 import TodoListItem from '../todo-list-item'
-
+import eventBus from '@/utils/eventBus'
 export class TodoList extends Component {
+  state = {
+    typeBus: 'all'
+  }
+  componentDidMount() {
+    eventBus.on('type', value => this.setState({typeBus: value}))
+    // eventBus.on('type', type => console.log(type))
+  }
+  componentWillUnmount() {
+    eventBus.off('type', () => {})
+  }
 
   toggleAllChange(e) {
     this.props.changeToggle(e.target.checked)
   }
 
   render() {
+    const {typeBus} = this.state
     const {list, toggle, type} = this.props
     let newList = []
     console.log(type);
-    if (type === 'active') {
+    if (typeBus === 'active') {
       newList = list.filter(todo => !todo.done)
-    } else if (type === 'completed') {
+    } else if (typeBus === 'completed') {
       newList = list.filter(todo => todo.done)
     } else {
       newList = list
