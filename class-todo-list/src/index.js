@@ -6,6 +6,7 @@ import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
+  // react检查react中写法是否合理
   <React.StrictMode>
     <App />
   </React.StrictMode>

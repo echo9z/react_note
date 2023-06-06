@@ -1,14 +1,25 @@
 import React, { Component } from 'react'
-import eventBus from '@/utils/eventBus'
+// import eventBus from '@/utils/eventBus'
 
 export class TodoFooter extends Component {
   state = {
-    type: 'all'
+    type: 'all',
+    // count: 0
   }
-  onEmitEvent(type){
-    eventBus.emit('type', type)
-    this.setState({type})
-  }
+  // onEmitEvent(type){
+  //   eventBus.emit('type', type)
+  //   this.setState({type})
+  // }
+  // componentDidMount() {
+  //   eventBus.on('todoCount', count => {
+  //     console.log(count);
+  //     this.setState({count})
+  //   })
+  //   // eventBus.on('type', type => console.log(type))
+  // }
+  // componentWillUnmount() {
+  //   eventBus.off('todoCount', () => {})
+  // }
   render() {
     // eslint-disable-next-line
     const {todoCount, showClearCompleted, clearDoneTodo, todoStatus, type} = this.props
@@ -19,7 +30,7 @@ export class TodoFooter extends Component {
         <span className="todo-count"><strong>{todoCount}</strong> item left</span>
         {/* <!-- Remove this if you don't implement routing --> */}
         <ul className="filters">
-          <li>
+          {/* <li>
             <a className={ this.state.type === 'all'? `selected`: ''} href="#/" onClick={e => this.onEmitEvent('all')}>All</a>
           </li>
           <li>
@@ -27,8 +38,8 @@ export class TodoFooter extends Component {
           </li>
           <li>
             <a className={ this.state.type === 'completed'? `selected`: ''} href="#/completed" onClick={e => this.onEmitEvent('completed')}>Completed</a>
-          </li>
-          {/* <li>
+          </li> */}
+          <li>
             <a className={ type === 'all'? `selected`: ''} href="#/" onClick={e => todoStatus('all')}>All</a>
           </li>
           <li>
@@ -36,7 +47,7 @@ export class TodoFooter extends Component {
           </li>
           <li>
             <a className={ type === 'completed'? `selected`: ''} href="#/completed" onClick={e => todoStatus('completed')}>Completed</a>
-          </li> */}
+          </li>
         </ul>
         {/* <!-- Hidden if no completed items are left ↓ --> */}
 

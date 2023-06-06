@@ -73,7 +73,14 @@ export class TodoApp extends Component {
 
   // 统计done不为true
   todoCount() {
-    return this.state.todos.filter(todo => !todo.done).length
+    const {todos, type} = this.state
+    if (type === 'active') {
+      return todos.filter(todo => !todo.done).length
+    } else if (type === 'completed') {
+      return todos.filter(todo => todo.done).length
+    } else {
+      return todos.length
+    }
   }
   clearDoneTodo(){
     this.setState(prevState => ({ todos: prevState.todos.filter(item => !item.done) }))
