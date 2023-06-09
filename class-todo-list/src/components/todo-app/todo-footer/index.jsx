@@ -21,7 +21,6 @@ export class TodoFooter extends Component {
   //   eventBus.off('todoCount', () => {})
   // }
   render() {
-    // eslint-disable-next-line
     const {todoCount, showClearCompleted, clearDoneTodo, todoStatus, type} = this.props
     return (
       // {/* <!-- This footer should be hidden by default and shown when there are todos --> */}

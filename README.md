@@ -1631,6 +1631,86 @@ class MyComponent extends React.Component {
 ReactDOM.render(<MyComponent />, document.getElementById('app'))
 ```
 
+### 13.react中样式模块化
+
+比如A组件中的index.css
+
+```css
+// index.css
+.title{ background-color:pink }
+```
+
+```jsx
+// A组件
+import React, { Component } from 'react'
+import './index.css'
+export class A extends Component {
+    render() {
+        return <h1 className='title'>A组件</h2>
+    }
+}
+```
+
+B组件中的index.css 同样页添加了title类样式
+
+```css
+// index.css
+.title{ background-color:skyblue }
+```
+
+```jsx
+// B组件
+import React, { Component } from 'react'
+import './index.css'
+export class B extends Component {
+    render() {
+        return <h1 className='title'>B组件</h2>
+    }
+}
+```
+
+App组件 按照组件加载顺序，后面覆盖前面类样式，B组件中title类样式覆盖了  A组件title类样式
+
+```jsx
+import A from './components/a-com' // 生效的是background-color:skyblue
+import B from './components/b-com' // 生效的是background-color:skyblue
+
+function App() {
+  return (
+    <div>
+      <A />
+      <B />
+    </div>
+  );
+}
+export default App;
+```
+
+在vue中通过scoped进行样式隔离
+
+react中通过样式的模块化，比如将B组件index.css 变更为 index.module.css
+
+```css
+// index.module.css
+.title{ background-color:skyblue }
+```
+
+样式文件index.module.css 引入B组件，通过B.title 
+
+```jsx
+// B组件
+import React, { Component } from 'react'
+import B from './index.module.css' // 通过模块化引入样式
+
+export class B extends Component {
+    render() {
+        return <h1 className={B.title} >B组件</h2>
+    }
+}
+```
+
+
+
 ## React组件通讯
 
 ### 1. 组件通讯介绍

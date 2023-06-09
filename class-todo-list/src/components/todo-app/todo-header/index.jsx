@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 
 export class TodoHeader extends Component {
   onEnter(e) {
@@ -13,7 +14,6 @@ export class TodoHeader extends Component {
   }
   render() {
     const {newTodo} = this.props
-
     return (
       <header className="header">
         <h1>class todos</h1>
@@ -25,6 +25,12 @@ export class TodoHeader extends Component {
       </header>
     )
   }
+}
+
+TodoHeader.propTypes = {
+  newTodo: PropTypes.string,
+  addTodo: PropTypes.func,
+  change: PropTypes.func
 }
 
 export default TodoHeader
