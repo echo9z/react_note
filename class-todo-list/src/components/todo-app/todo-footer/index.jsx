@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 // import eventBus from '@/utils/eventBus'
 
 export class TodoFooter extends Component {
@@ -56,6 +57,14 @@ export class TodoFooter extends Component {
       </footer>
     )
   }
+}
+
+TodoFooter.propTypes = {
+  todoCount: PropTypes.number,
+  showClearCompleted: PropTypes.bool,
+  clearDoneTodo: PropTypes.func,
+  todoStatus: PropTypes.func,
+  type: PropTypes.string,
 }
 
 export default TodoFooter

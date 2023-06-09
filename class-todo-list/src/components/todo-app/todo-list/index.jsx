@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import TodoListItem from '../todo-list-item'
+import PropTypes from 'prop-types'
 // import eventBus from '@/utils/eventBus'
 export class TodoList extends Component {
   state = {
@@ -46,6 +47,13 @@ export class TodoList extends Component {
       </section>
     )
   }
+}
+
+TodoList.propTypes = {
+  list: PropTypes.array,
+  toggle: PropTypes.bool,
+  type: PropTypes.string,
+  changeToggle: PropTypes.func
 }
 
 export default TodoList

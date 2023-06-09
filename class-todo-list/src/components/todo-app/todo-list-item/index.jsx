@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import TodoContext from '../todo-context'
+import PropTypes from 'prop-types'
 
 export class TodoListItem extends Component {
   editRef = React.createRef()
@@ -46,6 +47,10 @@ export class TodoListItem extends Component {
       </TodoContext.Consumer>
     )
   }
+}
+
+TodoListItem.propTypes = {
+  item: PropTypes.object,
 }
 
 export default TodoListItem

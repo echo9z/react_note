@@ -1709,8 +1709,6 @@ export class B extends Component {
 }
 ```
 
-
-
 ## React组件通讯
 
 ### 1. 组件通讯介绍
