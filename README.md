@@ -2101,7 +2101,82 @@ class App extends React.Component {
    [1,2,3].map(item=><span key={item.id} >{ item.name }</span>)
 }
 // react底层处理之后，等价于：
+<Fragment>
+   <span></span>
+   <span></span>
+   <span></span>
+</Fragment>
+```
 
+#### lazy
+
+**lazy**：允许你定义一个动态加载组件，这样有助于缩减 bundle 的体积，并延迟加载在初次渲染时未用到的组件，也就是懒加载组件（高阶组件）
+
+`lazy`接收一个函数，这个函数需要动态调用`import()`,如：
+
+```jsx
+onst LazyChild = lazy(() => import('./child'));
+```
+
+`React.lazy`和`Suspense`配合一起用，能够有动态加载组件的效果。`React.lazy` 接受一个函数，这个函数需要动态调用 `import()`。它必须返回一个 `Promise` ，该 `Promise` 需要 `resolve` 一个 `default export` 的 `React` 组件。
+
+举个例子🌰：
+
+```jsx
+const Child = () => {
+  React.useEffect(() => {
+    console.log('Child渲染了')
+  }, [])
+  return <div>
+        <img src="./react.svg"/>
+      </div>
+}
+// 用setTimeout来模拟import异步引入效果
+const LazyChild = React.lazy(() => new Promise((resolve, reject) =>{
+  setTimeout(() => {
+    resolve({
+      default: () => <Child />
+    })
+  }, 1000)
+}))
+
+class App extends React.Component {
+  state = {
+    show: false
+  }
+  render() {
+    const { show } = this.state
+    return (
+      <div>
+        <button onClick={() => this.setState({show:!show})}>
+          渲染图标
+        </button>
+        {
+          show && <React.Suspense fallback={<img src='./dog.gif' width='100%' height='100%' />} >
+            <LazyChild />
+          </React.Suspense>
+        }
+      </div>
+    )
+  }
+}
+```
+
+![](./img/2023-06-12%2021.24.48.gif)
+
+## Suspense
+
+何为`Suspense`, `Suspense` 让组件“等待”某个异步操作，直到该异步操作结束即可渲染。
+
+用于数据获取的 `Suspense` 是一个新特性，你可以使用 `<Suspense>` 以声明的方式来“等待”任何内容，包括数据。本文重点介绍它在数据获取的用例，它也可以用于等待图像、脚本或其他异步的操作。
+
+上面讲到高阶组件`lazy`时候，已经用 `lazy` + `Suspense`模式，构建了异步渲染组件。
+
+```jsx
+const ProfilePage = React.lazy(() => import('./ProfilePage')); // 懒加载
+<Suspense fallback={<Spinner />}>
+  <ProfilePage />
+</Suspense>
 ```
 
 

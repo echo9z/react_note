@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" >
+    const Child = () => {
+      React.useEffect(() => {
+        console.log('Child渲染了')
+      }, [])
+      return <div>
+            <img src="./react.svg"/>
+          </div>
+    }
+
+    const LazyChild = React.lazy(() => new Promise((resolve, reject) =>{
+      setTimeout(() => {
+        resolve({
+          default: () => <Child />
+        })
+      }, 1000)
+    }))
+
+    class App extends React.Component {
+      state = {
+        show: false
+      }
+      render() {
+        const { show } = this.state
+        return (
+          <div>
+            <button onClick={() => this.setState({show:!show})}>
+              渲染图标
+            </button>
+            {
+              show && <React.Suspense fallback={<img src='./dog.gif' width='100%' height='100%' />} >
+                <LazyChild />
+              </React.Suspense>
+            }
+          </div>
+        )
+      }
+    }
+    
+    const root = ReactDOM.createRoot(document.getElementById("root"))
+    root.render(<App />);
+  </script>
+</body>
+</html>
