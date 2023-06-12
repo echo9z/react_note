@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" >
+    const Child = (props) => {
+      const {num, setNum} = props
+      // 4.useEffect第一个参数回调中，返回一个函数
+      React.useEffect(() => {
+        console.log(`Child挂载`, num);
+        return () => {
+          setNum(556) // 卸载时设置父组件num为556
+          console.log(`Child卸载`, num);
+        }
+      }, [])
+      return <div>Child组件 {num}</div>
+    }
+    // useEffect: 如请求数据、修改全局变量，打印、数据获取、设置订阅以及手动更改 React 组件中的 DOM 都属于副作用操作
+    const HooksModel = () => {
+      const [count, setCount] = React.useState(0);
+      const [num, setNum] = React.useState(0);
+      const [flag, setFlag] = React.useState(false);
+      // 1.useEffect 不传入第二个参数dep依赖项，组件挂载是执行componentDidMount，state更新时执行componentDidUpdate
+      // React.useEffect(() => {
+      //   document.title = `点击了${ count }次！`
+      //   console.log(`点击了${ count }次！`);
+      // })
+      // 2.useEffect 第二个参数dep依赖项 []，相当于class中组件中的componentDidMount
+      // React.useEffect(() => {
+      //   document.title = `点击了${ count }次！`
+      //   console.log(`点击了${ count }次！`);
+      // }, [])
+      // 
+      // 3.useEffect传入第二个参数为[count]，监听传递的dep依赖项目，当依赖项发生变化，触发第一个参数回调
+      // React.useEffect(() => {
+      //   document.title = `num值${ num }！`
+      //   console.log(`num值${ num }！`);
+      // }, [num])
+      
+      return (
+        <div>
+          <h2>{ count }</h2>
+          <h2>{ num }</h2>
+          <button onClick={() => setCount(count+1)}>点击次数:{count}</button>
+          <button onClick={() => setNum(num+1)}>修改num:{num}</button> <hr/>
+
+          <button onClick={() => setFlag(v => !v)}>{flag ? '卸载child' : '挂载child'}</button>
+          {flag && <Child num={num} setNum={setNum} id='child' />}
+        </div>
+      )
+    }
+    
+    const root = ReactDOM.createRoot(document.getElementById("root"))
+    root.render(<HooksModel />);
+  </script>
+</body>
+</html>

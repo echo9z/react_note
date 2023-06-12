@@ -177,7 +177,7 @@ root.render(element)
   </script>
 ```
 
-## React JSX 语法规则
+## React JSX 语法
 
 - 1.全称: JavaScript XML
 
@@ -315,29 +315,31 @@ jsx语法规则总结：
 
 * (2)若大写字母开头，react就去渲染对应的组件，若没有则全局报错，影响视图渲染`<Good></Good>`
 
-案例：动态展示下面列表
+
+
+**案例：动态展示下面列表**
 
 <img src="file:///Users/echo/Desktop/myblog/react/img/iShot_2023-05-15_02.12.28.png" title="" alt="iShot_2023-05-15_02.12.28.png" data-align="center">
 
-```jsx
-  <script type="text/babel">
-    const list = ['angular','react','vue']
-    // 1.react {}嵌入表达式中出传入一个数组，react会自动进行遍历
-    // 下面是通过map进行数组处理，返回一个新的数组
-    // 2.react {}嵌入表达式传入一个对象，react会报错无法进行遍历
-    const obj = { name1: 'angular', name2: 'react',name3: 'vue'}
-    const VDOM = (
-      <div>
-        <h1>前端js框架列表</h1>
-        <ul>
-          { list.map( item => <li key={item}>{item}</li>) }
-        </ul>
-        { obj } // 渲染这里会报错 obj 是一个对象
-      </div>
-    )
-    // 2.渲染虚拟dom到页面 ReactDOM函数 (VDom, 选自器)
-    ReactDOM.render(VDOM, document.getElementById('app'))
-  </script>
+```html
+<script type="text/babel">
+  const list = ['angular','react','vue']
+  // 1.react {}嵌入表达式中出传入一个数组，react会自动进行遍历
+  // 下面是通过map进行数组处理，返回一个新的数组
+  // 2.react {}嵌入表达式传入一个对象，react会报错无法进行遍历
+  const obj = { name1: 'angular', name2: 'react',name3: 'vue'}
+  const VDOM = (
+    <div>
+      <h1>前端js框架列表</h1>
+      <ul>
+        { list.map( item => <li key={item}>{item}</li>) }
+      </ul>
+      { obj } // 渲染这里会报错 obj 是一个对象
+    </div>
+  )
+  // 2.渲染虚拟dom到页面 ReactDOM函数 (VDom, 选自器)
+  ReactDOM.render(VDOM, document.getElementById('app'))
+</script>
 ```
 
 ### JSX 嵌入表达式
@@ -2164,7 +2166,7 @@ class App extends React.Component {
 
 ![](./img/2023-06-12%2021.24.48.gif)
 
-## Suspense
+#### Suspense
 
 何为`Suspense`, `Suspense` 让组件“等待”某个异步操作，直到该异步操作结束即可渲染。
 
@@ -3162,7 +3164,7 @@ class Login extends React.Component {
 
 React类组件的生命周期整体概览，组件从创建到消耗的过程
 
-### 16.0之前生命周期函数 （旧）
+### 16.0 之前生命周期函数 （旧）
 
 <img title="" src="./img/2_react生命周期(旧).png" alt="" width="668" data-align="center">
 
@@ -3316,6 +3318,7 @@ class Count extends React.Component {
 
   death() {
     // 卸载组件 unmountComponentAtNode(container):从DOM中删除已挂载的 React 组件并清理其事件处理程序和状态。返回boolean
+    // 但是删除节点 unmountComponentAtNode()，在React18中被root.unmount()所取代。
     ReactDOM.unmountComponentAtNode(document.getElementById("app"))
   }
   // 更新state
@@ -3591,11 +3594,11 @@ class App extends React.Component {
 
 ### v16.8中的hooks
 
-### useState
+#### useState
 
-**useState**：定义变量，可以理解为他是类组件中的`this.state`
+`useState`可以弥补函数组件没有`state`的缺陷。`useState`可以接受一个初识值，也可以是一个函数`action`，`action`返回值作为新的`state`。返回一个数组，第一个值为`state`读取值，第二个值为改变`state`的`dispatchAction`函数。
 
-使用：
+**useState**：定义变量，可以理解为他是类组件中的`this.state`使用：
 
 ```js
 const [state, setState] = useState(initialState);
@@ -3607,29 +3610,178 @@ const [state, setState] = useState(initialState);
 
 ```jsx
 // useState：定义变量，可以理解为他是类组件中的this.state
-    function App() {
-      const [msg, setMsg] = React.useState('hooks');
+function App() {
+  const [msg, setMsg] = React.useState('hooks');
 
-      const click = (e) => {
-        console.log(e.target);
-        // 多个设置状态，会进行合并处理
-        setMsg(msg+'hello')
-        setMsg(msg+' test2222')
-      }
-      const click2 = (e) => {
-        console.log(e.target);
-        // 多次异步操作，使用异步回调函数
-        setMsg((value) => {
-          return value + 'hello'
-        })
-        setMsg(v => v + ' tset222')
-      }
-      return (
-        <div>
-          <h2>{ msg }</h2>
-          <button onClick={click}>切换</button>
-          <button onClick={click2}>多个setMsg</button>
-        </div>
-      )
-    }
+  const click = (e) => {
+    console.log(e.target);
+    // 多个设置状态，不会像class组件中的this.setState,总是替换，而不是合并
+    setMsg(msg+'hello')
+    setMsg(msg+' test2222')
+  }
+  const click2 = (e) => {
+    console.log(e.target);
+    // 多次异步操作，使用异步回调函数
+    setMsg((value) => {
+      return value + 'hello'
+    })
+    setMsg(v => v + ' tset222')
+  }
+  return (
+    <div>
+      <h2>{ msg }</h2>
+      <button onClick={click}>切换</button>
+      <button onClick={click2}>多个setMsg</button>
+    </div>
+  )
+}
 ```
+
+**注意：**`useState`有点类似于`PureComponent`,会进行一个比较浅的比较，如果是对象的时候直接传入并不会更新，这点一定要切记，如
+
+```jsx
+const App = () => {
+  const [ state, setState ] = useState({number: 0})
+
+  return <div>
+    <div>number：{state.number}</div>
+    <button
+      onClick={() => {
+        state.number++
+        setState(state)
+      }}
+    >点击</button>
+  </div>
+}
+```
+
+#### useEffect
+
+`useEffect`：副作用，理解为是类组件的生命周期，也是我们最常用的钩子
+
+> 什么是副作用呢？ **副作用（Side Effect)**：是指 function 做了和本身运算返回值无关的事，如请求数据、修改全局变量，打印、数据获取、设置订阅以及手动更改 `React` 组件中的 `DOM` 都属于副作用操作都算是副作用
+
+`useEffect`可以弥补函数组件没有生命周期的缺点。可以在`useEffect`第一个参数回调函数中，做一些请求数据，事件监听等操作，第二个参数作为`dep`依赖项，当依赖项发生变化，重新执行第一个函数。
+
+##### 1.useEffect不传递第二个参数`dep`依赖项
+
+默认，不传递第二个参数`dep`依赖项，无论什么情况，都会执行
+
+```jsx
+const HooksModel = () => {
+  const [count, setCount] = React.useState(0);
+  React.useEffect(() => {
+    document.title = `点击了${ count }次！`
+    console.log(`点击了${ count }次！`);
+  })
+  return (
+    <div>
+      <h2>{ count }</h2>
+      <button onClick={() => setCount(count+1)}>点击次数:{count}</button>
+    </div>
+  )
+}
+```
+
+![](./img/2023-06-12%2023.23.29.gif)
+
+如果是默认情况，它会自动执行之前class组件的componentDidMount，componentDidUpdate这两个生命周期的方法。组件挂载是执行componentDidMount，state更新时执行componentDidUpdat
+
+##### 2.useEffect 传入第二个参数为[]
+
+```jsx
+const HooksModel = () => {
+  const [count, setCount] = React.useState(0);
+  React.useEffect(() => {
+    document.title = `点击了${ count }次！`
+    console.log(`点击了${ count }次！`);
+  })
+  return (
+    <div>
+      <h2>{ count }</h2>
+      <button onClick={() => setCount(count+1)}>点击次数:{count}</button>
+    </div>
+  )
+}
+```
+
+![](./img/2023-06-13%2000.51.22.gif)
+
+相当于class组件中的componentDidMount，只在初始化的时候执行一次，不会重复执行。
+
+##### 3.useEffect传入第二个参数为[count]，传入一个可变的state
+
+监听传递的dep依赖项目，当依赖项发生变化，触发第一个参数回调，可以理解为vue中watch
+
+```jsx
+const HooksModel = () => {
+  const [count, setCount] = React.useState(0);
+  const [num, setNum] = React.useState(0);
+
+  React.useEffect(() => {
+    document.title = `num值${ num }！`
+    console.log(`num值${ num }！`);
+  })
+  return (
+    <div>
+      <h2>{ count }</h2>
+      <h2>{ num }</h2>
+      <utton onClick={() => setCount(count+1)}>点击次数:{count}</button>
+      <button onClick={() => setNum(num+1)}>修改num:{num}</button>
+    </div>
+  )
+}
+```
+
+![](./img/2023-06-13%2001.06.38.gif)
+
+**这种情况下，相当于class组件的componentDidMount，componentDidUpdate，我们的更新依赖于这可变的count（对比class组件的componentDidUpdate生命周期）**
+
+##### 4.useEffect中返回一个函数
+
+useEffect中返回一个函数，相当于class组件里边的componentWillUnmount
+
+```jsx
+const Child = (props) => {
+  const {num, setNum} = props
+  // 4.useEffect第一个参数回调中，返回一个函数
+  React.useEffect(() => {
+    console.log(`Child挂载`);
+    return () => {
+      setNum(556) // 卸载时设置父组件num为556
+      console.log(`Child卸载`, num);
+    }
+  }, [])
+  return <div>Child组件 {num}</div>
+}
+
+const HooksModel = () => {
+  const [count, setCount] = React.useState(0);
+  const [num, setNum] = React.useState(0);
+  const [flag, setFlag] = React.useState(false);
+ 
+  return (
+    <div>
+      <h2>{ count }</h2>
+      <h2>{ num }</h2>
+      <button onClick={() => setCount(count+1)}>点击次数:{count}</button>
+      <button onClick={() => setNum(num+1)}>修改num:{num}</button> <hr/>
+
+      <button onClick={() => setFlag(v => !v)}>{flag ? '卸载child' : '挂载child'}</button>
+      {flag && <Child num={num} setNum={setNum} id='child' />}
+    </div>
+  )
+}
+```
+
+![](./img/2023-06-13%2001.40.20.gif)
+
+之前在class组件中componentWillUnmount生命周期
+
+
+
+#### useContext
+
+**useContext**：上下文，类似于`Context`：其本意就是设置全局共享数据，使所有组件可跨层级实现共享
+
+`useContext`的参数一般是由`createContext`的创建，通过 `CountContext.Provider` 包裹的组件，才能通过 `useContext` 获取对应的值
