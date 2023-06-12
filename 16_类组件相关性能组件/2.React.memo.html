@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" >
+    function Child() {
+      return <div>
+        {console.log('子组件渲染')}
+        子组件Child
+      </div>
+    }
+    // React.memo只针对props变化是否进行渲染
+    // 通过React.memo处理无关组件的刷新
+    const HOCChild = React.memo(Child, () => {
+      // 返回 true 组件不渲染 ， 返回 false 组件重新渲染
+      return true
+    })
+
+    const ChildRender = React.memo(Child, (prevProps, nextProps) => {
+      // 返回 true 组件不渲染 ， 返回 false 组件重新渲染
+      if(prevProps.number === nextProps.number) return true // props传入number不变，则组件不重新渲染
+      else if (prevProps.number !== nextProps.number && nextProps.number > 5) return true // number不同，且值大于5时组件不重新渲染
+      else return false // 否则渲染组件
+    })
+    class App extends React.Component {
+      state = {
+        flag: true,
+        number: 0
+      }
+      render() {
+        const { flag, number } = this.state
+        return (
+          <div>
+            <div>
+              <HOCChild />
+              <button onClick={() => {
+                this.setState({ flag: !flag })
+              }}>flag: {JSON.stringify(flag)}</button>
+            </div>
+            <div>
+              <h2>number: {number}</h2>
+              {/*首先要传入props number属性*/}
+              <ChildRender number={number} />
+              <button onClick={() => {
+                this.setState({ number: number+1 })
+              }}>点击number：{number}</button>
+            </div>
+          </div>
+        )
+      }
+    }
+    
+    const root = ReactDOM.createRoot(document.getElementById("root"))
+    root.render(<App />);
+  </script>
+</body>
+</html>

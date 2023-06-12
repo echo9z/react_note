@@ -1440,7 +1440,7 @@ class App extends Component {
 export default App;
 ```
 
-### 10.setState扩展-发现问题
+### 10.setState扩展-异步
 
 > 发现setState是“异步”的，多次setState会合并。
 
@@ -1503,9 +1503,7 @@ class MyComponent extends React.Component {
 - “异步” 更新，或者做延时更新，为了等所有操作结束后去更新
 - 合并更新，是将多次setState合并，然后进行更新
 
-#### setState扩展-异步
-
-> 能够说出setState到底是同步的还是异步
+setState扩展-异步
 
 具体内容：
 
@@ -1708,6 +1706,405 @@ export class B extends Component {
     }
 }
 ```
+
+### 14.类组件
+
+#### PureComponent
+
+**PureComponent**：会对`props`和`state`进行浅比较，跳过不必要的更新，提高组件性能。
+
+`PureComponent`和`Component`基本完全一致，`PureComponent`浅比较，也就是较少`render`渲染的次数，所以`PureComponent`一般用于性能优化
+
+```jsx
+// PureComponent 会对props和state进行浅比较，跳过不必要的更新，提高组件性能。
+class App extends React.PureComponent {
+  state = {
+    data: {
+      number: 0
+    }
+  }
+  render() {
+    const { data } = this.state
+    return (
+      <div>
+        <h2>number: { data.number }</h2>
+        <button onClick={() => {
+          data.number++;
+          // PureComponent组件 对state props变化，浅比较，并没有比较data中属性的变化
+          this.setState({ data })
+        }}>number+1</button>
+      </div>
+    )
+  }
+}
+```
+
+击按钮的时候，数字并没有刷新，这是因为`PureComponent`会比较两次的`data`对象，它会认为这种写法并没有改变原先的`data`，所以不会改变
+
+![](./img/2023-06-12%2001.19.43.gif)
+
+只需要对data对象重新赋值
+
+```jsx
+this.setState({ data: {...data} })
+```
+
+##### 与shouldComponentUpdate的关系如何
+
+在生命周期中有一个`shouldComponentUpdate()`函数，那么它能改变`PureComponent`吗？
+
+其实是可以的，`shouldComponentUpdate()`如果被定义，就会对新旧 `props`、`state` 进行 `shallowEqual` 比较，新旧一旦不一致，便会触发 `update`。
+
+也可以这么理解：`PureComponent`通过自带的`props`和`state`的浅比较实现了`shouldComponentUpdate()`，这点`Component`并不具备
+
+`PureComponent`可能会因深层的数据不一致而产生错误的否定判断，从而导致`shouldComponentUpdate`结果返回false，界面得不到更新，要谨慎使用
+
+#### React.memo
+
+`React.memo`和`PureComponent`作用类似，可以用作性能优化，`React.memo` 是高阶组件，函数组件和类组件都可以使用， `React.memo`只能对`props`的情况确定是否渲染，而`PureComponent`是针对`props`和`state`。
+
+```jsx
+React.memo(ComponentMemo, boolean)
+```
+
+- 第一个参数：组件本身，也就是要优化的组件
+- 第二个参数：(pre, next) => boolean, `pre`：之前的数据， `next`：现在的数据，返回一个`布尔值`，若为 `true`则不更新，为`false`更新
+
+**React.memo: 第二个参数 返回 `true` 组件不渲染 ， 返回 `false` 组件重新渲染** **shouldComponentUpdate: 返回 `true` 组件渲染 ， 返回 `false` 组件不渲染**
+
+下面🌰：
+
+```jsx
+function Child() {
+  return <div>
+    {console.log('子组件渲染')}
+    子组件Child
+  </div>
+}
+// React.memo只针对props变化是否进行渲染
+class App extends React.Component {
+  state = {
+    flag: true
+  }
+  render() {
+    const { flag } = this.state
+    return (
+      <div>
+        <Child />
+        <button onClick={() => {
+          this.setState({ flag: !flag })
+        }}>flag: {JSON.stringify(flag)}</button>
+      </div>
+    )
+  }
+}
+```
+
+按钮的效果是切换 `flag` 的状态，可以看出`flag`和`Child`之间没有任何关系，那么在切换状态的时候，`Child`会刷新吗？
+
+![](./img/2023-06-12%2002.43.37.gif)
+
+切换状态的时候，`Child`实际上也会刷新，我们肯定不希望组件做无关的刷新，那么我们加上`memo`来看看的效果：
+
+```jsx
+const HOCChild = memo(Child, (prevProps, nextProps) => {
+    return true
+})
+```
+
+![](./img/2023-06-12%2002.51.31.gif)
+
+**第二个参数的作用**
+
+下面🌰：
+
+```jsx
+function Child() {
+  return <div>
+    {console.log('子组件渲染')}
+    子组件Child
+  </div>
+}
+
+const ChildRender = React.memo(Child, (prevProps, nextProps) => {
+  // 返回 true 组件不渲染 ， 返回 false 组件重新渲染
+  if(prevProps.number === nextProps.number) return true // props传入number不变，则组件不重新渲染
+  else if (prevProps.number !== nextProps.number && nextProps.number > 5) return true // number不同，且值大于5时组件不重新渲染
+  else return false // 否则渲染组件
+})
+class App extends React.Component {
+  state = {
+    number: 0
+  }
+  render() {
+    const { flag, number } = this.state
+    return (
+      <div>
+        <h2>number: {number}</h2>
+        {/*首先要传入props number属性*/}
+        <ChildRender number={number} />
+        <button onClick={() => {
+          this.setState({ number: number+1 })
+        }}>点击number：{number}</button>
+      </div>
+    )
+  }
+}
+```
+
+![](./img/2023-06-12%2003.13.27.gif)
+
+当数字小于5，才会出发`Child`的更新，通过返回的布尔值来控制
+
+##### memo的注意事项
+
+`React.memo`与`PureComponent`的区别：
+
+- 服务对象不同：`PureComponent` 服务与类组件，`React.memo`既可以服务于类组件，也可以服务与函数式组件，`useMemo`服务于函数式组件（后续讲到）
+- 针对的对象不同：`PureComponent`针对的是`props`和`state`，`React.memo`只能针对`props`来决定是否渲染
+
+这里还有个小的注意点：`memo`的第二个参数的返回值与`shouldComponentUpdate`的返回值是相反的，经常会弄混，还要多多注意
+
+- `memo`:返回 `true` 组件不渲染 ， 返回 `false` 组件重新渲染。
+- `shouldComponentUpdate`: 返回 `true` 组件渲染 ， 返回 `false` 组件不渲染。
+
+
+
+#### React.forwardRef
+
+`forwardRef`：引用传递，是一种通过组件向子组件自动传递引用`ref`的技术
+
+`react`不允许`ref`通过`props`传递，因为组件上已经有 `ref` 这个属性，在组件调和过程中，已经被特殊处理，`forwardRef`出现就是解决这个问题，把`ref`转发到自定义的`forwardRef`定义的属性上，让`ref`可以通过`props`传递。
+
+🌰：比如父组件想获取孙组件，某一个`dom`元素。这种隔代`ref`获取引用，就需要`forwardRef`来助力。
+
+```jsx
+function GrandChild(props) {
+  return <div>
+    孙子组件GrandChild
+    <span ref={props.grandRef}>获取dom元素</span>
+  </div>
+}
+function Child(props) {
+  return <div>
+    子组件Child
+    <GrandChild grandRef={props.ref} />
+  </div>
+}
+
+class Parent extends React.Component {
+  isGrandSonDom = React.createRef()
+  render() {
+    return (
+      <div>
+        <h2>父组件</h2>
+        {/* React不允许ref通过props传递，会提示异常 */}
+        <Child ref={this.isGrandSonDom} />
+        <button onClick={() => console.log(this.isGrandSonDom)}>获取Son中DOM元素</button>
+      </div>
+    )
+  }
+}
+```
+
+![](./img/iShot_2023-06-12_15.10.42.png)
+
+利用`forwardRef`来转发下`ref`
+
+```jsx
+function GrandChild(props) {
+  return <div>
+    孙子组件GrandChild
+    <span ref={props.grandRef}>获取dom元素</span>
+  </div>
+}
+function Child(props) {
+  return <div>
+    子组件Child
+    <GrandChild grandRef={props.grandRef} />
+  </div>
+}
+// forwardRef引用传递，将ref对象传递给子组件
+const ForwardFather = React.forwardRef((props, ref) => {
+  console.log(props, ref);
+  return <Child grandRef={ref} {...props} />
+})
+
+class Father extends React.Component {
+  isGrandSonDom = React.createRef()
+  render() {
+    return (
+      <div>
+        <h2>父组件</h2>
+        {/* 将ref对象传递给子组件 */}
+        <ForwardFather ref={this.isGrandSonDom} />
+        <button onClick={() => console.log(this.isGrandSonDom)}>获取Son中DOM元素</button>
+      </div>
+    )
+  }
+}
+```
+
+![](./img/2023-06-12%2015.23.20.gif)
+
+
+
+两种获取自定义组件中dom元素
+
+- 1.通过forwardRef进行转发，获取子组件中dom元素
+
+```jsx
+// 1.通过forwardRef进行转发，获取子组件中dom元素
+function BComp(props) {
+  return (
+    <div ref={props.BCompRef}>
+      <p>子B</p>
+      <ul>
+        <li><span>BComp</span></li>
+      </ul>
+    </div>)
+}
+const ForwardB = React.forwardRef((props, ref) =>{
+  return <BComp BCompRef={ref} />
+})
+class AComp extends React.Component {
+  BCompRef = React.createRef()
+  render() {
+    return (
+      <div>
+        父A
+        {/*<BComp ref={this.BCompRef}/>*/}
+        <ForwardB ref={this.BCompRef}/>
+        <button onClick={() => console.log(this.BCompRef)}>获取BComp元素</button>
+      </div>
+    )
+  }
+}
+
+```
+
+- 2.直接通过props，传递ref对象
+
+```jsx
+// 2.直接通过props，传递ref对象
+function DComp(props) {
+  return (
+    <div ref={props.CCompRef}>
+      <p>子E</p>
+      <ul>
+        <li><span>CComp</span></li>
+      </ul>
+    </div>)
+}
+class CComp extends React.Component {
+  CCompRef = React.createRef()
+  render() {
+    return (
+      <div>
+        父C
+        <DComp CCompRef={this.CCompRef}/>*
+        <button onClick={() => console.log(this.CCompRef)}>获取CComp元素</button>
+      </div>
+    )
+  }
+}
+```
+
+##### 高阶组件转发Ref
+
+```jsx
+// 高阶组件函数
+function HOC(Component) {
+  class Warp extends React.Component {
+    render() {
+      const {forwardRef} = this.props
+      // 获取传递Component中的dom元素
+      return <Component ref={forwardRef} {...this.props} />
+    }
+  }
+  // 调用高阶函数组件，返回一个forwardRef
+  return React.forwardRef((props, ref) => <Warp forwardRef={ref} {...props} />)
+}
+
+class Index extends React.Component {
+  componentDidMount(){
+    console.log('Index componentDidMount')
+  }
+  render(){
+    console.log(this.props);
+    return <div>Index组件: {this.props.number}</div>
+  }
+}
+const HOCIndx = HOC(Index)
+class App extends React.Component {
+  state = { number: 0 }
+  HOCIndxRef = React.createRef()
+
+  render() {
+    return (
+      <div>
+        <HOCIndx ref={this.HOCIndxRef} number={this.state.number}/>
+        <button onClick={() => {
+          this.setState({ number: this.state.number+1})
+          console.log(this.HOCIndxRef)
+        }}>获取HOC组件实例</button>
+      </div>
+    )
+  }
+}
+```
+
+![](./img/2023-06-12%2017.12.02.gif)
+
+#### Fragment
+
+`react`不允许一个组件返回多个节点元素，比如说如下情况
+
+```jsx
+ return <p>Angular</p>
+        <p>React</p>
+        <p>Vue</p>
+```
+
+为此套一个容器元素解决，如`<div></div>`
+
+```jsx
+ return <div>
+         <p>Angular</p>
+        <p>React</p>
+        <p>Vue</p>
+     </div>
+```
+
+这样做，无疑会多增加一个节点，所以在`16.0`后，官方推出了`Fragment`碎片概念，能够让一个组件返回多个元素，**React.Fragment 等价于`<></>`**
+
+```jsx
+ return <React.Fragment>
+         <p>Angular</p>
+        <p>React</p>
+        <p>Vue</p>
+     </React.Fragment>
+ // 简写
+  return <>
+         <p>Angular</p>
+        <p>React</p>
+        <p>Vue</p>
+     </>
+```
+
+和`Fragment`区别是，`Fragment`可以支持`key`属性。`<></>`不支持`key`属性。
+
+**注意：** 通过`map`遍历后的元素，`react`底层会处理，默认在外部嵌套一个`<Fragment>`。
+
+```jsx
+{
+   [1,2,3].map(item=><span key={item.id} >{ item.name }</span>)
+}
+// react底层处理之后，等价于：
+
+```
+
+
 
 ## React组件通讯
 
@@ -3065,3 +3462,99 @@ class App extends React.Component {
 ## React diff算法
 
 ![](./img/diff.png)
+
+## React hooks
+
+### 1.hooks-介绍
+
+**具体内容：**
+
+1. hooks 解释
+   
+   - `Hooks`：钩子、钓钩、钩住 ，`Hooks` 是 **React v16.8** 中的新增功能
+
+2. hooks 作用
+   
+   - 为**函数组件**提供状态、生命周期等原本 class 组件中提供的 React 功能
+   - 可以理解为通过 Hooks 为函数组件钩入 class 组件的特性
+   - 注意：**Hooks 只能在函数组件中使用**，自此，函数组件成为 React 的新宠儿
+
+3. React v16.8 版本前后，组件开发模式的对比：
+   
+   - React v16.8 以前： class 组件(提供状态) + 函数组件(展示内容)
+   - React v16.8 及其以后：
+     1. class 组件(提供状态) + 函数组件(展示内容)
+     2. Hooks(提供状态) + 函数组件(展示内容)
+     3. 混用以上两种方式：部分功能用 class 组件，部分功能用 Hooks+函数组件
+
+**总结**：
+
+- 虽然有了 Hooks，但 React 官方并没有计划从 React 库中移除 class
+
+- 有了 Hooks 以后，不能再把**函数组件**称为~~无状态组件~~了，因为 Hooks 为函数组件提供了状态
+
+### 2. hooks-解决的问题
+
+**具体内容：**
+
+1. 组件的状态逻辑复用问题
+   
+   - 在 Hooks 之前，组件的状态逻辑复用经历了：mixins（混入）、HOCs（高阶组件）、render-props 等模式
+   - （早已废弃）mixins 的问题：1 数据来源不清晰 2 命名冲突
+   - HOCs、render-props 的问题：重构组件结构，导致组件形成 JSX 嵌套地狱问题
+
+2. class 组件自身的问题
+   
+   - 选择：函数组件和 class 组件之间的区别以及使用哪种组件更合适
+   - 需要理解 class 中的 this 是如何工作的
+   - 相互关联且需要对照修改的代码被拆分到不同生命周期函数中
+   - 相比于函数组件来说，不利于代码压缩和优化，也不利于 TS 的类型推导
+
+**总结**：
+
+- 正是由于 React 原来存在的这些问题，才有了 Hooks 来解决这些问题
+
+### v16.8中的hooks
+
+### useState
+
+**useState**：定义变量，可以理解为他是类组件中的`this.state`
+
+使用：
+
+```js
+const [state, setState] = useState(initialState);
+```
+
+- `state`：目的是提供给 `UI`，作为渲染视图的数据源
+- `setState`：改变 state 的函数，可以理解为`this.setState`
+- `initialState`：初始默认值
+
+```jsx
+// useState：定义变量，可以理解为他是类组件中的this.state
+    function App() {
+      const [msg, setMsg] = React.useState('hooks');
+
+      const click = (e) => {
+        console.log(e.target);
+        // 多个设置状态，会进行合并处理
+        setMsg(msg+'hello')
+        setMsg(msg+' test2222')
+      }
+      const click2 = (e) => {
+        console.log(e.target);
+        // 多次异步操作，使用异步回调函数
+        setMsg((value) => {
+          return value + 'hello'
+        })
+        setMsg(v => v + ' tset222')
+      }
+      return (
+        <div>
+          <h2>{ msg }</h2>
+          <button onClick={click}>切换</button>
+          <button onClick={click2}>多个setMsg</button>
+        </div>
+      )
+    }
+```

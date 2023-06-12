@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" >
+    function GrandChild(props) {
+      return <div>
+        孙子组件GrandChild
+        <span ref={props.grandRef}>获取dom元素</span>
+      </div>
+    }
+    function Child(props) {
+      return <div>
+        子组件Child
+        <GrandChild grandRef={props.grandRef} />
+      </div>
+    }
+    // forwardRef引用传递，将ref对象传递给子组件
+    const ForwardFather = React.forwardRef((props, ref) => {
+      console.log(props, ref);
+      return <Child grandRef={ref} {...props} />
+    })
+
+    class Father extends React.Component {
+      isGrandSonDom = React.createRef()
+      render() {
+        return (
+          <div>
+            <h2>父组件</h2>
+            <ForwardFather ref={this.isGrandSonDom} />
+            {/*<<Child ref={this.isGrandSonDom} />*/}
+            <button onClick={() => console.log(this.isGrandSonDom)}>获取Son中DOM元素</button>
+          </div>
+        )
+      }
+    }
+
+    // 1.通过forwardRef进行转发，获取子组件中dom元素
+    function BComp(props) {
+      return (
+        <div ref={props.BCompRef}>
+          <p>子B</p>
+          <ul>
+            <li><span>BComp</span></li>
+          </ul>
+        </div>)
+    }
+    const ForwardB = React.forwardRef((props, ref) =>{
+      return <BComp BCompRef={ref} />
+    })
+    class AComp extends React.Component {
+      BCompRef = React.createRef()
+      render() {
+        return (
+          <div>
+            父A
+            {/*<BComp ref={this.BCompRef}/>*/}
+            <ForwardB ref={this.BCompRef}/>
+            <button onClick={() => console.log(this.BCompRef)}>获取BComp元素</button>
+          </div>
+        )
+      }
+    }
+
+    // 2.直接通过props，传递ref对象
+    function DComp(props) {
+      return (
+        <div ref={props.CCompRef}>
+          <p>子E</p>
+          <ul>
+            <li><span>CComp</span></li>
+          </ul>
+        </div>)
+    }
+    class CComp extends React.Component {
+      CCompRef = React.createRef()
+      render() {
+        return (
+          <div>
+            父C
+            <DComp CCompRef={this.CCompRef}/>
+            <button onClick={() => console.log(this.CCompRef)}>获取CComp元素</button>
+          </div>
+        )
+      }
+    }
+    
+    const root = ReactDOM.createRoot(document.getElementById("root"))
+    root.render(<CComp />);
+  </script>
+</body>
+</html>

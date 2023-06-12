@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" >
+    // useState：定义变量，可以理解为他是类组件中的this.state
+    function App() {
+      const [msg, setMsg] = React.useState('hooks');
+      
+      const click = (e) => {
+        console.log(e.target);
+        // 多个设置状态，会进行合并处理
+        setMsg(msg+'hello')
+        setMsg(msg+' test2222')
+      }
+      const click2 = (e) => {
+        console.log(e.target);
+        // 多次异步操作，使用异步回调函数
+        setMsg((value) => {
+          return value + 'hello'
+        })
+        setMsg(v => v + ' tset222')
+      }
+      return (
+        <div>
+          <h2>{ msg }</h2>
+          <button onClick={click}>切换</button>
+          <button onClick={click2}>多个setMsg</button>
+        </div>
+      )
+    }
+    
+    const root = ReactDOM.createRoot(document.getElementById("root"))
+    root.render(<App />);
+  </script>
+</body>
+</html>

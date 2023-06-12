@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" >
+    // PureComponent 会对props和state进行浅比较，跳过不必要的更新，提高组件性能。
+    class App extends React.PureComponent {
+      state = {
+        data: {
+          number: 0
+        }
+      }
+      render() {
+        const { data } = this.state
+        return (
+          <div>
+            <h2>number: { data.number }</h2>
+            <button onClick={() => {
+              data.number++;
+              // PureComponent组件 对state props变化，浅比较，并没有比较data中属性的变化
+              // this.setState({ data })
+              this.setState({ data: {...data} })
+            }}>number+1</button>
+          </div>
+        )
+      }
+    }
+    
+    const root = ReactDOM.createRoot(document.getElementById("root"))
+    root.render(<App />);
+  </script>
+</body>
+</html>

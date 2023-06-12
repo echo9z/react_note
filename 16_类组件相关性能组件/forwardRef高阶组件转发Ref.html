@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" >
+    // 高阶组件函数
+    function HOC(Component) {
+      class Warp extends React.Component {
+        render() {
+          const {forwardRef} = this.props
+          // 获取传递Component中的dom元素
+          return <Component ref={forwardRef} {...this.props} />
+        }
+      }
+      // 调用高阶函数组件，返回一个forwardRef
+      return React.forwardRef((props, ref) => <Warp forwardRef={ref} {...props} />)
+    }
+
+    class Index extends React.Component {
+      componentDidMount(){
+        console.log('Index componentDidMount')
+      }
+      render(){
+        console.log(this.props);
+        return <div>Index组件: {this.props.number}</div>
+      }
+    }
+    const HOCIndx = HOC(Index)
+    class App extends React.Component {
+      state = { number: 0 }
+      HOCIndxRef = React.createRef()
+
+      render() {
+        return (
+          <div>
+            <HOCIndx ref={this.HOCIndxRef} number={this.state.number}/>
+            <button onClick={() => {
+              this.setState({ number: this.state.number+1})
+              console.log(this.HOCIndxRef)
+            }}>获取HOC组件实例</button>
+          </div>
+        )
+      }
+    }
+    
+    const root = ReactDOM.createRoot(document.getElementById("root"))
+    root.render(<App />);
+  </script>
+</body>
+</html>
