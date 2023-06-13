@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" >
+    function useList(list) {
+      return React.useMemo(() => {
+        return list.map((item,index) => {
+          {console.log('list渲染')}
+          return <li key={index}>{item}</li>
+        })
+      }, [])
+    }
+    function Child({num}){
+      // 当props.num发送变化时重新渲染
+      return React.useMemo(() =>{
+        console.log('Child函数组件');
+        return <div>num: {num}</div>
+      }, [num])
+    }
+
+    function App() {
+      const [flag, setFlag] = React.useState(false)
+      const [num, setNum] = React.useState(0)
+      const list = useList(['Angular', 'React', 'Vue'])
+      return (
+        <div>
+          <ul>{list}</ul>
+          <Child num={num}/>
+          status: {JSON.stringify(flag)}
+          <button onClick={() => setFlag(!flag)}>{JSON.stringify(flag)}</button>
+        </div>
+      )
+    }
+    
+    const root = ReactDOM.createRoot(document.getElementById("root"))
+    root.render(<App />);
+  </script>
+</body>
+</html>

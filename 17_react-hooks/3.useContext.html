@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" >
+
+    // useContext(使用createContext 创建的上下文) 
+    // 通过createContext 创建的上下文对象，通过useContext()所有组件可跨层级实现共享
+    const CompContext = React.createContext(null)
+    function App() {
+      const [style, setStyle] = React.useState('pink');
+      const [count, setCount] = React.useState(0);
+      const toggle = () => {
+        setCount(v => ++v)
+        setStyle(v => v === 'pink'? 'skyblue' : 'pink')
+      }
+      return (
+        <div>
+          <h1>App 根组件: {count}</h1>
+          {/* 注入相关对象或方法 */}
+          <CompContext.Provider value={{
+            count,
+            style,
+            toggle
+          }}>
+            <Parent />
+          </CompContext.Provider>
+        </div>
+      )
+    }
+
+    const Parent = () => {
+      return (<div>
+          <h2>Parent父组件</h2>
+          {/* 组件数据共享 */}
+          <ChildO />
+          <ChildT />
+        </div>)
+    }
+
+    const ChildO = () => {
+      // 通过useContext() 获取
+      const {count, style, toggle} = React.useContext(CompContext)
+      return (<div>
+          <h3>Child1组件：{count}</h3>
+          <button onClick={toggle}
+            style={{backgroundColor:style}}>toggle</button>
+        </div>)
+    }
+    const ChildT = () => {
+      // 通过useContext() 获取
+      const {count, style, toggle} = React.useContext(CompContext)
+      return (<div>
+          <h3>Child2组件：{count}</h3>
+          <button onClick={toggle}
+            style={{backgroundColor:style}}>toggle</button>
+        </div>)
+    }
+    
+    const root = ReactDOM.createRoot(document.getElementById("root"))
+    root.render(<App />);
+  </script>
+</body>
+</html>

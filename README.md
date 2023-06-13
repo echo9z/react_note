@@ -315,8 +315,6 @@ jsx语法规则总结：
 
 * (2)若大写字母开头，react就去渲染对应的组件，若没有则全局报错，影响视图渲染`<Good></Good>`
 
-
-
 **案例：动态展示下面列表**
 
 <img src="file:///Users/echo/Desktop/myblog/react/img/iShot_2023-05-15_02.12.28.png" title="" alt="iShot_2023-05-15_02.12.28.png" data-align="center">
@@ -1870,8 +1868,6 @@ class App extends React.Component {
 - `memo`:返回 `true` 组件不渲染 ， 返回 `false` 组件重新渲染。
 - `shouldComponentUpdate`: 返回 `true` 组件渲染 ， 返回 `false` 组件不渲染。
 
-
-
 #### React.forwardRef
 
 `forwardRef`：引用传递，是一种通过组件向子组件自动传递引用`ref`的技术
@@ -1949,8 +1945,6 @@ class Father extends React.Component {
 
 ![](./img/2023-06-12%2015.23.20.gif)
 
-
-
 两种获取自定义组件中dom元素
 
 - 1.通过forwardRef进行转发，获取子组件中dom元素
@@ -1982,7 +1976,6 @@ class AComp extends React.Component {
     )
   }
 }
-
 ```
 
 - 2.直接通过props，传递ref对象
@@ -2180,8 +2173,6 @@ const ProfilePage = React.lazy(() => import('./ProfilePage')); // 懒加载
   <ProfilePage />
 </Suspense>
 ```
-
-
 
 ## React组件通讯
 
@@ -3659,7 +3650,7 @@ const App = () => {
 
 `useEffect`：副作用，理解为是类组件的生命周期，也是我们最常用的钩子
 
-> 什么是副作用呢？ **副作用（Side Effect)**：是指 function 做了和本身运算返回值无关的事，如请求数据、修改全局变量，打印、数据获取、设置订阅以及手动更改 `React` 组件中的 `DOM` 都属于副作用操作都算是副作用
+> 什么是副作用呢？ **副作用（Side Effect)**：是指函数式编程，将那些跟数据计算无关的操作，都称为 "副效应"，如请求数据、修改全局变量，打印、数据获取、设置订阅以及手动更改 `React` 组件中的 `DOM` 都属于副作用操作都算是副作用
 
 `useEffect`可以弥补函数组件没有生命周期的缺点。可以在`useEffect`第一个参数回调函数中，做一些请求数据，事件监听等操作，第二个参数作为`dep`依赖项，当依赖项发生变化，重新执行第一个函数。
 
@@ -3759,7 +3750,7 @@ const HooksModel = () => {
   const [count, setCount] = React.useState(0);
   const [num, setNum] = React.useState(0);
   const [flag, setFlag] = React.useState(false);
- 
+
   return (
     <div>
       <h2>{ count }</h2>
@@ -3778,10 +3769,294 @@ const HooksModel = () => {
 
 之前在class组件中componentWillUnmount生命周期
 
+`useEffect()`允许返回一个函数，在组件卸载时，执行该函数，清理副效应。如果不需要清理副效应，`useEffect()`就不用返回任何值。
 
+```jsx
+useEffect(() => {
+  const subscription = props.source.subscribe();
+  return () => {
+    subscription.unsubscribe();
+  };
+}, [props.source]);
+```
+
+上面例子中，`useEffect()`在组件加载时订阅了一个事件，并且返回一个清理函数，在组件卸载时取消订阅。
+
+##### 5.useEffect() 的用途
+
+只要是副效应，都可以使用`useEffect()`引入。它的常见用途有下面几种。
+
+- 获取数据（data fetching）
+- 事件监听或订阅（setting up a subscription）
+- 改变 DOM（changing the DOM）
+- 输出日志（logging）
+
+下面是从远程服务器获取数据的例子。
+
+```js
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+function App() {
+  const [data, setData] = useState({ hits: [] });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const result = await axios(
+        'https://hn.algolia.com/api/v1/search?query=redux',
+      );
+      setData(result.data);
+    };
+    fetchData();
+  }, []);
+
+  return (
+    <ul>
+      {data.hits.map(item => (
+        <li key={item.objectID}>
+          <a href={item.url}>{item.title}</a>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export default App;
+```
+
+上面例子中，`useState()`用来生成一个状态变量（`data`），保存获取的数据；`useEffect()`的副效应函数内部有一个 async 函数，用来从服务器异步获取数据。拿到数据以后，再用`setData()`触发组件的重新渲染。
+
+##### 6.useEffect() 的注意点
+
+使用`useEffect()`时，有一点需要注意。如果有多个副效应，应该调用多个`useEffect()`，而不应该合并写在一起。
+
+```jsx
+function App() {
+  const [varA, setVarA] = useState(0);
+  const [varB, setVarB] = useState(0);
+  useEffect(() => {
+    const timeoutA = setTimeout(() => setVarA(varA + 1), 1000);
+    const timeoutB = setTimeout(() => setVarB(varB + 2), 2000);
+
+    return () => {
+      clearTimeout(timeoutA);
+      clearTimeout(timeoutB);
+    };
+  }, [varA, varB]);
+
+  return <span>{varA}, {varB}</span>;
+}
+```
+
+上面的例子是错误的写法，副效应函数里面有两个定时器，它们之间并没有关系，其实是两个不相关的副效应，不应该写在一起。正确的写法是将它们分开写成两个`useEffect()`。
+
+```jsx
+function App() {
+  const [varA, setVarA] = useState(0);
+  const [varB, setVarB] = useState(0);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setVarA(varA + 1), 1000);
+    return () => clearTimeout(timeout);
+  }, [varA]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setVarB(varB + 2), 2000);
+
+    return () => clearTimeout(timeout);
+  }, [varB]);
+
+  return <span>{varA}, {varB}</span>;
+}
+```
 
 #### useContext
 
 **useContext**：上下文，类似于`Context`：其本意就是设置全局共享数据，使所有组件可跨层级实现共享
 
 `useContext`的参数一般是由`createContext`的创建，通过 `CountContext.Provider` 包裹的组件，才能通过 `useContext` 获取对应的值
+
+```jsx
+// 通过createContext 创建的上下文对象，通过useContext()所有组件可跨层级实现共享
+const CompContext = React.createContext(null)
+function App() {
+  const [style, setStyle] = React.useState('pink');
+  const [count, setCount] = React.useState(0);
+  const toggle = () => {
+    setCount(v => ++v)
+    setStyle(v => v === 'pink'? 'skyblue' : 'pink')
+  }
+  return (
+    <div>
+      <h1>App 根组件: {count}</h1>
+      {/* 注入相关对象或方法 */}
+      <CompContext.Provider value={{
+        count,
+        style,
+        toggle
+      }}>
+        <Parent />
+      </CompContext.Provider>
+    </div>
+  )
+}
+
+const Parent = () => {
+  return (<div>
+      <h2>Parent父组件</h2>
+      {/* 组件数据共享 */}
+      <ChildO />
+      <ChildT />
+    </div>)
+}
+
+const ChildO = () => {
+  // 通过useContext() 获取
+  const {count, style, toggle} = React.useContext(CompContext)
+  return (<div>
+      <h3>Child1组件：{count}</h3>
+      <button onClick={toggle}
+        style={{backgroundColor:style}}>toggle</button>
+    </div>)
+}
+const ChildT = () => {
+  // 通过useContext() 获取
+  const {count, style, toggle} = React.useContext(CompContext)
+  return (<div>
+      <h3>Child2组件：{count}</h3>
+      <button onClick={toggle}
+        style={{backgroundColor:style}}>toggle</button>
+    </div>)
+}
+```
+
+![](./img/2023-06-13%2019.20.46.gif)
+
+#### useReducer()：action 钩子
+
+React 本身不提供状态管理功能，通常需要使用外部库。这方面最常用的库是 Redux。
+
+Redux 的核心概念是，组件发出 action 与状态管理器通信。状态管理器收到 action 以后，使用 Reducer 函数算出新的状态。Reducer 函数的形式是`(state, action) => newState`返回一个新的state值
+
+**useReducer**：它类似于`redux`功能的api
+
+```jsx
+const [state, dispatch] = useReducer(reducer, initialArg, init?)
+```
+
+- `state`：更新后的`state`值
+- `dispatch`：可以理解为和`useState`的`setState`一样的效果
+- `reducer`：可以理解为`redux`的`reducer`回调函数
+- `initialArg`：初始值
+- `init`：应返回初始状态的初始值设定项函数。如果未指定，则初始状态设置为 `initialArg` 。否则，初始状态将设置为调用 `init(initialArg)` 的结果
+
+```jsx
+function App() {
+  // useReducer 与 useState 非常相似
+  // const [state, dispatch] = useReducer(reducer, initialArg, init?)
+  // 参数一：Reducer回调函数，回调参数的 state 和 action，state第一次为初始值0，action接收dispatch中参数，回调中return值为最新number值即state
+  // 参数二：为 state 的初始值
+  // 参数三：返回初始状态的初始值预设项函数。如果未指定，则初始状态设置为initialArg 。否则，初始状态为调用 init(initialArg) 的结果
+  const [number, dispatchNumber] = React.useReducer((state, action) => {
+    console.log(state, action);
+    const { type, payload } = action
+    switch (type) {
+      case 'add':
+        state = state + payload; break;
+      case 'sub':
+        state = state - payload; break
+      case 'reset':
+        state = payload; break
+    }
+    return state // 返回新state值，供number使用
+  }, 0, (number) => number + 100)
+  return (
+    <div>
+      <h2>当前number：{ number }</h2>
+      <button onClick={() => dispatchNumber({type: 'add', payload: 1})}>加+1</button>
+      <button onClick={() => dispatchNumber({type: 'sub', payload: 1})}>减-1</button>
+      <button onClick={() => dispatchNumber({type: 'reset', payload: 0})}>重置</button>
+    </div>
+  )
+}
+```
+
+![](./img/2023-06-13%2019.35.45.gif)
+
+#### useMemo
+
+`useMemo`接受两个参数，第一个参数是`callback`函数，返回值用于产生**保存值**。 第二个参数是一个数组，作为`dep`依赖项，数组里面的依赖项发生变化，重新执行第一个函数，产生**新的值**。
+
+当一个父组件中调用了一个子组件的时候，父组件的 state 发生变化，会导致父组件更新，而子组件虽然没有发生改变，但也会进行更新。
+
+简单的理解下，当一个页面内容非常复杂，模块非常多的时候，函数式组件会**从头更新到尾**，只要一处改变，所有的模块都会进行刷新，这种情况显然是没有必要的。
+
+看下面一个小栗子🌰：
+
+```jsx
+function useList(list) {
+  return list.map((item,index) => {
+    {console.log('list渲染')}
+    return <li key={index}>{item}</li>
+  })
+}
+function Child({num}){
+  console.log('Child函数组件');
+  return <div>num: {num}</div>
+}
+
+function App() {
+  const [flag, setFlag] = React.useState(false)
+  const [num, setNum] = React.useState(0)
+  const list = useList(['Angular', 'React', 'Vue'])
+  return (
+    <div>
+      <ul>{list}</ul>
+      <Child num={num}/>
+      status: {JSON.stringify(flag)}
+      <button onClick={() => setFlag(!flag)}>{JSON.stringify(flag)}</button>
+    </div>
+  )
+}
+```
+
+![](./img/2023-06-14%2001.35.39.gif)
+
+当点击按钮切换flag值，App函数式组件会**从头更新到尾**，会触发useList()，会做出不必要的渲染增加了性能开销，所以做自定义 `hooks`的时候一定要注意，需要**减少性能开销**,我们为组件加入 `useMemo`试试：
+
+```jsx
+function useList(list) {
+  return React.useMemo(() => {
+    return list.map((item,index) => {
+      {console.log('list渲染')}
+      return <li key={index}>{item}</li>
+    })
+  }, [])
+}
+
+function Child({num}){
+  // 当props.num发送变化时重新渲染
+  return React.useMemo(() =>{
+    console.log('Child函数组件');
+    return <div>num: {num}</div>
+  }, [num])
+}
+
+function App() {
+  const [flag, setFlag] = React.useState(false)
+  const [num, setNum] = React.useState(0)
+  const list = useList(['Angular', 'React', 'Vue'])
+  return (
+    <div>
+      <ul>{list}</ul>
+      <Child num={num}/>
+      status: {JSON.stringify(flag)}
+      <button onClick={() => setFlag(!flag)}>{JSON.stringify(flag)}</button>
+    </div>
+  )
+}
+```
+
+![](./img/2023-06-14%2001.39.02.gif)
+
+此时修改App中状态值，不会在做相关的渲染

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" >
+    function App() {
+      // useReducer 与 useState 非常相似
+      // const [state, dispatch] = useReducer(reducer, initialArg, init?)
+      // 参数一：Reducer回调函数，回调参数的 state 和 action，state第一次为初始值0，action接收dispatch中参数，回调中return值为最新number值即state
+      // 参数二：为 state 的初始值
+      // 参数三：返回初始状态的初始值预设项函数。如果未指定，则初始状态设置为initialArg 。否则，初始状态为调用 init(initialArg) 的结果
+      const [number, dispatchNumber] = React.useReducer((state, action) => {
+        console.log(state, action);
+        const { type, payload } = action
+        switch (type) {
+          case 'add':
+            state = state + payload; break;
+          case 'sub':
+            state = state - payload; break
+          case 'reset':
+            state = payload; break
+        }
+        return state
+      }, 0, (number) => number + 100)
+      return (
+        <div>
+          <h2>当前number：{ number }</h2>
+          <button onClick={() => dispatchNumber({type: 'add', payload: 1})}>加+1</button>
+          <button onClick={() => dispatchNumber({type: 'sub', payload: 1})}>减-1</button>
+          <button onClick={() => dispatchNumber({type: 'reset', payload: 0})}>重置</button>
+        </div>
+      )
+    }
+    
+    const root = ReactDOM.createRoot(document.getElementById("root"))
+    root.render(<App />);
+  </script>
+</body>
+</html>
