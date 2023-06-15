@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    .dark {
+      background-color: black;
+      color: white;
+    }
+
+    .light {
+      background-color: white;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" >
+    function post (url, data) {
+      console.log('POST '+ url);
+      console.log(data);
+    }
+    // form组件
+    const ShippingForm = React.memo(({onSubmit}) => {
+      const [count, setCount] = React.useState(0)
+      console.log('渲染<ShippingForm />');
+      const startTime = performance.now();
+      while(performance.now() - startTime < 500){ 
+        // 在500毫秒内不做任何事情来模拟极慢的代码
+      } 
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target)
+        // console.log(formData.get('city'));
+        const formDataObj = {}
+        for(let enter of formData.entries()) {
+          formDataObj[enter[0]] = enter[1]
+        }
+
+        onSubmit({ ...formDataObj, count})
+      }
+      return (
+        <div>
+          <p><b>Note: <code>ShippingForm</code> is artificially slowed down!</b></p>
+          <form onSubmit={handleSubmit}>
+            <label>
+              Number of items:
+              <button onClick={() => setCount(count-1)} >-</button>
+              {count}
+              <button onClick={() => setCount(count+1)}>+</button>
+            </label> <br/>
+            <label>Street:<input name='street' /></label> <br/>
+            <label>City:<input name='city' /></label> <br/>
+            <label>Postal code:<input name='zipCode' /></label> <br/>
+            <button type="submit">submit</button>
+          </form>
+        </div>);
+    })
+
+    // 产品组件
+    function ProductPage ({ productId, referrer, theme }){
+      console.log('ProductPage 组件');
+      // 使用useCallback处理
+      const submit = React.useCallback((orderDetails) => {
+        post(`/product/${productId}/buy`, {
+          referrer,
+          orderDetails
+        })
+      }, [productId, referrer]) // 当productId, referrer发送变化时，才会执行回调进行返回
+      
+      return (
+        <div className={theme}>
+          <ShippingForm onSubmit={submit} />
+        </div>
+      )
+    }
+
+    function App() {
+      const [isDark, setIsDark] = React.useState(false)
+      return (
+        <div>
+          <label>
+            <input type="checkbox" checked={isDark} onChange={e => setIsDark(e.target.checked)} />
+            Dark mode</label>
+          <hr/>
+          <ProductPage 
+            productId={'wizard_of_oz'}
+            referrer={123}
+            theme={isDark ? 'dark': 'light'} />
+        </div>
+      )
+    }
+    
+    const root = ReactDOM.createRoot(document.getElementById("root"))
+    root.render(<App />);
+  </script>
+</body>
+</html>

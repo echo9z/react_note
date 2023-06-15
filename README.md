@@ -1707,7 +1707,7 @@ export class B extends Component {
 }
 ```
 
-### 14.类组件
+### 14.组件类
 
 #### PureComponent
 
@@ -3534,7 +3534,7 @@ class App extends React.Component {
 
 ## React hooks
 
-### 1.hooks-介绍
+### hooks-介绍
 
 **具体内容：**
 
@@ -3562,7 +3562,7 @@ class App extends React.Component {
 
 - 有了 Hooks 以后，不能再把**函数组件**称为~~无状态组件~~了，因为 Hooks 为函数组件提供了状态
 
-### 2. hooks-解决的问题
+### hooks-解决的问题
 
 **具体内容：**
 
@@ -4060,3 +4060,61 @@ function App() {
 ![](./img/2023-06-14%2001.39.02.gif)
 
 此时修改App中状态值，不会在做相关的渲染
+
+还有一个🌰具体看todo-useMemo-demo.html 文件
+
+#### useCallback
+
+`useMemo` 和 `useCallback` 接收的参数都是一样，都是在其依赖项发生变化后才执行，都是返回缓存的值，区别在于 `useMemo` 返回的是函数运行的结果， `useCallback` 返回的是函数。 返回的`callback`可以作为`props`回调函数传递给子组件。
+
+```jsx
+function App() {
+  const [flag, setFlag] = React.useState(false)
+  const [num, setNum] = React.useState(0)
+  const add = () => {
+    setNum(num + 1)
+  }
+  // useCallback返回一个函数
+  const addCallback = React.useCallback(() => {
+    setNum(num + 1)
+  }, [num])
+  return (
+    <div>
+      <h3>num: {num}</h3>
+      <Button onClick={add}>普通function</Button>
+      <Button onClick={addCallback}>useCallback处理</Button>
+      <button onClick={() => setFlag(!flag)}>切换flag：{JSON.stringify(flag)}</button>
+    </div>
+  )
+}
+const Button = React.memo((props) => {
+  console.log(props.children)
+  return <button onClick={props.onClick}>{props.children}</button>
+})
+```
+
+![](./img/2023-06-15%2000.37.02.gif)
+
+两个按钮组件，props传入onClick点击函数，一个传入普通函数，另一传入useCallback返回的函数。当父组件中的flag状态发生变化，函数式组件会**从头更新到尾**，通过useCallback传递函数就不会触发，原因是对num值进行监听，当num值发生变化时才会执行回调。
+
+还有一个🌰具体看todo-useCallback-demo.html 文件
+
+#### useRef
+
+**useRef**： 可以获取当前元素的所有属性，并且返回一个可变的ref对象，并且这个对象**只有current属性**，可设置`initialValue`
+
+- 返回一个可变的 ref 对象，该对象只有个 current 属性，初始值为传入的参数( initialValue )。
+- 返回的 ref 对象在组件的整个生命周期内保持不变
+- 当更新 current 值时并不会 re-render ，这是与 useState 不同的地方
+- 更新 useRef 是 side effect (副作用)，所以一般写在 useEffect 或 event handler 里
+- useRef 类似于类组件的 this
+
+1.useRef传递引用值，读取和写入，实现缓存数据
+
+
+
+
+
+
+
+### v18中的hooks

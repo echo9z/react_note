@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" >
+    function Stopwatch() {
+      const [startTime, setStartTime] = React.useState(null)
+      const [now, setNow] = React.useState(null)
+      const intervalRef = React.useRef(null)
+      // 开始倒计时
+      const handleStart = () => {
+        setStartTime(Date.now())
+        setNow(Date.now())
+
+        clearInterval(intervalRef.current)
+        intervalRef.current = setInterval(() => {
+          
+        },10)
+      }
+      const handleStop = () => {
+        clearInterval(intervalRef.current)
+      }
+      let secondsPassed = 0
+      return (<div>
+          <h2>Time passed: {secondsPassed}</h2> <br />
+          <button onClick={() => handleStart()}>Start</button>
+          <button onClick={() => handleStop()}>Stop</button>
+        </div>)
+    }
+    function App() {
+      
+      return (
+        <div>
+          <Stopwatch />
+        </div>
+      )
+    }
+    
+    const root = ReactDOM.createRoot(document.getElementById("root"))
+    root.render(<App />);
+  </script>
+</body>
+</html>
