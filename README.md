@@ -4249,8 +4249,47 @@ useImperativeHandle(ref, createHandle, [deps])
 - `createHandle`：处理的函数，返回值作为暴露给父组件的 ref 对象。
 - `deps`：依赖项，依赖项更改形成新的 ref 对象。
 
+```jsx
+// 将ref进行转发
+const Child = React.forwardRef(function Child(props, ref) {
+  const [count, setCount] = React.useState(0)
+  const inputRef = React.useRef(null)
+  // 对外暴露方法，父组件通过ref.current.add()调用
+  React.useImperativeHandle(ref, () => {
+    return {
+      add,
+      focus
+    }
+  }, [])
+  
+  const add = () => {
+    setCount((v) => v + 1)
+  }
+  const focus = () => {
+    inputRef.current.focus()
+    inputRef.current.value = 'focus'
+  }
+  
+  return (
+    <div>
+      <p>点击次数：{count}</p>
+      <input type="text" ref={inputRef} />
+      <button onClick={add}>Child+1</button>
+    </div>)
+})
 
+function App() {
+  const childRef = React.useRef(null)
+  return (
+    <div>
+      <Child ref={childRef}/>
+      <button onClick={() => childRef.current.add()}>根组件App +1</button>
+      <button onClick={() => childRef.current.focus()}>根组件App 聚焦</button>
+    </div>
+  )
+}
+```
 
-
+![](./img/2023-06-16%2023.19.31.gif)
 
 ### v18中的hooks
