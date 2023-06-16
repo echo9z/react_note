@@ -4103,15 +4103,151 @@ const Button = React.memo((props) => {
 
 **useRef**： 可以获取当前元素的所有属性，并且返回一个可变的ref对象，并且这个对象**只有current属性**，可设置`initialValue`
 
+```jsx
+const refContainer = useRef(initialValue);
+```
+
 - 返回一个可变的 ref 对象，该对象只有个 current 属性，初始值为传入的参数( initialValue )。
 - 返回的 ref 对象在组件的整个生命周期内保持不变
-- 当更新 current 值时并不会 re-render ，这是与 useState 不同的地方
+- 当更新 current 值时并不会重新渲染re-render ，这是与 useState 不同的地方
 - 更新 useRef 是 side effect (副作用)，所以一般写在 useEffect 或 event handler 里
 - useRef 类似于类组件的 this
 
-1.useRef传递引用值，读取和写入，实现缓存数据
+##### 1.useRef传递引用值，读取和写入，实现缓存数据
 
+秒表🌰：
 
+```jsx
+function Stopwatch() {
+  const [flag, setFlag] = React.useState(false)
+  const [startTime, setStartTime] = React.useState(null)
+  const intervalRef = React.useRef(null) // 用户缓存记录定时id
+  const endRef = React.useRef(null) // 记录stop时毫秒数，用于下一次start
+
+  const change = () => {
+    setFlag(!flag)
+    !flag ? handleStart(): handleStop()
+  }
+  // 开始倒计时
+  const handleStart = () => {
+    startTime===null? setStartTime(0): setStartTime(endRef.current)
+    clearInterval(intervalRef.current)
+    intervalRef.current = setInterval(() => {
+      setStartTime(v => v+=10)
+    },10)
+  }
+  const handleStop = () => {
+    clearInterval(intervalRef.current)
+    endRef.current = startTime
+  }
+  const handleReset = () => {
+    clearInterval(intervalRef.current)
+    setStartTime(null)
+  }
+  let secondsPassed = 0
+  if(startTime !== null) {
+    secondsPassed = startTime / 1000
+  }
+  return (<div>
+      <h2>Time passed: {secondsPassed.toFixed(2)}</h2> <br />
+      <button disabled={startTime === null && !flag}
+        onClick={() => handleReset()}>reset</button>
+      <button onClick={change}>
+        {!flag ? 'Start':'Stop'}
+      </button>
+    </div>)
+}
+```
+
+![](./img/2023-06-16%2001.58.38.gif)
+
+创建`useRef`时候，会创建一个原始对象，只要函数组件不被销毁，原始对象就会一直存在
+
+##### 2.useRef操作 DOM
+
+```jsx
+function InputForm() {
+  const inputRef = React.useRef(null)
+  React.useEffect(() => {
+    // 组件挂载是聚焦input
+    inputRef.current.focus()
+  }, [])
+  return (<label>
+      focus: <input ref={inputRef} type="text"/>
+    </label>)
+}
+```
+
+父组件操作组件内部的 DOM，自定义`MyInput` 组件，但父级能够聚焦输入（父级无权访问）。可以使用 `useRef` 的组合来保存输入，并使用 `forwardRef` 将其公开给父组件。
+
+```jsx
+import { forwardRef, useRef } from 'react';
+
+const MyInput = forwardRef((props, ref) => {
+  return <input {...props} ref={ref} />;
+});
+
+export default function Form() {
+  const inputRef = useRef(null);
+
+  function handleClick() {
+    inputRef.current.focus();
+  }
+
+  return (
+    <>
+      <MyInput ref={inputRef} />
+      <button onClick={handleClick}>
+        Focus the input
+      </button>
+    </>
+  );
+}
+```
+
+##### 3.useRef与createRef的区别
+
+```jsx
+function RefDiff(){
+  const [num, setNum] = React.useState(1)
+  const refForUseRef = React.useRef(null)
+  const refForCreateRef = React.createRef()
+  console.log(`useRef ${refForUseRef.current}`);
+  console.log(`createRef ${refForCreateRef.current}`);
+
+  if(!refForUseRef.current) refForUseRef.current = num
+  if(!refForCreateRef.current) refForCreateRef.current = num
+
+  return (
+    <div>
+      <h3>Current render num: {num}</h3>
+      <p>refForUseRef: {refForUseRef.current}</p>
+      <p>refForCreateRef: {refForCreateRef.current}</p>
+      <button onClick={() => setNum(prev => ++prev)}>+1</button>
+    </div>
+  )
+}
+```
+
+看到refForUseRef.current一直为1(因为refForUseRef.current已经存在该引用)，而refForCreateRef.current却是(因为createRef 每次渲染都会返回一个新的引用，所以if判断时为true，会被重新赋值，页面就会显示出新的值)
+
+![](./img/2023-06-16%2012.38.19.gif)
+
+组件在下一次渲染中，createRef 每次渲染都会返回一个新的引用，而 useRef 每次都会返回相同的引用
+
+#### useImperativeHandle
+
+**useImperativeHandle**：可以让你在使用 `ref` 时自定义暴露给父组件的实例值。
+
+我们需要在`最外层的组件上`控制其他组件的方法，希望最外层的点击事件，同时执行`子组件的事件`，这时就需要 useImperativeHandle 的帮助
+
+```jsx
+useImperativeHandle(ref, createHandle, [deps])
+```
+
+- `ref`：`useRef`所创建的ref
+- `createHandle`：处理的函数，返回值作为暴露给父组件的 ref 对象。
+- `deps`：依赖项，依赖项更改形成新的 ref 对象。
 
 
 
