@@ -3870,6 +3870,79 @@ function App() {
 }
 ```
 
+#### useLayoutEffect
+
+**useLayoutEffect**： 与`useEffect`基本一致，不同的地方时，`useLayoutEffect`是`同步`
+
+**`useEffect`执行顺序:** 组件更新挂载完成 -> 浏览器 `dom` 绘制完成 -> 执行 `useEffect` 回调。
+
+**`useLayoutEffect` 执行顺序:** 组件更新挂载完成 -> 执行 `useLayoutEffect` 回调-> 浏览器`dom`绘制完成。
+
+由于`useLayoutEffect`是同步的，所以它会阻塞页面渲染，所以需根据场景谨慎使用。
+
+```jsx
+function EffectTwo(){
+  const [value, setValue] = React.useState(0)
+  React.useEffect(() => {
+    if (value === 0) {
+      setValue(Math.random() * 100);
+    }
+  }, [value]);
+  console.log('render', value);
+  return (<div>
+      <p>useEffect value: {value}</p>
+      <button onClick={() => setValue(0)}>click</button>
+    </div>)
+}
+```
+
+在实际观察页面的时候，这个div是有闪动的，这在交互上和性能上是绝对需要避免的。这个例子中组件的变化顺序是：
+
+1. click setState （value）
+2. 虚拟 DOM 设置到真实 DOM 上
+3. 渲染
+4. 执行useEffect回调
+5. setState（value）
+6. 虚拟 DOM 设置到真实 DOM 上
+7. 渲染
+
+一共执行了两次渲染
+
+```jsx
+function EffectOne(){
+  const [value, setValue] = React.useState(0)
+  // 会损耗性能
+  React.useLayoutEffect(() => {
+    if (value === 0) {
+      setValue(Math.random() * 100);
+    }
+  }, [value]);
+  console.log('render', value);
+  return (<div>
+      <p>useLayoutEffect value: {value}</p>
+      <button onClick={() => setValue(0)}>click</button>
+    </div>)
+}
+```
+
+1. click setState （value）
+2. 虚拟 DOM 设置到真实 DOM 上
+3. 执行useLayEffect回调
+4. setState （value）
+5. 虚拟 DOM 设置到真实 DOM 上
+6. 渲染
+
+`useLayoutEffect`页面并没有出现闪动，而是正常渲染
+
+![](./img/2023-06-18%2002.09.37.gif)
+
+**差异**
+
+- `useEffect` 是异步执行的，而`useLayoutEffect`是同步执行的。
+- `useEffect` 的执行时机是浏览器完成渲染之后，而 `useLayoutEffect` 的执行时机是浏览器把内容真正渲染到界面之前，和 `componentDidMount` 等价。
+
+使用场景：比如我们需要在dom绘制之前，移动dom到制定位置，先确定dom元素x轴和y轴坐标，在进行渲染
+
 #### useContext
 
 **useContext**：上下文，类似于`Context`：其本意就是设置全局共享数据，使所有组件可跨层级实现共享
@@ -4261,7 +4334,7 @@ const Child = React.forwardRef(function Child(props, ref) {
       focus
     }
   }, [])
-  
+
   const add = () => {
     setCount((v) => v + 1)
   }
@@ -4269,7 +4342,7 @@ const Child = React.forwardRef(function Child(props, ref) {
     inputRef.current.focus()
     inputRef.current.value = 'focus'
   }
-  
+
   return (
     <div>
       <p>点击次数：{count}</p>
@@ -4291,5 +4364,27 @@ function App() {
 ```
 
 ![](./img/2023-06-16%2023.19.31.gif)
+
+#### useDebugValue
+
+`useDebugValue` 可用于在 `React` 开发者工具中显示自定义 `hook` 的标签。这个`hooks`目的就是检查自定义`hooks`
+
+```jsx
+function useFriendStatus(friendID) {
+  const [isOnline, setIsOnline] = useState(null);
+  // ...
+  // 在开发者工具中的这个 Hook 旁边显示标签
+  // e.g. "FriendStatus: Online"
+  useDebugValue(isOnline ? 'Online' : 'Offline');
+
+  return isOnline;
+}
+```
+
+>  不推荐你向每个自定义 Hook 添加 debug 值。当它作为共享库的一部分时才最有价值。
+> 
+> 在某些情况下，格式化值的显示可能是一项开销很大的操作。除非需要检查 Hook，否则没有必要这么做。因此，useDebugValue 接受一个格式化函数作为可选的第二个参数。
+> 
+> 该函数只有在 Hook 被检查时才会被调用。它接受 debug 值作为参数，并且会返回一个格式化的显示值。
 
 ### v18中的hooks

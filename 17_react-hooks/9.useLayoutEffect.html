@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" >4
+    function EffectOne(){
+      const [value, setValue] = React.useState(0)
+      // 会损耗性能
+      React.useLayoutEffect(() => {
+        if (value === 0) {
+          setValue(Math.random() * 100);
+        }
+      }, [value]);
+      console.log('render', value);
+      return (<div>
+          <p>useLayoutEffect value: {value}</p>
+          <button onClick={() => setValue(0)}>click</button>
+        </div>)
+    }
+    function EffectTwo(){
+      const [value, setValue] = React.useState(0)
+      React.useEffect(() => {
+        if (value === 0) {
+          setValue(Math.random() * 100);
+        }
+      }, [value]);
+      console.log('render', value);
+      return (<div>
+          <p>useEffect value: {value}</p>
+          <button onClick={() => setValue(0)}>click</button>
+        </div>)
+    }
+    function Test(params) {
+      const [count, setCount] = React.useState(0);
+      React.useEffect(() => { // 会有闪烁
+        console.log(`useEffect - count=${count}`)
+        // 耗时的操作
+        const pre = Date.now();
+        while(Date.now() - pre < 1000) {}
+        // count为 0 时重新生成个随机数
+        if (count === 0) {   
+          setCount(10 + Math.random() * 200);
+        }
+      }, [count]);
+      // React.useLayoutEffect(() => { // 不会有闪烁，但是会卡一下
+      //   console.log(`useLayoutEffect - count=${count}`)
+      //   const pre = Date.now();
+      //   while(Date.now() - pre < 1000) {}
+      //   if (count === 0) {   
+      //     setCount(10 + Math.random() * 200);
+      //   }
+      // }, [count]);
+      return <div onClick={() => setCount(0)}>{count}</div>
+    }
+    
+    function App() {
+      // <EffectOne />
+      return (
+        <>
+          <Test />
+        </>
+      );
+    }
+    const root = ReactDOM.createRoot(document.getElementById("root"))
+    root.render(<App />);
+  </script>
+</body>
+</html>
