@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script crossorigin src="https://unpkg.com/redux@4.2.1/dist/redux.min.js"></script>
+  <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root" ></div>
+  <script type="text/babel" >
+    // 函数
+    const initCount = { count: 1 }
+    const sumReducer = (state = initCount, action) => {
+      console.log(state.count);
+      switch (action.type) {
+        case 'add':
+          return {
+            ...state,
+            count: state.count + action.payload.num,
+          } 
+        case 'sub':
+          return {
+            ...state,
+            count: state.count - action.payload.num,
+          }
+        default:
+          console.log('未执行操作')
+          return state
+      }
+    }
+    const totalReducer = (state = { num: 0 }, action) => {
+      console.log(2);
+      switch (action.type) {
+        case 'total':
+          return {
+            ...state,
+            count: state.count + action.payload.num,
+          }
+        default:
+          console.log('未执行操作')
+          return state
+      }
+    }
+    // combine 合并多个 reducer
+    const rootReducers = Redux.combineReducers({
+      counter: sumReducer,
+      total: totalReducer,
+    })
+    // 创建store
+    const store = Redux.createStore(
+      rootReducers,
+      window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+    )
+
+    function App() {
+      // 订阅
+      const state = React.useSyncExternalStore(store.subscribe, 
+        () => store.getState().counter.count)
+      return (<div>
+        <div>{state}</div>
+        <div>
+          <button onClick={() => store.dispatch({ type:'add', payload: {num: 1} })} >加1</button>
+          <button onClick={() => store.dispatch({ type:'sub', payload: {num: 1} })} >减1</button>
+        </div>
+      </div>)
+    }
+    const root = ReactDOM.createRoot(document.getElementById("root"))
+    root.render(<App />);
+  </script>
+</body>
+</html>

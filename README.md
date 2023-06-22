@@ -177,6 +177,40 @@ root.render(element)
   </script>
 ```
 
+### react 脚手架
+
+#### create-react-app创建spa项目
+
+创建项目方式：
+
+- 全局安装脚手架再使用命令创建项目
+- 使用 npx 远程调用脚手架创建项目
+
+方式 1：
+
+- 全局安装
+
+```shell
+# 全局安装脚手架
+npm i create-react-app -g
+```
+
+- 创建项目
+
+```shell
+# project-name 项目名称
+create-react-app project-name
+```
+
+方式 2：
+
+- npx 安装，npm5.2+支持
+
+```shell
+# project-name 项目名称
+npx create-react-app project-name
+```
+
 ## React JSX 语法
 
 - 1.全称: JavaScript XML
@@ -4388,3 +4422,129 @@ function useFriendStatus(friendID) {
 > 该函数只有在 Hook 被检查时才会被调用。它接受 debug 值作为参数，并且会返回一个格式化的显示值。
 
 ### v18中的hooks
+
+#### useSyncExternalStore
+
+**useSyncExternalStore**:是一个推荐用于`读取`和`订阅外部数据源`的 `hook`，其方式与选择性的 `hydration` 和时间切片等并发渲染功能兼容
+
+```jsx
+const state = useSyncExternalStore(subscribe, getSnapshot[, getServerSnapshot])
+```
+
+- `subscribe`: 订阅函数，用于注册一个回调函数，当存储值发生更改时被调用。此外， `useSyncExternalStore` 会通过带有记忆性的 `getSnapshot` 来判别数据是否发生变化，如果发生变化，那么会`强制更新`数据。
+- `getSnapshot`: 返回当前存储值的函数。必须返回缓存的值。如果 `getSnapshot` 连续多次调用，则必须返回相同的确切值，除非中间有存储值更新。
+- `getServerSnapshot`：返回服务端(`hydration`模式下)渲染期间使用的存储值的函数
+
+```jsx
+// 函数
+const initCount = { count: 1 }
+const sumReducer = (state = initCount, action) => {
+  console.log(state.count);
+  switch (action.type) {
+    case 'add':
+      return {
+        ...state,
+        count: state.count + action.payload.num,
+      } 
+    case 'sub':
+      return {
+        ...state,
+        count: state.count - action.payload.num,
+      }
+    default:
+      console.log('未执行操作')
+      return state
+  }
+}
+const totalReducer = (state = { num: 0 }, action) => {
+  console.log(2);
+  switch (action.type) {
+    case 'total':
+      return {
+        ...state,
+        count: state.count + action.payload.num,
+      }
+    default:
+      console.log('未执行操作')
+      return state
+  }
+}
+// combine 合并多个 reducer
+const rootReducers = Redux.combineReducers({
+  counter: sumReducer,
+  total: totalReducer,
+})
+// 创建store
+const store = Redux.createStore(
+  rootReducers,
+  window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+)
+
+function App() {
+  // 订阅
+  const state = React.useSyncExternalStore(store.subscribe, 
+    () => store.getState().counter.count)
+  return (<div>
+    <div>{state}</div>
+    <div>
+      <button onClick={() => store.dispatch({ type:'add', payload: {num: 1} })} >加1</button>
+      <button onClick={() => store.dispatch({ type:'sub', payload: {num: 1} })} >减1</button>
+    </div>
+  </div>)
+}
+```
+
+![](./img/2023-06-22%2019.55.06.gif)
+
+当点击按钮后，会触发 `store.subscribe`（订阅函数），执行`getSnapshot`后得到新的`count`，如果`count`发生变化，则会触发更新
+
+
+
+#### useTransition
+
+**useTransition**：返回一个状态值表示过渡任务的等待状态，以及一个启动该过渡任务的函数。
+
+如：输入框、tab切换、按钮等，这些任务需要视图上`立刻`做出响应，这些任务可以称之为立即更新的任务
+
+但有的时候，更新任务并不是那么紧急，或者来说要去请求数据等，导致新的状态不能立更新，需要用一个`loading...`的等待状态，这类任务就是过度任务
+
+```jsx
+const [isPending, startTransition] = useTransition();
+```
+
+- `isPending`：过渡状态的标志，为`true`时是等待状态
+- `startTransition`：可以将里面的任务变成过渡任务
+
+```jsx
+    function App() {
+      // isPending为true时是等待状态; startTransition过渡任务函数
+      const [isPending, startTransition] = React.useTransition()
+      const [list, setList] = React.useState([])
+      const [keyword, setKeyword] = React.useState('')
+      return (<div>
+        useTransition：
+        <input type="text" value={keyword}
+          onChange={e => {
+            setKeyword(e.target.value)
+            startTransition(() =>{
+              // 过渡任务
+              const res = []
+              for (let i = 0; i < 50; i++) {
+                res.push(e.target.value)
+              }
+              setList(res)
+            })
+          }} />
+        <ul>
+          {isPending ? (<h1>🌀 Loading...</h1>) : 
+            (list.map((item, index) => <li key={index}>{item}</li>))}
+        </ul>
+      </div>)
+    }
+```
+
+![](./img/2023-06-22%2021.46.37.gif)
+
+
+
+input输入内容是，会进行增加，假设我们在`startTransition`中请求一个接口，在接口请求的时候，`isPending`会为`true`，就会有一个`loading`的状态，请求完之后，`isPending`变为`false`渲染列表

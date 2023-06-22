@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root" ></div>
+  <script type="text/babel" >
+
+    function App() {
+      // isPending为true时是等待状态; startTransition过渡任务函数
+      const [isPending, startTransition] = React.useTransition()
+      const [list, setList] = React.useState([])
+      const [keyword, setKeyword] = React.useState('')
+      return (<div>
+        useTransition：
+        <input type="text" value={keyword}
+          onChange={e => {
+            setKeyword(e.target.value)
+            startTransition(() =>{
+              // 过渡任务
+              const res = []
+              for (let i = 0; i < 50; i++) {
+                res.push(e.target.value)
+              }
+              setList(res)
+            })
+          }} />
+        <ul>
+          {isPending ? (<h1>🌀 Loading...</h1>) : 
+            (list.map((item, index) => <li key={index}>{item}</li>))}
+        </ul>
+      </div>)
+    }
+    const root = ReactDOM.createRoot(document.getElementById("root"))
+    root.render(<App />);
+  </script>
+</body>
+</html>
