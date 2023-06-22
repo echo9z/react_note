@@ -3617,7 +3617,7 @@ class App extends React.Component {
 
 - 正是由于 React 原来存在的这些问题，才有了 Hooks 来解决这些问题
 
-### v16.8中的hooks
+### v16.8中的新增hooks
 
 #### useState
 
@@ -4421,7 +4421,7 @@ function useFriendStatus(friendID) {
 > 
 > 该函数只有在 Hook 被检查时才会被调用。它接受 debug 值作为参数，并且会返回一个格式化的显示值。
 
-### v18中的hooks
+### v18.2中的新增hooks
 
 #### useSyncExternalStore
 
@@ -4516,35 +4516,157 @@ const [isPending, startTransition] = useTransition();
 - `startTransition`：可以将里面的任务变成过渡任务
 
 ```jsx
-    function App() {
-      // isPending为true时是等待状态; startTransition过渡任务函数
-      const [isPending, startTransition] = React.useTransition()
-      const [list, setList] = React.useState([])
-      const [keyword, setKeyword] = React.useState('')
-      return (<div>
-        useTransition：
-        <input type="text" value={keyword}
-          onChange={e => {
-            setKeyword(e.target.value)
-            startTransition(() =>{
-              // 过渡任务
-              const res = []
-              for (let i = 0; i < 50; i++) {
-                res.push(e.target.value)
-              }
-              setList(res)
-            })
-          }} />
-        <ul>
-          {isPending ? (<h1>🌀 Loading...</h1>) : 
-            (list.map((item, index) => <li key={index}>{item}</li>))}
-        </ul>
-      </div>)
-    }
+function App() {
+  // isPending为true时是等待状态; startTransition过渡任务函数
+  const [isPending, startTransition] = React.useTransition()
+  const [list, setList] = React.useState([])
+  const [keyword, setKeyword] = React.useState('')
+  return (<div>
+    useTransition：
+    <input type="text" value={keyword}
+      onChange={e => {
+        setKeyword(e.target.value)
+        startTransition(() =>{
+          // 过渡任务
+          const res = []
+          for (let i = 0; i < 50; i++) {
+            res.push(e.target.value)
+          }
+          setList(res)
+        })
+      }} />
+    <ul>
+      {isPending ? (<h1>🌀 Loading...</h1>) : 
+        (list.map((item, index) => <li key={index}>{item}</li>))}
+    </ul>
+  </div>)
+}
 ```
 
 ![](./img/2023-06-22%2021.46.37.gif)
 
-
-
 input输入内容是，会进行增加，假设我们在`startTransition`中请求一个接口，在接口请求的时候，`isPending`会为`true`，就会有一个`loading`的状态，请求完之后，`isPending`变为`false`渲染列表
+
+
+
+#### useDeferredValue
+
+**useDeferredValue**：接受一个值，并返回该值的新副本，该副本将推迟到更紧急地更新之后。
+
+如果当前渲染是一个紧急更新的结果，比如用户输入，`React` 将返回之前的值，然后在紧急渲染完成后渲染新的值
+
+```jsx
+const deferredValue = useDeferredValue(value);
+```
+
+- `value`：可变的值，如`useState`创建的值
+- `deferredValue`: 延时状态
+
+```jsx
+function App() {
+  const [value, setValue] = React.useState('')
+  // 更新值是滞后的值
+  const deferredValue = React.useDeferredValue(value)
+  console.log('value', value);
+  console.log('deferredValue', deferredValue);
+
+  const getList = key => {
+    const arr = [];
+    for (let i = 0; i < 10000; i++) {
+      if (String(i).includes(key)) {
+        arr.push(<li key={i}>{i}</li>);
+      }
+    }
+    return arr;
+  }
+
+  return (<div>
+    useTransition：
+    <input type="text" value={value}
+      onChange={e => {
+        setValue(e.target.value)
+      }} />
+    <ul>
+      {deferredValue ?  getList(deferredValue): (<h1>🌀 Loading...</h1>)}
+    </ul>
+  </div>)
+}
+```
+
+![](./img/2023-06-23%2000.19.09.gif)
+
+当value值发生变化，通过useDeferredValue返回的deferredValue值是滞后的
+
+`useTransition`和`useDeferredValue`不同：
+
+- 相同点：`useDeferredValue`和`useTransition`一样，都是过渡更新任务
+- 不同点：`useTransition`给的是一个状态，而`useDeferredValue`给的是一个值
+
+#### useInsertionEffect
+
+**useInsertionEffect**：与 `useEffect`一样，但它在所有 DOM 突变 之前同步触发。
+
+`useInsertionEffect`对比于`useEffect`和`useLayoutEffect`在执行顺序上有什么区别🌰：
+
+```jsx
+useEffect(()=>{
+  console.log('useEffect')
+},[])
+
+useLayoutEffect(()=>{
+  console.log('useLayoutEffect')
+},[])
+
+useInsertionEffect(()=>{
+  console.log('useInsertionEffect')
+},[])
+```
+
+![](./img/iShot_2023-06-23_00.39.10.png)
+
+执行顺序上 `useInsertionEffect` > `useLayoutEffect` > `useEffect`
+
+注意：`useInsertionEffect` 应仅限于 **css-in-js** 库作者使用。优先考虑使用 `useEffect` 或 `useLayoutEffect` 来替代。
+
+```jsx
+function App() {
+  React.useEffect(()=>{
+    console.log('useEffect')
+  },[])
+
+  React.useLayoutEffect(()=>{
+    console.log('useLayoutEffect')
+  },[])
+
+  React.useInsertionEffect(()=>{
+    console.log('useInsertionEffect')
+    const style = document.createElement('style')
+    style.innerHTML = `
+      .css-in-js{
+        color: blue;
+      }`
+    document.head.appendChild(style)
+  },[])
+
+  return (<div className='css-in-js'>useInsertionEffect</div>)
+}
+```
+
+#### useId
+
+**useId** ： 是一个用于生成横跨服务端和客户端的稳定的`唯一 ID` 的同时避免`hydration` 不匹配的 `hook`。
+
+```jsx
+const App = () => {
+  const id = React.useId()
+  return (
+    <div>
+        <div id={id} >
+          useId
+        </div>
+    </div>
+  );
+}
+```
+
+![](./img/iShot_2023-06-23_00.54.22.png)

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root" ></div>
+  <script type="text/babel" >
+
+    function App() {
+      const [value, setValue] = React.useState('')
+      // 更新值是滞后的值
+      const deferredValue = React.useDeferredValue(value)
+      console.log('value', value);
+      console.log('deferredValue', deferredValue);
+
+      const getList = key => {
+        const arr = [];
+        for (let i = 0; i < 10000; i++) {
+          if (String(i).includes(key)) {
+            arr.push(<li key={i}>{i}</li>);
+          }
+        }
+        return arr;
+      }
+
+      return (<div>
+        useTransition：
+        <input type="text" value={value}
+          onChange={e => {
+            setValue(e.target.value)
+          }} />
+        <ul>
+          {deferredValue ?  getList(deferredValue): (<h1>🌀 Loading...</h1>)}
+        </ul>
+      </div>)
+    }
+    const root = ReactDOM.createRoot(document.getElementById("root"))
+    root.render(<App />);
+  </script>
+</body>
+</html>
