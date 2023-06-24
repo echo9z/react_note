@@ -4498,8 +4498,6 @@ function App() {
 
 当点击按钮后，会触发 `store.subscribe`（订阅函数），执行`getSnapshot`后得到新的`count`，如果`count`发生变化，则会触发更新
 
-
-
 #### useTransition
 
 **useTransition**：返回一个状态值表示过渡任务的等待状态，以及一个启动该过渡任务的函数。
@@ -4546,8 +4544,6 @@ function App() {
 ![](./img/2023-06-22%2021.46.37.gif)
 
 input输入内容是，会进行增加，假设我们在`startTransition`中请求一个接口，在接口请求的时候，`isPending`会为`true`，就会有一个`loading`的状态，请求完之后，`isPending`变为`false`渲染列表
-
-
 
 #### useDeferredValue
 

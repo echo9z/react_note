@@ -1,0 +1,17 @@
+.cart-counter {
+  display: flex;
+  input {
+    width: 32px;
+    height: 28px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    margin: 0 5px;
+  }
+  span {
+    width: 32px;
+    text-align: center;
+    padding: 0px;
+    background-color: #f8f9fa;
+  }
+}

@@ -20,9 +20,11 @@ export class TodoApp extends Component {
   }
 
   toggle(){
+    // array.every 数组中的元素有一个不满足判断条件，则返回false
     return this.state.todos.every((todo) => todo.done)
   }
   showClearCompleted(){
+    // array.some 数组中的元素有一个满足判断条件，则返回true
     return this.state.todos.some((todo) => todo.done)
   }
 
