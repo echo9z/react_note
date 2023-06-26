@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root" ></div>
+  <script type="text/babel" >
+    // 实现一个记录鼠标移动坐标的功能, 封装一个hooks函数
+    function useMouse() {
+      const [mouse, setMouse] = React.useState({x:0, y:0})
+      React.useEffect(() => {
+        // 组件挂载完毕后
+        const handelMouseMove = (e) => {
+          setMouse({x: e.clientX, y: e.clientY})
+        }
+        document.addEventListener('mousemove', handelMouseMove)
+        return () => {
+          document.removeEventListener('mousemove', handelMouseMove)
+        }
+      }, [])
+      return React.useMemo(() => mouse, [mouse])
+    }
+    function App() {
+      const [flag, setFlag] = React.useState(true)
+      const mouse = useMouse()
+      return (
+        <div>
+          <div>鼠标坐标位置：{JSON.stringify(mouse)}</div>
+          <button onClick={() => {setFlag(v => !v)}}>切换</button>
+          <div>切换状态：{JSON.stringify(flag)}</div>
+        </div>
+      );
+    }
+    const root = ReactDOM.createRoot(document.getElementById("root"))
+    root.render(<App />);
+  </script>
+</body>
+</html>

@@ -675,30 +675,30 @@ root.render(element);
 - 需求：在元素 `button`上根据 `isActive` 数据的值添加 `active` 类名，`isBlock` 数据的值添加 `block` 类名
 
 ```jsx
-    // 如果是多个类名的变化呢？
-    // vue 中绑定类名的时候使用 {类名:布尔} 用布尔值决定是否加上这个类名 { btn: true, 't-btn': true }
-    const isActiveT = false
-    const isBlocked = false
+// 如果是多个类名的变化呢？
+// vue 中绑定类名的时候使用 {类名:布尔} 用布尔值决定是否加上这个类名 { btn: true, 't-btn': true }
+const isActiveT = false
+const isBlocked = false
 
-    // 类名对象，即像vue中在class="{btn: true'}"
-    const classObject = { // key属性
-      button: true,
-      active: isActiveT,
-      block: isBlocked
-    }
-    const className = (classObj) => {
-      return Object.keys(classObj)
-      .filter(key => classObj[key]) // 将属性名为true，过滤出来形成数组
-      .join(' ') // 再将数组每个元素进行拼接，返回成字符串
-    }
+// 类名对象，即像vue中在class="{btn: true'}"
+const classObject = { // key属性
+  button: true,
+  active: isActiveT,
+  block: isBlocked
+}
+const className = (classObj) => {
+  return Object.keys(classObj)
+  .filter(key => classObj[key]) // 将属性名为true，过滤出来形成数组
+  .join(' ') // 再将数组每个元素进行拼接，返回成字符串
+}
 
-    const VDOM2 = (
-      <div>
-        <span className={ className(classObject) }>按钮2</span>
-      </div>
-    )
+const VDOM2 = (
+  <div>
+    <span className={ className(classObject) }>按钮2</span>
+  </div>
+)
 
-    ReactDOM.render(VDOM2, document.getElementById('app'))
+ReactDOM.render(VDOM2, document.getElementById('app'))
 ```
 
 **总结：** 使用 `JS` 原生的能力处理多个类名的动态绑定，当然这样的需求已经有 `classnames` 库给我们解决了
@@ -4666,3 +4666,46 @@ const App = () => {
 ```
 
 ![](./img/iShot_2023-06-23_00.54.22.png)
+
+### 自定义hooks
+
+`自定义hooks`是在`react-hooks`基础上的一个扩展，可以根据业务、需求去制定相应的`hooks`,将常用的逻辑进行封装，从而具备复用性。
+
+自定义hooks的名称是以**use**开头：
+
+```js
+const [ xxx, ...] = useXXX(参数一，参数二...)
+```
+
+简单的小例子来了解下`自定义hooks`:
+
+```jsx
+// 实现一个记录鼠标移动坐标的功能, 封装一个hooks函数
+function useMouse() {
+  const [mouse, setMouse] = React.useState({x:0, y:0})
+  React.useEffect(() => {
+    // 组件挂载完毕后
+    const handelMouseMove = (e) => {
+      setMouse({x: e.clientX, y: e.clientY})
+    }
+    document.addEventListener('mousemove', handelMouseMove)
+    return () => {
+      document.removeEventListener('mousemove', handelMouseMove)
+    }
+  }, [])
+  return React.useMemo(() => mouse, [mouse])
+}
+function App() {
+  const [flag, setFlag] = React.useState(true)
+  const mouse = useMouse()
+  return (
+    <div>
+      <div>鼠标坐标位置：{JSON.stringify(mouse)}</div>
+      <button onClick={() => {setFlag(v => !v)}}>切换</button>
+      <div>切换状态：{JSON.stringify(flag)}</div>
+    </div>
+  );
+}
+```
+
+![](./img/2023-06-25%2020.26.26.gif)
