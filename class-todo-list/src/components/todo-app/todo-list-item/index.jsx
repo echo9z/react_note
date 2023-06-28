@@ -8,9 +8,11 @@ export class TodoListItem extends Component {
     editing: false,
   }
   onDouble() {
-    this.setState(prevState => ({editing: true}), () => {
-      this.editRef.current.focus()
-    })
+    return (e) => {
+      this.setState(prevState => ({editing: true}), () => {
+        this.editRef.current.focus()
+      })
+    }
     // setTimeout(() => {this.editRef.current.focus()}, 10)
   }
   onBlur(e) {
@@ -33,7 +35,7 @@ export class TodoListItem extends Component {
               <div className="view">
                 <input className="toggle" type="checkbox" checked={item.done}
                   onChange={(e) => context.changeDone(item.id, e.target.checked)} />
-                <label onDoubleClick={this.onDouble.bind(this)} >{item.content}</label>
+                <label onDoubleClick={this.onDouble()} >{item.content}</label>
                 <button className="destroy" onClick={() => context.delTodo(item.id)}></button>
               </div>
               <input className="edit" ref={this.editRef}

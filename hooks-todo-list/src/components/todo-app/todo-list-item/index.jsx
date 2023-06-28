@@ -2,8 +2,9 @@ import React, { useContext, useEffect, useRef, useState } from 'react'
 import PropTypes from 'prop-types'
 import Context from '../todo-context'
 
-function TodoListItem({ todo }) {
+function TodoListItem({ id, content, done }) {
   const [editing, setEditing] = useState(false)
+  const [mouseFlag, setMouseFlag] = useState(false)
   const editRef = useRef(null)
   useEffect(() => {
     editing && editRef.current.focus()
@@ -17,7 +18,7 @@ function TodoListItem({ todo }) {
 
   const doubleLabel = () => {
     setEditing(true)
-    editRef.current.value = todo.content
+    editRef.current.value = content
     // editRef.current.focus()
   }
 
@@ -31,21 +32,28 @@ function TodoListItem({ todo }) {
   }
 
   return (
-    <li className={`${todo.done && 'completed'} ${editing && 'editing'}`}>
+    <li className={`${done && 'completed'} ${mouseFlag && 'mouse'} ${editing && 'editing'}`}>
       <div className="view">
         <input className="toggle" type="checkbox"
-          checked={todo.done}
-          onChange={(e) => changeDone(todo.id, e.target.checked)} />
-        <label onDoubleClick={doubleLabel}>{todo.content}</label>
-        <button className="destroy" onClick={e => deleteTodo(todo.id)}></button>
+          checked={done}
+          onChange={(e) => changeDone(id, e.target.checked)} />
+        <label onDoubleClick={doubleLabel}
+          onMouseEnter={() => setMouseFlag(true)}
+          onMouseLeave={() => setMouseFlag(false)}
+        >{content}</label>
+        <button className="destroy" onClick={e => deleteTodo(id)}></button>
       </div>
       <input className="edit" ref={editRef} 
-        onBlur={e => changeTodoContext(e, todo.id)}
-        onKeyDown={e => onEnter(e, todo.id)} />
+        onBlur={e => changeTodoContext(e, id)}
+        onKeyDown={e => onEnter(e, id)} />
     </li>
   )
 }
 
-TodoListItem.propTypes = {}
+TodoListItem.propTypes = {
+  id: PropTypes.number.isRequired,
+  content: PropTypes.string.isRequired,
+  done: PropTypes.bool.isRequired
+}
 
 export default TodoListItem

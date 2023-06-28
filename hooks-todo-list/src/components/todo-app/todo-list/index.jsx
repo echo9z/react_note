@@ -14,12 +14,15 @@ function TodoList({todos, toggleAll}) {
         onChange={e => toggleAll(e.target.checked)} />
       <label htmlFor="toggle-all">Mark all as complete</label>
       <ul className="todo-list">
-        {visibleTodos.map((todo) => <TodoListItem key={todo.id} todo={todo} />) }
+        {visibleTodos.map((todo) => <TodoListItem key={todo.id} {...todo} />) }
       </ul>
     </section>
   )
 }
 
-TodoList.propTypes = {}
+TodoList.propTypes = {
+  todos: PropTypes.array.isRequired,
+  toggleAll: PropTypes.func.isRequired
+}
 
 export default TodoList

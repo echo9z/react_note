@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
-import './index.css'
 import TodoHeader from './todo-header'
 import TodoFooter from './todo-footer'
 import TodoList from './todo-list'
 import Context from './todo-context'
+import './index.css'
 
 function TodoApp() {
   const [type, setType] = useState('all')

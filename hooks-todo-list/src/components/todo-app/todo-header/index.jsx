@@ -5,6 +5,7 @@ function TodoHeader({onEnter}) {
   const [content, setContent] = useState('')
   const keyDown = (e) => {
     if (e.keyCode !== 13) return;
+    if (e.target.value.trim() === '') return;
     onEnter(content)
     setContent('')
   }
@@ -20,6 +21,8 @@ function TodoHeader({onEnter}) {
   )
 }
 
-TodoHeader.propTypes = {}
+TodoHeader.propTypes = {
+  onEnter: PropTypes.func.isRequired
+}
 
 export default TodoHeader

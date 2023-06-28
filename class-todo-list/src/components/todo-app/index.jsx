@@ -6,17 +6,12 @@ import TodoList from './todo-list'
 import TodoContext from './todo-context'
 export class TodoApp extends Component {
   state = {
-    newTodo: '', // 输入的文本框
     // toggle: false, // 是否全选
     todos: [
       {id:1, content:"Taste JavaScript", done:true},
       {id:2, content:"Buy a unicorn", done:false}
     ],
     type: 'all' // todo状态
-  }
-  // 修改输入的文本框
-  changeNewTodo (newTodo) {
-    this.setState(() => ({newTodo}))
   }
 
   toggle(){
@@ -96,17 +91,13 @@ export class TodoApp extends Component {
   render() {
     const {
       todos, // list数据
-      newTodo, // 创建新todo
       type
     } = this.state
 
     return (
       <div>
         <section className="todoapp">
-          {/* This section should be hidden by default and shown when there are todos */}
           <TodoHeader
-            newTodo={newTodo} 
-            change={this.changeNewTodo.bind(this)}
             addTodo={this.addTodo.bind(this)} />
           <TodoContext.Provider value={{ 
             delTodo: this.delTodo,

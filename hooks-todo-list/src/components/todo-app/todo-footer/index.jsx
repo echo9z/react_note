@@ -25,6 +25,12 @@ function TodoFooter({type, setType, total, showClearCompleted, clearCompleted}) 
   )
 }
 
-TodoFooter.propTypes = {}
+TodoFooter.propTypes = {
+  type: PropTypes.string.isRequired,
+  setType: PropTypes.func.isRequired,
+  total: PropTypes.number.isRequired,
+  showClearCompleted: PropTypes.bool.isRequired,
+  clearCompleted: PropTypes.func.isRequired
+}
 
 export default TodoFooter

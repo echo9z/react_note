@@ -224,6 +224,9 @@ body {
 	color: #949494;
 	text-decoration: line-through;
 }
+.todo-list li.mouse label {
+	background-color:#f2f2f2;
+}
 
 .todo-list li .destroy {
 	display: none;
