@@ -211,6 +211,72 @@ create-react-app project-name
 npx create-react-app project-name
 ```
 
+#### 配置代理
+
+- 1.create-react-app脚手架若在2.0版本以下，在项目的package.json文件中配置
+
+```json
+"proxy":{
+   "/api":{
+      "target":"http://127.0.0.1:5000",  # 跨域地址
+      "changeOrigin": true,    # 是否允许跨域
+      "pathRewrite": {        # 重写路径
+           "^/api": "/"
+       },
+    }
+}
+```
+
+例如：后端接口地址是http://127.0.0.1:5000/cars，经过上述配置，前端访问就变成http://127.0.0.1:5000/api/cars，请求url中包含 `/api`，pathRewrite重新路径将 /api重写为 /，被重写为http://127.0.0.1:5000/cars
+
+pathRewrite，如果不配置，访问和实际地址就都是http://127.0.0.1:5000/api/cars
+
+- 2.若脚手架版本在2.0以上只能配置string类型
+
+```json
+"proxy": "http://127.0.0.1:5000",
+```
+
+局限性只能配置一个接口地址，如果不同接口数据在不同地址，就无法满足
+
+工作方式：上述方式配置代理，当请求了3000不存在的资源时，那么该请求会转发给5000 （优先匹配前端资源）
+
+- 3.配置一个或者多个代理，middleware中间件
+
+```bash
+yarn add http-proxy-middleware # 安装代理中间件
+```
+
+注意：webpack内置了http-proxy-middleware包
+
+项目的src目录下建立**setupProxy.js**文件
+
+```js
+# src/setupProxy.js文件
+const { createProxyMiddleware } = require('http-proxy-middleware');
+
+module.exports = function (app) {
+    app.use(
+      createProxyMiddleware('/api', {
+        target: 'http://localhost:5000',
+        secure: false,    // 指定Cookies能否被用户读取
+        changeOrigin: true,
+        pathRewrite: {
+          "^/api": "/"
+        },
+      }),
+      createProxyMiddleware('/base', {
+        target: 'http://localhost:5001',
+        secure: false,    // 指定Cookies能否被用户读取
+        changeOrigin: true,
+        pathRewrite: {
+          "^/base": "/api1"
+        },
+      })
+    );
+};
+```
+
 ## React JSX 语法
 
 - 1.全称: JavaScript XML
@@ -2999,6 +3065,16 @@ export class ChildTwo extends Component {
     } 
 }
 ```
+
+### react中组件间4种通信方式-redux、props、context、订阅发布
+
+- 1.父子组件之间， 通过props通信
+
+- 2.祖先元素与后代元素的数据通信-通过`Context`实现跨层级
+
+- 3.消息订阅-发布模式 pubsub-js库 或者 引入 event模块进行通信
+
+- 4.使用redux或Mobx全局状态管理工具
 
 ### 10.react如何实现vue中插槽类似功能
 

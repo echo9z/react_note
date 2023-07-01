@@ -7,10 +7,11 @@ function TodoList({todos, toggleAll}) {
     () => todos,
     [todos]
   );
+
   return (
     <section className="main">
       <input id="toggle-all" className="toggle-all" type="checkbox"
-        checked={visibleTodos.every(todo => todo.done)}
+        checked={ visibleTodos.length === visibleTodos.filter((todo) => todo.done).length && visibleTodos.length !== 0 }
         onChange={e => toggleAll(e.target.checked)} />
       <label htmlFor="toggle-all">Mark all as complete</label>
       <ul className="todo-list">
