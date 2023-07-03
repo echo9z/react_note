@@ -3066,7 +3066,132 @@ export class ChildTwo extends Component {
 }
 ```
 
-### react中组件间4种通信方式-redux、props、context、订阅发布
+### 10.Pubsub发布订阅模式
+
+观察者模式是软件设计模式里很常见的一种，它提供了一个订阅模型，假如一个对象订阅了某个事件，当那个事件发生的时候，这个对象将收到通知。
+
+```js
+// 观察者模式
+function PubSub() {
+  const subscriptions = {}
+  // 订阅
+  this.subscribe = (eventType, callback) => {
+    const id = Symbol('id') // 创建唯一类型Symbol
+    // 如果订阅的事件不存在，这添加一个eventType事件对象
+    if(!subscriptions[eventType]) subscriptions[eventType] = {}
+    subscriptions[eventType][id] = callback; // 在为eventType事件对象的id 添加一个callback
+    console.log(Object.getOwnPropertySymbols(subscriptions[eventType]));
+    return {
+      // 移除eventType事件对象
+      unsubscribe: function (eventType) {
+        delete subscriptions[eventType][id] // 移除对应事件对象id属性
+        // obj = { vala: Symbol('geek1'), valb:Symbol.for('geek2') }
+        // getOwnPropertySymbols(obj).length为 2
+        if (Object.getOwnPropertySymbols(subscriptions[eventType]).length === 0) {
+          delete subscriptions[eventType];
+        }
+      }
+    }
+  }
+
+  // 发布
+  this.publish = (eventType, arg) => {
+    // 订阅事件不存在直接返回
+    if (!subscriptions[eventType]) return;
+
+    // 将subscriptions中Symbol转为数组，循环遍历并调用点阅函数并传递参数
+    Object.getOwnPropertySymbols(subscriptions[eventType])
+      .forEach(key => subscriptions[eventType][key](arg));
+  };
+}
+```
+
+使用定义PubSub函数
+
+```jsx
+const pub = new PubSub()
+class Rose extends React.Component {
+  state = { msg: '' }
+  componentDidMount() {
+    // 订阅消息
+    this.sub = pub.subscribe('sendRose', (msg) => {
+      console.log(msg, 1);
+      this.setState({ msg })
+    })
+  }
+  componentWillUnmount() {
+    // 取消订阅
+    this.sub.unsubscribe('sendRose')
+  }
+
+  sendEvent = () => {
+    pub.publish('sendJack', '向jack发送消息：i am Rose')
+  }
+  render() {
+    return (
+      <div>
+        <h3>Rose组件：{this.state.msg}</h3>
+        <button onClick={this.sendEvent}>向jack发送消息</button>
+      </div>
+    )
+  }
+}
+
+class Jack extends React.Component {
+  state = { msg: '' }
+  componentDidMount() {
+    // 订阅消息Rose
+    this.sub = pub.subscribe('sendJack', (msg) => {
+      console.log(msg, 2);
+      this.setState({ msg })
+    })
+  }
+  componentWillUnmount() {
+    // 取消订阅
+    this.sub.unsubscribe('sendJack')
+  }
+
+  sendEvent = () => {
+    pub.publish('sendRose', '向rose发送消息：i am Jack')
+  }
+  render() {
+    return (
+      <div>
+        <h3>Jack组件：{this.state.msg}</h3>
+        <button onClick={this.sendEvent} >向rose发送消息</button>
+      </div>
+    )
+  }
+}
+class App extends React.Component {
+  state = {
+    flag: true
+  }
+  render () {
+    return (
+      <div>
+        <h1>App组件</h1>
+        {/* 兄弟组件 1 */}
+        <Jack />
+        {/* 兄弟组件 2 */}
+        {this.state.flag && <Rose />}
+        <button onClick={() => this.setState({flag: !this.state.flag})}>卸载rose组件</button>
+      </div>
+    )
+  }
+}
+ReactDOM.render(<App />, document.getElementById('app'))
+```
+
+![](./img/2023-07-04%2000.43.19.gif)
+
+也可以通过第三方库`pubsub-js`
+
+
+
+
+
+### 11.react中组件间4种通信方式-redux、props、context、订阅发布
 
 - 1.父子组件之间， 通过props通信
 
@@ -3076,7 +3201,7 @@ export class ChildTwo extends Component {
 
 - 4.使用redux或Mobx全局状态管理工具
 
-### 10.react如何实现vue中插槽类似功能
+### 12.react如何实现vue中插槽类似功能
 
 插槽可以决定某一块区域存放什么内容。在vue中通slot来完成。
 
@@ -3216,7 +3341,7 @@ class NavBar extends React.Component {
 }
 ```
 
-### 11.高阶函数与函数柯里化
+### 13.高阶函数与函数柯里化
 
 **高阶函数**：如果一个函数符合下面2个规范中的任意一个，那么就是高阶函数
 
