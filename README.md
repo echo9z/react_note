@@ -3185,11 +3185,39 @@ ReactDOM.render(<App />, document.getElementById('app'))
 
 ![](./img/2023-07-04%2000.43.19.gif)
 
-也可以通过第三方库`pubsub-js`
+也可以通过第三方库`pubsub-js`安装
 
+```bash
+npm i pubsub-js
+```
 
+引入`pubsub-js`库
 
+```js
+import PubSub from 'pubsub-js'
+```
 
+通过 `subscribe` 来订阅消息，它接收两个参数，第一个参数是消息的名称，第二个是消息成功的回调，回调中也接受两个参数，一个是消息名称，一个是返回的数据
+
+```js
+this.token = PubSub.subscribe('sendMgs',(msg, data)=>{
+  console.log(msg, data);
+})
+```
+
+发布消息
+
+采用 `publish` 来发布消息：
+
+```js
+PubSub.publish('search',{name:'tom', age:18})
+```
+
+通过 `unsubscribe` 来取消指定的订阅
+
+```js
+PubSub.unsubscribe(this.token)
+```
 
 ### 11.react中组件间4种通信方式-redux、props、context、订阅发布
 
@@ -3921,7 +3949,7 @@ const HooksModel = () => {
   React.useEffect(() => {
     document.title = `点击了${ count }次！`
     console.log(`点击了${ count }次！`);
-  })
+  }, [])
   return (
     <div>
       <h2>{ count }</h2>

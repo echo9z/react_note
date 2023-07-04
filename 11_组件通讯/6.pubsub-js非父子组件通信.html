@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="app"></div>
+  <!-- 先引入react核心库 react-dom操作dom库 babel, jsx转换js库  -->
+  <script type="text/javascript" src="../lib/16.8.4/react.development.js"></script>
+  <script type="text/javascript" src="../lib/16.8.4/react-dom.development.js"></script>
+  <script type="text/javascript" src="../lib/16.8.4/babel.min.js"></script>
+  <!-- 引入prop-types 对组件标签属性传递的值进行限制 全局对象PropTypes -->
+  <script type="text/javascript" src="../lib/16.8.4/prop-types.js"></script>
+  <script type="text/javascript" src="https://unpkg.com/pubsub-js@1.9.4/src/pubsub.js"></script>
+  <!-- text/babel 写的是jsx，让babel进行编译转译为js -->
+  <script type="text/babel">
+
+    class Rose extends React.Component {
+      state = {
+        msg: ''
+      }
+      componentDidMount() {
+        // 订阅消息
+        this.token = PubSub.subscribe('sendRose', (msg, data) => {
+          console.log(msg, data);
+          this.setState({ msg: data })
+        })
+      }
+      componentWillUnmount() {
+        // 取消订阅
+        PubSub.unsubscribe(this.token)
+      }
+
+      sendEvent = () => {
+        PubSub.publish('sendJack', '向jack发送消息：i am Rose')
+      }
+      render() {
+        return (
+          <div>
+            <h3>Rose组件：{this.state.msg}</h3>
+            <button onClick={this.sendEvent}>向jack发送消息</button>
+          </div>
+        )
+      }
+    }
+
+    class Jack extends React.Component {
+      state = {
+        msg: ''
+      }
+      componentDidMount() {
+        // 订阅消息Rose
+        this.token = PubSub.subscribe('sendJack', (msg, data) => {
+          console.log(msg, data);
+          this.setState({ msg: data })
+        })
+      }
+      componentWillUnmount() {
+        // 取消订阅
+        PubSub.unsubscribe(this.token)
+      }
+
+      sendEvent = () => {
+        PubSub.publish('sendRose', '向rose发送消息：i am Jack')
+      }
+      render() {
+        return (
+          <div>
+            <h3>Jack组件：{this.state.msg}</h3>
+            <button onClick={this.sendEvent} >向rose发送消息</button>
+          </div>
+        )
+      }
+    }
+    class App extends React.Component {
+      state = {
+        flag: true
+      }
+      render () {
+        return (
+          <div>
+            <h1>App组件</h1>
+            {/* 兄弟组件 1 */}
+            <Jack />
+            {/* 兄弟组件 2 */}
+            {this.state.flag && <Rose />}
+            <button onClick={() => this.setState({flag: !this.state.flag})}>卸载rose组件</button>
+          </div>
+        )
+      }
+    }
+    ReactDOM.render(<App />, document.getElementById('app'))
+  </script>
+</body>
+</html>
