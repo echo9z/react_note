@@ -3205,18 +3205,87 @@ this.token = PubSub.subscribe('sendMgs',(msg, data)=>{
 })
 ```
 
-发布消息
-
-采用 `publish` 来发布消息：
+发布 `publish` 来发布消息：
 
 ```js
 PubSub.publish('search',{name:'tom', age:18})
 ```
 
-通过 `unsubscribe` 来取消指定的订阅
+通过 `unsubscribe` 来取消指定的订阅：
 
 ```js
 PubSub.unsubscribe(this.token)
+```
+
+利用PubSub-js 不同组件直接通讯🌰：
+
+```js
+class Rose extends React.Component {
+  state = { msg: '' }
+  componentDidMount() {
+    // 订阅消息
+    this.token = PubSub.subscribe('sendRose', (msg, data) => {
+      console.log(msg, data);
+      this.setState({ msg: data })
+    })
+  }
+  componentWillUnmount() {
+    // 取消订阅
+    PubSub.unsubscribe(this.token)
+  }
+
+  sendEvent = () => {
+    PubSub.publish('sendJack', '向jack发送消息：i am Rose')
+  }
+  render() {
+    return (
+      <div>
+        <h3>Rose组件：{this.state.msg}</h3>
+        <button onClick={this.sendEvent}>向jack发送消息</button>
+      </div>
+    )
+  }
+}
+
+class Jack extends React.Component {
+  state = { msg: '' }
+  componentDidMount() {
+    // 订阅消息Rose
+    this.token = PubSub.subscribe('sendJack', (msg, data) => {
+      console.log(msg, data);
+      this.setState({ msg: data })
+    })
+  }
+  componentWillUnmount() {
+    // 取消订阅
+    PubSub.unsubscribe(this.token)
+  }
+
+  sendEvent = () => {
+    PubSub.publish('sendRose', '向rose发送消息：i am Jack')
+  }
+  render() {
+    return (
+      <div>
+        <h3>Jack组件：{this.state.msg}</h3>
+        <button onClick={this.sendEvent} >向rose发送消息</button>
+      </div>
+    )
+  }
+}
+class App extends React.Component {
+  state = { flag: true }
+  render () {
+    return (
+      <div>
+        <h1>App组件</h1>
+        <Jack />
+        {this.state.flag && <Rose />}
+        <button onClick={() => this.setState({flag: !this.state.flag})}>卸载rose组件</button>
+      </div>
+    )
+  }
+}
 ```
 
 ### 11.react中组件间4种通信方式-redux、props、context、订阅发布
@@ -4938,3 +5007,99 @@ function App() {
 ```
 
 ![](./img/2023-06-25%2020.26.26.gif)
+
+## React过渡动画
+
+React 可以被用来实现强大的动画效果。参见 [React Transition Group](https://reactcommunity.org/react-transition-group/) 、 [React Spring](https://github.com/react-spring/react-spring) 以及[Framer Motion](https://www.framer.com/motion/)等示例。
+
+想要让某一个组件的显示和消失添加某种过渡动画，增加用户体验。我们可以通过原生css来实现过渡动画，但react社区提供了`react-transition-group`来完成过渡动画
+
+react曾为开发中提供过动画插插件reac-addons-css-transition-group，后社区维护，形成现在的`react-transition-group`。
+
+react-transition-group实现组件的`入场` 和`离场`动画，需要额为安装：
+
+```bash
+npm install react-transition-group --save
+```
+
+react-transition-group主要包含四个组件：
+
+- Transition
+  该组件是一个和平台无关的组件 (不一定要结合CSS)口在前端开发中，我们一般是结合CSS来完成样式，所以比较常用的是CSSTransition;
+
+- CSSTransition
+  
+  在前端开发中，**通常使用CSSTransition来完成过渡动画效果**
+
+- SwitchTransition
+  两个组件显示和隐藏切换时，使用该组件
+
+- TransitionGroup
+  将多个动组件包裹在其中，一般用于列表中元素的动画
+
+**Transition**
+
+一段时间内从一个组件状态到另一个组件状态的转换。它最常用于对组件的装载和卸载进行动画处理，但也可用于描述就地转换状态。
+
+下面例子：
+
+```js
+import { Transition } from 'react-transition-group'
+
+const duration = 300 // 延迟300ms执行
+// 默认style
+const defaultStyle = {
+  transition: `opacity ${duration}ms ease-in-out`, // 对opacity做过渡效果
+  opacity: 0,
+}
+const transitionStyles = {
+  entering: { opacity: 1 },
+  entered:  { opacity: 1 },
+  exiting:  { opacity: 0 },
+  exited:  { opacity: 0 },
+};
+export default function TransitionCom({ in: inProp }) {
+  const nodeRef = useRef(null);
+  return (
+    <Transition nodeRef={nodeRef} in={inProp} timeout={duration}>
+      {/* state过渡状态
+        inProp为 true 时，组件开始“输入”阶段，transition状态切换到 'entering' 在转换期间，然后在完成后切换到 'entered' 阶段
+       */}
+      {state => (
+        <div ref={nodeRef} style={{
+          ...defaultStyle,
+          ...transitionStyles[state]
+        }}>
+          I'm a fade Transition!
+        </div>
+      )}
+    </Transition>
+  );
+}
+```
+
+state过渡状态 四个过渡状态
+
+nodeRef：对需要转换的 DOM 元素的 React 引用
+
+in：为 true 时，组件开始“输入”阶段，transition状态切换到 `entering` 在转换期间，然后在完成后切换到 `entered` 阶段
+
+为 false 时，组件开始“退出”阶段，状态从 `exiting` 移动到 `exited`
+
+timeout：组件将切换到 `entering` 状态并在那里停留 500 毫秒（ timeout 的值），然后最终切换到 `entered`
+
+通过in控制进场 和 离场状态
+
+```jsx
+function App() {
+  const [flag, setFlag] = useState(false)
+  return (
+    <div className="App">
+      <button onClick={() => setFlag(!flag)}>显示隐藏</button> <br />
+      <TransitionCom in={flag} />
+    </div>
+  );
+}
+```
+
+![](./img/2023-07-06%2002.47.47.gif)

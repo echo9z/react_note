@@ -10,10 +10,16 @@ function SearchHeader(props) {
     const getList = async () => {
       // changeStatus({isLoading: true})
       Pubsub.publish('sendState', {isLoading: true})
-      const res = await axios.get(`/api/search/users?q=${keywords}`)
-        .catch(err => Pubsub.publish('sendState', {isLoading: false, err: err.message}))
-      if(res.status === 200) {
-        Pubsub.publish('sendState', { list: res.data.items, isLoading: false })
+      // const res = await axios.get(`/api/search/users?q=${keywords}`)
+      //   .catch(err => Pubsub.publish('sendState', {isLoading: false, err: err.message}))
+      try {
+        const res = await fetch(`/api/search/users?q=${keywords}`)
+        if(res.status === 200) {
+          const data = await res.json()
+          Pubsub.publish('sendState', { list: data.items, isLoading: false })
+        }
+      } catch (err) {
+        Pubsub.publish('sendState', {isLoading: false, err: err.message})
       }
     }
     keywords !== '' && getList()
