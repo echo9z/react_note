@@ -16,7 +16,17 @@ const transitionStyles = {
 export default function TransitionCom({ in: inProp }) {
   const nodeRef = useRef(null);
   return (
-    <Transition nodeRef={nodeRef} in={inProp} timeout={duration}>
+    <Transition nodeRef={nodeRef} in={inProp} timeout={duration}
+      addEndListener={(done) => {
+        // 使用CSS transitionend事件来标记过渡的结束
+        nodeRef.current.addEventListener('transitionend', (e) =>{
+          done(e)
+          console.log('标记过渡的结束');
+        }, false);
+      }}
+      onEnter={(isAppearing) => console.log("在应用“正在进入”状态之前触发的回调", isAppearing)}
+      onExit={() => console.log("应用“正在退出”状态之前触发的回调")}
+    >
       {/* 
        */}
       {state => (

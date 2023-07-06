@@ -1,0 +1,59 @@
+/* 如设置in与appear为true，开场动画 */
+.my-tran-appear {
+  transform: translateX(-150px);
+}
+.my-tran-appear-active {
+  transform: translateX(0);
+  transition: transform 1s ease-in-out;
+}
+
+/* 进入状态，透明度由0到1 */
+.my-tran-enter { /* 进入的初始状态 */
+  opacity: 0;
+}
+.my-tran-enter-active { /* 执行动画 */
+  opacity: 1;
+  animation: enter 1500ms linear;
+  transition: all 1500ms ease-in-out;
+}
+/* 执行结束 */
+/* .my-tran-enter-done{
+  opacity: 1;
+} */
+
+/* 离开状态，透明度由1到0 */
+.my-tran-exit {
+  opacity: 1;
+}
+.my-tran-exit-active {
+  opacity: 0;
+  animation: exit 1500ms linear;
+  transition: all 1500ms ease-in-out;;
+}
+/* .my-tran-exit-done{
+  opacity: 0;
+} */
+
+@keyframes enter {
+  0% {
+      transform: scale(0);
+  }
+  50% {
+      transform: scale(1.25);
+  }
+  100% {
+      transform: scale(1);
+  }
+}
+
+@keyframes exit {
+  0% {
+      transform: scale(1);
+  }
+  50% {
+      transform: scale(1.25);
+  }
+  100% {
+      transform: scale(0);
+  }
+}

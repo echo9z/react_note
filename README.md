@@ -4969,6 +4969,12 @@ const App = () => {
 
 `自定义hooks`是在`react-hooks`基础上的一个扩展，可以根据业务、需求去制定相应的`hooks`,将常用的逻辑进行封装，从而具备复用性。
 
+- [react-use](https://streamich.github.io/react-use/)
+
+- [react-hook-form](https://react-hook-form.com/)
+
+- [ahooks - React Hooks Library - ahooks 3.0](https://ahooks.js.org/zh-CN/)
+
 自定义hooks的名称是以**use**开头：
 
 ```js
@@ -5037,13 +5043,31 @@ react-transition-group主要包含四个组件：
 - TransitionGroup
   将多个动组件包裹在其中，一般用于列表中元素的动画
 
-**Transition**
+### Transition
 
 一段时间内从一个组件状态到另一个组件状态的转换。它最常用于对组件的装载和卸载进行动画处理，但也可用于描述就地转换状态。
 
+- **appear**  默认值： `false`
+
+        默认情况下，子组件在首次装载时不执行`enter` transition，无论 `in` 的值如何。如果需要此行为，请将 `appear` 和 `in` 都设置为 `true` 。
+
+        注意：没有像 `appearing` / `appeared` 这样的特殊出现状态，只增加了一个额外的进入过渡。但是，在 `<CSSTransition>` 组件中，首次输入转换确实会产生额外的 `.appear-*` 类，这样你可以选择以不同的方式设置其样式。
+
+- **enter**  默认值： `true`
+  
+  entering与entered
+
+        启用或禁用输入过渡。
+
+- **exit**  默认值： `true`
+  
+  exiting与exited
+  
+  启用或禁用退出过渡。
+
 下面例子：
 
-```js
+```jsx
 import { Transition } from 'react-transition-group'
 
 const duration = 300 // 延迟300ms执行
@@ -5052,6 +5076,7 @@ const defaultStyle = {
   transition: `opacity ${duration}ms ease-in-out`, // 对opacity做过渡效果
   opacity: 0,
 }
+// 2种 enter与exit状态，4个过渡状态
 const transitionStyles = {
   entering: { opacity: 1 },
   entered:  { opacity: 1 },
@@ -5063,7 +5088,8 @@ export default function TransitionCom({ in: inProp }) {
   return (
     <Transition nodeRef={nodeRef} in={inProp} timeout={duration}>
       {/* state过渡状态
-        inProp为 true 时，组件开始“输入”阶段，transition状态切换到 'entering' 在转换期间，然后在完成后切换到 'entered' 阶段
+        in：为 true 时，组件开始“进入”阶段，transition状态切换到 'entering' 在转换期间，然后在完成后切换到 'entered' 阶段
+            为 false 时，组件开始“退出”阶段，状态从 'exiting' 移动到 'exited'
        */}
       {state => (
         <div ref={nodeRef} style={{
@@ -5078,15 +5104,15 @@ export default function TransitionCom({ in: inProp }) {
 }
 ```
 
-state过渡状态 四个过渡状态
+- state：过渡状态，四个过渡状
 
-nodeRef：对需要转换的 DOM 元素的 React 引用
+- nodeRef：对需要转换的 DOM 元素的 React 引用
 
-in：为 true 时，组件开始“输入”阶段，transition状态切换到 `entering` 在转换期间，然后在完成后切换到 `entered` 阶段
+- in：为 true 时，组件开始“进入”阶段，transition状态切换到 `entering` 在转换期间，然后在完成后切换到 `entered` 阶段；
+  
+  为 false 时，组件开始“退出”阶段，状态从 `exiting` 移动到 `exited`
 
-为 false 时，组件开始“退出”阶段，状态从 `exiting` 移动到 `exited`
-
-timeout：组件将切换到 `entering` 状态并在那里停留 500 毫秒（ timeout 的值），然后最终切换到 `entered`
+- timeout：组件将切换到 `entering` 状态并在那里停留 500 毫秒（ timeout 的值），然后最终切换到 `entered`
 
 通过in控制进场 和 离场状态
 
@@ -5103,3 +5129,276 @@ function App() {
 ```
 
 ![](./img/2023-07-06%2002.47.47.gif)
+
+**mountOnEnter**  default: false
+    默认情况下，子组件与父 Transition 组件一起立即装载。如果要在第一个 in={true} 上“延迟挂载”组件，可以设置 mountOnEnter 。在第一次进入转换后，组件将保持挂载状态，即使在“退出”时也是如此，除非您还指定 unmountOnExit 。
+**unmountOnExit**  default: false
+    默认情况下，子组件在达到 'exited' 状态后保持挂载状态。如果您希望在组件完成退出后卸载组件，请设置 unmountOnExit 。
+
+
+**addEndListener**
+
+添加自定义过渡结束触发器。使用Transition DOM 节点和 `done` 回调调用
+
+```jsx
+<Transition nodeRef={nodeRef} in={inProp} timeout={duration}
+  addEndListener={(done) => {
+    // 使用CSS transitionend事件来标记过渡的结束
+    nodeRef.current.addEventListener('transitionend', (e) =>{
+      done(e)
+      console.log('标记过渡的结束');
+    }, false);
+  }}
+>
+ {state => (
+    <div ref={nodeRef} style={{
+      ...defaultStyle,
+      ...transitionStyles[state]
+    }}>
+      I'm a fade Transition!
+    </div>
+  )}
+</Transition>
+```
+
+注意：当传递 `nodeRef`为prop 时，不会传递 `node` ，因此 `done` 作为第一个参数传递。
+
+```js
+addEndListener={(node, done) => {
+  // 使用CSS transitionend事件来标记过渡的结束
+  node.addEventListener('transitionend', done, false);
+}}
+```
+
+**onEnter**
+
+    在应用“正在进入”状态之前触发的回调。提供了一个额外的参数 `isAppearing` ，用于指示初始装载时是否正在发生进入阶段
+
+- type: Function(node: HtmlElement, isAppearing: bool) -> void
+
+- default: function noop() {}
+
+**onEntering**
+    应用“正在进入”状态后触发的回调。提供了一个额外的参数 isAppearing ，用于指示初始装载时是否正在发生进入阶段
+
+- type: Function(node: HtmlElement, isAppearing: bool)
+
+- default: function noop() {}
+
+**onEntered**
+    应用“已进入”状态后触发的回调。提供了一个额外的参数 isAppearing ，用于指示初始装载时是否正在发生进入阶段
+
+- type: Function(node: HtmlElement, isAppearing: bool) -> void
+
+- default: function noop() {}
+
+    **注意**：上述三个回调事件，当传递 nodeRef prop 时，不会传递 node ，因此 isAppearing 作为第一个参数传递。
+
+**onExit**
+应用“正在退出”状态之前触发的回调。
+
+- type: Function(node: HtmlElement) -> void
+
+- default: function noop() {}
+
+**onExiting**
+应用“正在退出”状态后触发的回调。
+
+- type: Function(node: HtmlElement) -> void
+
+- default: function noop() {}
+
+**onExited**
+应用“已退出”状态后触发的回调。
+
+- type: Function(node: HtmlElement) -> void
+
+- default: function noop() {}
+
+    **注意**：当 nodeRef 道具被传递时， node 不会被传递
+
+### CSSTransition
+
+CSSTransition执行过程中，有三个状态: `appear`、`enter`、`exit`;它们有三种状态，需要定义对应的CSS样式:
+
+- 第一类，开始状态: 对于的类是`-appear`、`-enter`、`exit`;
+
+- 第二类: 执行动画: 对应的类是`-appear-active`、-enter-active、-exit-active;
+
+- 第三类: 执行结束: 对应的类是`-appear-done`、-enter-done、-exit-done;
+
+        `CSSTransition` 在转换的 `appear` 、 `enter` 和 `exit` 状态期间应用第一类名。应用第一个类，然后应用第二个 `*-active` 类以激活 CSS 过渡。转换后，将应用匹配第三类的 `*-done` 类名来保持转换状态。
+
+看下面🌰：
+
+```jsx
+import { useRef } from 'react'
+import { CSSTransition } from 'react-transition-group'
+import './CSSTransitionC.css'
+
+export default function CSSTransitionCom({ children, in: inProp }) {
+  const nodeRef = useRef(null)
+  return (
+    <div>
+      <CSSTransition nodeRef={nodeRef} in={inProp}
+        timeout={1500} classNames="my-tran" unmountOnExit={true}
+        >
+        <div ref={nodeRef} style={{backgroundColor: 'pink', display: 'inline-block'}}>
+          {/* I'll receive my-node-* classes <br/> */}
+          {children}
+        </div>
+      </CSSTransition>
+    </div>
+  )
+}
+```
+
+`classNames`：动画class名称
+
+type: `string | { appear?: string, appearActive?: string, appearDone?: string, enter?: string, enterActive?: string, enterDone?: string, exit?: string, exitActive?: string, exitDone?: string, }`
+
+在组件出现、进入、退出或完成过渡时应用于组件的动画类名称。可以提供单个名称，该名称将为每个阶段添加后缀，例如 `classNames="fade"` 适用：
+
+- `fade-appear`, `fade-appear-active`, `fade-appear-done`
+- `fade-enter`, `fade-enter-active`, `fade-enter-done`
+- `fade-exit`, `fade-exit-active`, `fade-exit-done`
+
+每个单独的类名也可以独立指定，如下所示：
+
+```js
+classNames={{
+ appear: 'my-appear',
+ appearActive: 'my-active-appear',
+ appearDone: 'my-done-appear',
+ enter: 'my-enter',
+ enterActive: 'my-active-enter',
+ enterDone: 'my-done-enter',
+ exit: 'my-exit',
+ exitActive: 'my-active-exit',
+ exitDone: 'my-done-exit',
+}}
+```
+
+classNames是一个类名 `classNames="my"`
+
+```css
+// CSSTransitionC.css
+
+/* 进入状态，透明度由0到1 */
+.my-tran-enter { /* 进入的初始状态 */
+  opacity: 0;
+}
+.my-tran-enter-active { /* 执行动画 */
+  opacity: 1;
+  animation: enter 1500ms linear;
+  transition: all 1500ms ease-in-out;
+}
+/* 执行结束 */
+/* .my-tran-enter-done{
+  opacity: 1;
+} */
+
+/* 离开状态，透明度由1到0 */
+.my-tran-exit {
+  opacity: 1;
+}
+.my-tran-exit-active {
+  opacity: 0;
+  animation: exit 1500ms linear;
+  transition: all 1500ms ease-in-out;;
+}
+/* .my-tran-exit-done{
+  opacity: 0;
+} */
+
+@keyframes enter { /* 进入动画 */
+  0% {
+      transform: scale(0);
+  }
+  50% {
+      transform: scale(1.5);
+  }
+  100% {
+      transform: scale(1);
+  }
+}
+
+@keyframes exit { /* 离开动画 */
+  0% {
+      transform: scale(1);
+  }
+  50% {
+      transform: scale(1.5);
+  }
+  100% {
+      transform: scale(0);
+  }
+}
+```
+
+使用CSSTransitionCom组件
+
+```jsx
+function App() {
+  const [flag, setFlag] = useState(false)
+  return (
+    <div className="App">
+      <button onClick={() => setFlag(!flag)}>显示隐藏</button> <br />
+      <CSSTransitionCom in={flag} >
+        <img alt='#' src={logo} width={150} height={150} />
+      </CSSTransitionCom>
+    </div>
+  );
+}
+```
+
+![](./img/2023-07-06%2023.35.10.gif)
+
+- 如果添加 unmountOnExit={true)，那么该组件会在执行退出动画结束后被移除掉;
+
+- 当in为true时，触发进入状态，会添加-enter、-enteracitve的class开始执行动画，当动画执行结束后，会移除两个class并目添加-enter-done的class:
+
+- 当in为false时，触发退出状态，会添加-exit、-exit-active的cass开始执行动画，当动画执行结束后，会移除两个class，并目添加-enter-done的class;
+
+**appear**：是否在初次组件进入时添加动画。将 `appear` 和 `in` 都设置为 `true`
+
+    在CSSTransitionC.css中添加 *-appear、\*-appear-active
+
+```jsx
+/* 如设置in与appear为true，开场动画 */
+.my-tran-appear {
+  transform: translateX(-150px);
+}
+.my-tran-appear-active {
+  transform: translateX(0);
+  transition: transform 1s ease-in-out;
+}
+
+... ...CSSTransitionC.css其他内容
+```
+
+CSSTransition 中设置 in与appear 为true
+
+```jsx
+import React, { useRef } from 'react'
+import { CSSTransition } from 'react-transition-group'
+import './CSSTransitionC.css'
+
+export default function CSSTransitionCom({ children, in: inProp }) {
+  const nodeRef = useRef(null)
+  return (
+    <div>
+      <CSSTransition nodeRef={nodeRef} in={inProp}
+        timeout={1500} classNames="my-tran" unmountOnExit={true} appear={true}
+        >
+        <div ref={nodeRef} style={{backgroundColor: 'pink', display: 'inline-block'}}>
+          {/* I'll receive my-node-* classes <br/> */}
+          {children}
+        </div>
+      </CSSTransition>
+    </div>
+  )
+}
+```
+
+![](./img/2023-07-07%2002.28.56.gif)
