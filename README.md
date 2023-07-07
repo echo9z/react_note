@@ -5135,7 +5135,6 @@ function App() {
 **unmountOnExit**  default: false
     默认情况下，子组件在达到 'exited' 状态后保持挂载状态。如果您希望在组件完成退出后卸载组件，请设置 unmountOnExit 。
 
-
 **addEndListener**
 
 添加自定义过渡结束触发器。使用Transition DOM 节点和 `done` 回调调用
@@ -5218,6 +5217,8 @@ addEndListener={(node, done) => {
     **注意**：当 nodeRef 道具被传递时， node 不会被传递
 
 ### CSSTransition
+
+受出色的ng-animate库启发的过渡组件，如果您使用的是CSS过渡或动画，则应使用它。它建立在 `Transition` 组件之上，继承了它的所有属性。
 
 CSSTransition执行过程中，有三个状态: `appear`、`enter`、`exit`;它们有三种状态，需要定义对应的CSS样式:
 
@@ -5402,3 +5403,70 @@ export default function CSSTransitionCom({ children, in: inProp }) {
 ```
 
 ![](./img/2023-07-07%2002.28.56.gif)
+
+### SwitchTransition
+
+受 vue 过渡模式启发的过渡组件。当您想要控制状态转换之间的渲染时，可以使用它。根据所选模式和子键（即 `Transition` 或 `CSSTransition` 组件）， `SwitchTransition` 在它们之间进行一致的过渡
+
+- mode
+  
+  过渡模式。 `out-in` ：当前元素首先转换出来，完成后，新元素转换进来。 `in-out` ：新元素首先过渡，完成后，当前元素过渡出来。
+  
+  类型： `'out-in'|'in-out'`
+  
+  默认值： `'out-in'`
+
+SwitchTransition切换动画组件
+
+- children子组件key属性：切换设置不同key值，执行动画相关动画 `<CSSTransition
+   key={state} />`
+
+```jsx
+import {useState, useRef} from 'react'
+import { SwitchTransition, CSSTransition } from 'react-transition-group';
+import './SwitchTransitionC.css'
+
+const modes = ["out-in", "in-out"];
+export default function SwitchTransitionCom({ children }) {
+  const [mode, setMode] = useState('out-in')
+  const [state, setState] = useState(false)
+  const GoodbyeRef = useRef(null)
+  const HelloRef = useRef(null)
+  const nodeRef = state ? GoodbyeRef : HelloRef
+  return (
+    <div>
+      <h3>Mode: {mode}</h3>
+      <div>
+        {modes.map(item => (
+          <label key={item} >
+            <input type='radio' checked={item === mode}
+              value={item} onChange={e => setMode(e.target.value)}
+            /> {item}
+          </label>
+        ))}
+      </div>
+      <div className='main'>
+        <SwitchTransition mode={mode}>
+          <CSSTransition
+            key={state ? "Goodbye, world!" : "Hello, world!"}
+            nodeRef={nodeRef}
+            addEndListener={(done) => nodeRef.current.addEventListener("transitionend", done, false) }
+            classNames='fade'>
+            <div ref={nodeRef}>
+              <button onClick={() => setState(state => !state)}>
+                {state? 'Goodbye, world!': "Hello, world!"}
+              </button>
+            </div>
+          </CSSTransition>
+        </SwitchTransition>
+      </div>
+    </div>
+  )
+}
+```
+
+![](./img/2023-07-07%2019.51.01.gif)
+
+SwitchTransition组件里面要有CSSTransition或者Transition组件，不能直接包裹你想要切换的组件:
+
+SwitchTransition里面的CSSTransition或Transition组件不再像以前那样接受in属性来判断元素是何种状态，取而代之的是key属性;
