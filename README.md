@@ -5470,3 +5470,107 @@ export default function SwitchTransitionCom({ children }) {
 SwitchTransition组件里面要有CSSTransition或者Transition组件，不能直接包裹你想要切换的组件:
 
 SwitchTransition里面的CSSTransition或Transition组件不再像以前那样接受in属性来判断元素是何种状态，取而代之的是key属性;
+
+### TransitionGroup
+
+当有一组数据需要动画时，可以为使用`TransitionGroup`
+
+- component
+
+    `<TransitionGroup>` 默认呈现 `<div>`。可以通过提供 `component` 道具来更改此行为。如果您使用 React v16+ 并希望避免包装 `<div>` 元素，您可以传入 `component={null}`。
+
+- children
+
+    TransitionGroup中包裹，多个 `Transition` 或 `CSSTransition` 子组件
+
+以下示例。当项目被删除或添加到待办事项列表时， `in` 属性由 `<TransitionGroup>` 自动切换。
+
+```jsx
+import {useState, createRef} from 'react'
+import {TransitionGroup, CSSTransition} from 'react-transition-group'
+import {v4 as uuid} from 'uuid'
+import './TransitionGroupC.css'
+
+export default function TransitionGroupCom() {
+  const [list, setList] = useState([
+    {
+      id: uuid(),
+      text: 'Buy eggs',
+      nodeRef: createRef(null),
+    },
+    {
+      id: uuid(),
+      text: 'Pay bills',
+      nodeRef: createRef(null),
+    },
+    {
+      id: uuid(),
+      text: 'Invite friends over',
+      nodeRef: createRef(null),
+    }
+  ])
+  const onEnter = (e) =>{
+    const text = e.target.value.trim()
+    if(e.keyCode !== 13 || text === '') return;
+    console.log(e.keyCode );
+    e.target.value = ''
+    setList(v => [...v,  {
+      id: uuid(),
+      text,
+      nodeRef: createRef(null),
+    }])
+  }
+  return (
+    <div>
+      <input type="text" onKeyDown={onEnter} />
+      {/* 一组列表都需要动画 */}
+      <TransitionGroup component='ul'>
+        {list.map(({id, text, nodeRef}) => (
+          // 为每个li元素添加动画
+          <CSSTransition key={id} timeout={750} appear
+            nodeRef={nodeRef}
+            classNames="item">
+            <li ref={nodeRef}>
+              {text}
+              <span onClick={() => {
+                setList(v => v.filter(item => item.id !== id))
+              }}>❌</span>
+            </li>
+          </CSSTransition>)
+        )}
+      </TransitionGroup>
+    </div>
+  )
+}
+```
+
+```css
+/* TransitionGroupC.css */
+.item-appear {
+  opacity: 0;
+}
+.item-appear-active {
+  opacity: 1;
+  transition: opacity 750ms ease-in-out;
+}
+.item-enter {
+  opacity: 0;
+  transform: translateX(-100%);
+}
+.item-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: all 750ms ease-in;
+}
+.item-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+.item-exit-active {
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 750ms ease-in;
+}
+```
+
+![](./img/2023-07-08%2023.38.09.gif)
