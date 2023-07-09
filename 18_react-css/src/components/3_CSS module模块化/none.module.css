@@ -1,0 +1,11 @@
+.title{
+  font-size: 40px;
+  color:rgb(174, 174, 207);
+}
+.content {
+  background-color: skyblue;
+  color:coral;
+}
+.p-sy {
+  border: 1px darkblue dashed;
+}

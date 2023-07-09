@@ -1106,7 +1106,7 @@ ReactDom.render(<App />, document.getElementById('root'));
 
 - 定义`state`属性定义组件状态，属于组件自己的数据，它的值是个对象。
 - 使用`state`的时候通过`this`去访问即可，例如：`this.state.xxx`。
-- 数据发生变化，驱动视图更新。****
+- 数据发生变化，驱动视图更新。
 
 ```jsx
 import { Component } from 'react';
@@ -5574,3 +5574,145 @@ export default function TransitionGroupCom() {
 ```
 
 ![](./img/2023-07-08%2023.38.09.gif)
+
+## React中CSS
+
+css一直是React的痛点，也是被很多开发者吐槽、诟病的一个点。
+
+    从普通的css，到css modules，再到css in js，有几十种不同的解决方案，上百个不同的库；
+
+    大家一致在寻找最好的或者说最适合自己的CSS方案，但是到目前为止也没有统一的方案;
+
+#### 内联样式
+
+- 内联样式是官方推荐的一种css样式的写法:
+  
+  - style 接受一个采用小驼峰命名属性的 JavaScript 对象，而不是 CSS 字符串;
+  
+  - 并且可以引用state中的状态来设置相关的样式，
+
+- 内联样式的优点
+  1.内联样式，样式之间不会有冲突
+  
+  2.可以动念获取当前state中的状态
+
+- 内联样式的缺点:
+  1.写法上都需要使用驼峰标识
+  2.某些样式没有提示
+  3.大量的样式,代码混乱
+  4.某些样式无法编写(比如伪类/伪元素)、::before；
+
+```jsx
+import {useState} from 'react'
+
+export default function InlineStyle() {
+  const [fontSize, setFontSize] = useState(20)
+  return (
+    <div>
+      <button onClick={() => setFontSize(v => v+5)}>改变字体</button>
+      <h2 style={{color: 'red', fontSize}}>inline-style</h2>
+      <p style={{backgroundColor: 'skyblue'}}>
+        this is inline content
+      </p>
+    </div>
+  )
+}
+```
+
+#### 引入css文件
+
+普通的css我们通常会编写到一个单独的文件，之后再进行引入。这样的编写方式和普通的网页开发中编写方式是一致的:
+
+- 如果我们按照普通的网页标准去编写，那么也不会有太大的问题;
+
+- 但是组件化开发中我们总是希望组件是一个独立的模块，即便是样式也只是在自己内部生效，不会相互影响口 但是普通的css都属于全局的css，样式之间会相互影响;
+
+```jsx
+import './none.css'
+// 组件中直接引入.css文件是全局样式，如果不同组件使用css文件中存在样式名称相同，那么后引入的样式会覆盖前面的组件样式
+import About from './comp/about'
+import Home from './comp/home'
+
+export default function NoneStyle() {
+  return (
+    <div>
+      <h2 className='title'>none-style</h2>
+      <p className='content'>这是一段文字啊</p>
+      {/* About和home组件存在使用相同样式类名，后引入home组件中css样式覆盖About组件样式 */}
+      <About/>
+      <Home/>
+    </div>
+  )
+}
+```
+
+```css
+/* none.css */
+.title{
+  font-size: 32px;
+  color:rgb(174, 174, 207);
+}
+.content {
+  background-color: skyblue;
+}
+```
+
+这种编写方式最大的问题是样式直接会互相层叠
+
+#### CSS modules模块
+
+css modules并不是React特有的解决方案，而是所有使用了类似于webpack配置的环境下都可以使用的。
+
+- 如果在其他项目中使用webpack，那么我们需要自己来进行配置，比如配置webpack.config.js中的modules: true等。
+
+React的脚手架已经内置了css modules的配置:
+
+- .css/.less/.scss 等样式文件都需要修改成 .module.css/.module.less/.module.scss 等
+
+```jsx
+// 模块化引入
+import noneModule from './none.module.css'
+import About from './comp/about'
+import Home from './comp/home'
+
+export default function NoneStyle() {
+  return (
+    <div>
+      <h2 className={noneModule.title}>none-style</h2>
+      {/* ${noneModule.p-Sy} module模块化不支持 p-sy带 -的类名，但要写成${noneModule['p-sy']} */}
+      <p className={`${noneModule.content} ${noneModule['p-sy']}`}>这是一段文字啊</p>
+      {/* About和home组件存在使用相同样式类名，为各自css文件修改为xxx.module.css */}
+      <About/>
+      <Home/>
+    </div>
+  )
+}
+```
+
+将文件修改xxx.module.css
+
+```css
+.title{
+  font-size: 40px;
+  color:rgb(174, 174, 207);
+}
+.content {
+  background-color: skyblue;
+  color:coral;
+}
+.p-sy {
+  border: 1px darkblue dashed;
+}
+```
+
+css modules确实解决了局部作用域的问题，也是很多人喜欢在React中使用的一种方案。
+
+**但是这种方案也有自己的缺陷：**
+
+- 引用的类名，不能使用连接符`(.home-title)`，在JavaScript中是不识别的；如果想要使用`noneModule['home-title']`
+  
+  - 所有的 className都必须使用`{style.className}`的形式来编写
+  
+  - 不方便动态来修改某些样式，依然需要使用内联样式的方式，如果你觉得上面的缺陷
+
+- 如果觉得上面缺陷还可以接受，那么在开发中完全可以选择使用css modules来编写，并且也是在React中很受欢迎的一种方式
