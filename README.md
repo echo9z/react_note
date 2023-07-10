@@ -5721,7 +5721,73 @@ css modules确实解决了局部作用域的问题，也是很多人喜欢在Rea
 
 两种方式配置
 
-1. 通过修改webpack脚手架配置，npm run eject生成webpack配置文件添加less-loader，scss-loader
+1. 通过修改webpack脚手架配置，npm run eject生成webpack配置
+   
+   **配置less**
+   
+   ```bash
+   npm i less less-loader -S
+   ```
+   
+   暴露webpack配置文件，执行`npm run eject`，根目录会出现一个config文件夹，在里面可以找到webpack.config.js文件
+   
+   修改webpack.config.js配置文件，使用Ctrl+F，搜索内容为sass
+   
+   ```js
+   // style files regexes
+   const sassRegex = /\.css$/;
+   const cssModuleRegex = /\.module\.css$/;
+   const sassRegex = /\.(scss|sass)$/;
+   const sassModuleRegex = /\.module\.(scss|sass)$/;
+   + const lessRegex = /\.less$/;
+   + const lessModuleRegex = /\.module\.less$/;
+   ```
+   
+   搜索sass，根据sass配置修改为以下代码：
+   
+   ```js
+   {
+     test: lessRegex,
+     exclude: lessModuleRegex,
+     use: getStyleLoaders(
+       {
+         importLoaders: 3,
+         sourceMap: isEnvProduction
+           ? shouldUseSourceMap
+           : isEnvDevelopment,
+         modules: {
+           mode: 'icss',
+         },
+       },
+       'less-loader'
+     ),
+     sideEffects: true,
+   },
+   {
+     test: sassModuleRegex,
+     use: getStyleLoaders(
+       {
+         importLoaders: 3,
+         sourceMap: isEnvProduction
+           ? shouldUseSourceMap
+           : isEnvDevelopment,
+         modules: {
+           mode: 'local',
+           getLocalIdent: getCSSModuleLocalIdent,
+         },
+       },
+       'less-loader'
+     ),
+   },
+   ```
+   
+   **配置sass**
+   
+   create-react-app的webpack内置了sass-loader，只需要安装sass语法包
+   
+   ```bash
+   npm i sass
+   ```
 
 2. craco：在webpack原有配置上补充新的配置，通过`craco`包
    
@@ -5768,8 +5834,12 @@ css modules确实解决了局部作用域的问题，也是很多人喜欢在Rea
      ],
    };
    ```
-   
-   
+
+### css in js
+
+
+
+
 
 
 

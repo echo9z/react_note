@@ -3,6 +3,7 @@ import React from 'react'
 // import NoneStyle from './components/2_直接引入CSS/none-style'
 // import ModuleStyle from './components/3_CSS module模块化/module-style'
 import LessStyle from './components/4_Less编写方式/less-style'
+import ScssStyle from './components/5_Scss编写方式/scss-style'
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
       {/* <NoneStyle /> */}
       {/* <ModuleStyle /> */}
       <LessStyle />
+      <ScssStyle />
     </div>
   );
 }
