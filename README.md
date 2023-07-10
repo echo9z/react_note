@@ -5716,3 +5716,63 @@ css modules确实解决了局部作用域的问题，也是很多人喜欢在Rea
   - 不方便动态来修改某些样式，依然需要使用内联样式的方式，如果你觉得上面的缺陷
 
 - 如果觉得上面缺陷还可以接受，那么在开发中完全可以选择使用css modules来编写，并且也是在React中很受欢迎的一种方式
+
+### 引入less或者sass
+
+两种方式配置
+
+1. 通过修改webpack脚手架配置，npm run eject生成webpack配置文件添加less-loader，scss-loader
+
+2. craco：在webpack原有配置上补充新的配置，通过`craco`包
+   
+   ```bash
+   npm i -D @craco/craco
+   ```
+   
+   根目录中创建一个CRACO配置文件并配置 `craco.config.js`
+   
+   package.json添加配置
+   
+   ```json
+   "scripts": {
+       ... ...
+       "cr:start": "craco start",
+       "cr:build": "craco build",
+       "cr:test": "craco test"
+   }
+   ```
+   
+   下载less 以及craco-less 加载插件
+   
+   ```bash
+   npm i less craco-less -D
+   ```
+   
+   比如修改打包入口文件：craco.config.js示例
+   
+   ```js
+   const CracoLessPlugin = require("craco-less");
+   module.exports = {
+     plugins: [
+       {
+           plugin: CracoLessPlugin,
+           options: {
+             lessLoaderOptions: {
+               lessOptions: { // less配置
+                   modifyVars: { "@primary-color": "#1DA57A" },
+                   javascriptEnabled: true
+               }
+             }
+           }
+       }
+     ],
+   };
+   ```
+   
+   
+
+
+
+
+
+    
