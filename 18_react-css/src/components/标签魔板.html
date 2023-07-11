@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <script type="text/babel" >
+    // alert`Hello` // 等同于 alert("Hello") 
+    let a = 5
+    let b = 10
+    test`hello ${a+b} template ${a*2}` // 标签魔板调用
+    // test函数的第一个strArray参数是数组，数组是由模板字符中哪些没有变量替换的部分
+    // test函数的第二个，第三个或者多个参数，用剩余参数，是模拟字符串被替换后的值
+    function test(strArray, ...args) {
+      console.log(strArray); // ['hello ', ' template ', '']
+      console.log(args); // [15, 10]
+      console.log(arguments);
+    }
+    let total = 14
+    const res = passthru`${total+2} this is total ${total} (${total*2} with max) ${total+1}`
+    console.log(res);
+    // 复杂🌰
+    function passthru(literals) {
+      console.log(literals);
+      console.log(arguments);
+      let result = ''
+      let i = 0;
+      while (i < literals.length) {
+        result += literals[i++]
+        if(i < arguments.length) { // argument数组长度5，['', ' this is total ', ' (', ' with max) ', ''] 16 14 28 15
+          result += arguments[i] // 过滤argument数组中的第一个元素
+        }
+      }
+      return result
+    }
+    
+  </script>
+</body>
+</html>

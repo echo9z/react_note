@@ -5835,14 +5835,110 @@ css modules确实解决了局部作用域的问题，也是很多人喜欢在Rea
    };
    ```
 
-### css in js
+### Css in js
 
+- 官方文档也有提到过Css in JS这种方案
+  
+  - “CsS-in-JS”是指 种模式，其中 CSS 由 JavaScript 生成而不是在外部文件中定义
+  
+  - 注意此功能并不是 React 的一部分，而是由第三方库提供
+  
+  - React 对样式如何定义并没有明确态度
 
+- 在传统的前端开发中，我们通常会将结构(HTML) 、样式(CSS) 、逻辑(JavaScript) 进行分离
+  
+  - 但是在前面的学习中，我们就提到过，React的思想中认为逻辑本身和UI是无法分离的，所以才会有了JSX的语法。样式也是属于UI的一部分
+  - 事实上CSS-in-JS的模式就是一种将样式(CSS) 也写入到javascript中的方式，并且可以方便的使用JavaScript的状态，所以React有被人称之为 `All in JS`
 
+- 批评声音虽然有，但是在我们看来很多优秀的Css-in-Js的库依然非常强大、方便:
+  
+  - CSS-in-JS通过JavaScript来为CSS赋予一些能力，包括类似于CSS预处理器一样的样式嵌套、函数定义、逻辑复用、动态修改状态等等
+  
+  - 虽然CSS预处理器也具备某些能力，但是获取动态状态依然是一个不好处理的点
+  
+  - 所以，目前可以说CSS-in-JS是React编写CSS最为受欢迎的一种解决方案;
 
+- 目前比较流行的css-in-js库：
+  
+  - [styled-components](https://styled-components.com/)
+  
+  - [emotion](https://emotion.sh/)
+  
+  - [styled-jsx](https://www.npmjs.com/package/styled-jsx)
 
+**styled-components使用**
 
+```bash
+npm install styled-components
+```
 
+基本使用，创建css style.js
 
+```js
+import styled, {css} from 'styled-components'
 
-    
+// 1.基本使用
+export const Wrapper = styled.div`
+  h2{
+    font-size: 30px
+  }
+  
+  footer{
+    background-color: pink;
+  }
+`
+// 将section子元素单独抽取一个样式组件
+export const SectionWrapper = styled.section`
+  border: 1px solid red;
+  border-radius: 10px;
+  .title{
+    font-size: 24px;
+    color: #ffccec;
+  }
+  p {
+    background-color: purple;
+    &:hover{
+      text-shadow: 1px 1px 1px #ccc;
+    }
+  }
+`
+```
+
+组件中引入样式组件
+
+```jsx
+import React from 'react'
+import { Wrapper, SectionWrapper } from './style'
+
+export default function CssInJsComp() {
+  
+  return (
+    <Wrapper>
+      <h2>css-in-js-Comp</h2>
+      <SectionWrapper>
+        <h4 className='title'>title123456</h4>
+        <p className='content'>这是一段文字123456</p>
+      </SectionWrapper>
+      <footer>
+        关于echo9z
+      </footer>
+    </Wrapper>
+  )
+}
+```
+
+![](./img/iShot_2023-07-11_18.58.32.png)
+
+- styled-components的本质是通过函数的调用，最终创建出一个组件:
+  
+  - 这个组件会被自动添加上一个不重复的class
+  
+  - styled-components会给该class添加相关的样式
+
+- 另外，它支持类似于CSS预处理器一样的样式嵌套
+  
+  - 支持直接子代选择器或后代选择器，并且直接编写样式;
+  
+  - 可以通过&符号获取当前元素
+  
+  - 直接伪类选择器、伪元素等
