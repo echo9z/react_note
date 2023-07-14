@@ -6023,6 +6023,33 @@ export const SectionWrapper = styled.section.attrs(props => ({
 
 ![](./img/2023-07-12%2000.15.27.gif)
 
+从 `styled-components` 导入 `{ css }` ，并将一个函数插入到我们的模板文字中
+
+```jsx
+import styled, { css } from 'styled-components'
+
+export const Button = styled.button`
+  border-radius: 3px;
+  border: 2px solid #BF4F74;
+  color: '#BF4F74';
+  margin: 0 1em;
+  padding: 0.25em 1em;
+  ${props =>
+    props.$primary && css`
+      background: #BF4F74;
+      color: white;
+    `};
+`
+render(
+  <Container>
+    <Button>Normal Button</Button>
+    <Button $primary>Primary Button</Button>
+  </Container>
+);
+```
+
+![](./img/iShot_2023-07-15_01.56.36.png)
+
 **styled高级特性**
 
 - 支持样式的继承
@@ -6081,12 +6108,16 @@ export const SectionWrapper = styled.section.attrs(props => ({
   ```jsx
   <Box>123</Box>
   ```
-
-![](./img/2023-07-14%2021.01.37.gif)
+  
+  ![](./img/2023-07-14%2021.01.37.gif)
 
 - 使用Animation
   
+  带有 `@keyframes` 的 CSS 动画不限于单个组件，但您仍然不希望它们是全局的以避免名称冲突。这就是导出 `keyframes` 帮助程序的原因。
+  
   ```js
+  import styled, {keyframes} from 'styled-components'
+  
   const rotate = keyframes`
     from {
       transform: rotate(0deg);
@@ -6096,17 +6127,17 @@ export const SectionWrapper = styled.section.attrs(props => ({
       transform: rotate(360deg);
     }
   `;
-  
-  const Rotate = styled.div`
+  export const Rotate = styled.div`
     display: inline-block;
     animation: ${rotate} 2s linear infinite;
-    padding: 2rem 1rem;
-    font-size: 1.2rem;
-  `;
-  
+    padding: 32px 16px;
+    font-size: 18px;
+  `
   render(
-    <Rotate>&lt; 💅🏾 &gt;</Rotate>
+    <Rotate>< 💅🏾 ></Rotate>
   );
   ```
   
-  
+  ![](./img/2023-07-15%2000.44.19.gif)
+
+### classNames库

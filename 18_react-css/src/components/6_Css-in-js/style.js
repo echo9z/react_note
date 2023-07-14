@@ -1,4 +1,4 @@
-import styled, {css} from 'styled-components'
+import styled, {css, keyframes} from 'styled-components'
 import {primaryColor} from '../../style/variables'
 // 1.基本使用
 export const Wrapper = styled.div`
@@ -64,9 +64,24 @@ const rotate = keyframes`
     transform: rotate(360deg);
   }
 `;
+
 export const Rotate = styled.div`
   display: inline-block;
   animation: ${rotate} 2s linear infinite;
   padding: 32px 16px;
   font-size: 18px;
+`
+
+export const Button = styled.button`
+  background: transparent;
+  border-radius: 3px;
+  border: 2px solid #BF4F74;
+  color: '#BF4F74';
+  margin: 0 1em;
+  padding: 0.25em 1em;
+  ${props =>
+    props.$primary && css`
+      background: #BF4F74;
+      color: white;
+    `}
 `

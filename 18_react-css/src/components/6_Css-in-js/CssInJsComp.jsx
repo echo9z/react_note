@@ -1,5 +1,5 @@
 import React,{useState} from 'react'
-import { Wrapper, SectionWrapper, WarnButton, Box } from './style'
+import { Wrapper, SectionWrapper, WarnButton, Box, Rotate, Button } from './style'
 
 export default function CssInJsComp() {
   const [style, setStyle] = useState({
@@ -19,7 +19,9 @@ export default function CssInJsComp() {
       </footer> */}
 
       <Box>123</Box>
-
+      <Rotate>&lt; 💅🏾 &gt;</Rotate>
+      <Button>I&apos;m &lt;Button&gt;</Button>
+      <Button $primary>Primary Button</Button>
       {/* <WarnButton>warning</WarnButton> */}
     </Wrapper>
   )
