@@ -5876,30 +5876,27 @@ npm install styled-components
 
 ```js
 import styled, {css} from 'styled-components'
-
-// 1.基本使用
+// 导出
 export const Wrapper = styled.div`
   h2{
     font-size: 30px
   }
-  
+  .section{
+    border: 1px solid red;
+    border-radius: 10px;
+    .title{
+      font-size: 24px;
+      color: #ffccec;
+    }
+    p {
+      background-color: purple;
+      &:hover{
+        text-shadow: 1px 1px 1px #ccc;
+      }
+    }
+  }
   footer{
     background-color: pink;
-  }
-`
-// 将section子元素单独抽取一个样式组件
-export const SectionWrapper = styled.section`
-  border: 1px solid red;
-  border-radius: 10px;
-  .title{
-    font-size: 24px;
-    color: #ffccec;
-  }
-  p {
-    background-color: purple;
-    &:hover{
-      text-shadow: 1px 1px 1px #ccc;
-    }
   }
 `
 ```
@@ -5908,17 +5905,17 @@ export const SectionWrapper = styled.section`
 
 ```jsx
 import React from 'react'
-import { Wrapper, SectionWrapper } from './style'
+import { Wrapper } from './style'
 
 export default function CssInJsComp() {
-  
+
   return (
     <Wrapper>
       <h2>css-in-js-Comp</h2>
-      <SectionWrapper>
+      <div className='section'>
         <h4 className='title'>title123456</h4>
         <p className='content'>这是一段文字123456</p>
-      </SectionWrapper>
+      </div>
       <footer>
         关于echo9z
       </footer>
@@ -5942,3 +5939,174 @@ export default function CssInJsComp() {
   - 可以通过&符号获取当前元素
   
   - 直接伪类选择器、伪元素等
+
+styled-components定义的组件可以传递props属性
+
+```jsx
+import React,{useState} from 'react'
+import { Wrapper, SectionWrapper } from './style'
+
+export default function CssInJsComp() {
+  const [style, setStyle] = useState({
+    fontSize: 30,
+    color: 'skyblue',
+  })
+  return (
+    <Wrapper>
+      <h2>css-in-js-Comp</h2>
+      <SectionWrapper size={style.fontSize} color={style.color}>
+        <h4 className='title'>title123456</h4>
+        <p className='content'>这是一段文字123456</p>
+        <button onClick={() => setStyle(v => ({...v, color: 'yellow'}))}>修改SectionWrapper颜色</button>
+      </SectionWrapper>
+      <footer>
+        关于echo9z
+      </footer>
+    </Wrapper>
+  )
+}
+```
+
+获取props需要通过`${}`传入一个插值函数，props会作为该函数的参数;
+
+```js
+export const SectionWrapper = styled.section`
+  border: 1px solid red;
+  border-radius: 10px;
+  .title{
+    font-size: ${props => props.size}px;
+    color: ${props => props.color};
+  }
+  p {
+    background-color: purple;
+    &:hover{
+      text-shadow: 1px 1px 1px #ccc;
+    }
+  }
+`
+```
+
+添加attrs属性，即设置为默认值
+
+```js
+import styled, {css} from 'styled-components'
+
+// 1.基本使用
+export const Wrapper = styled.div`
+  h2{
+    font-size: 30px
+  }
+  footer{
+    background-color: pink;
+  }
+`
+// 2.将section子元素单独抽取一个样式组件
+// 3.可以接收外物的props
+// 4.attrs设置元素标签属性 <section color='blue'></section>
+export const SectionWrapper = styled.section.attrs(props => ({
+  color: props.color || 'blue', // 当组件没有传递color，默认值为blue
+}))`
+  border: 1px solid red;
+  border-radius: 10px;
+  .title{
+    font-size: ${props => props.size}px;
+    color: ${props => props.color};
+  }
+  p {
+    background-color: purple;
+    &:hover{
+      text-shadow: 1px 1px 1px #ccc;
+    }
+  }
+`
+```
+
+![](./img/2023-07-12%2000.15.27.gif)
+
+**styled高级特性**
+
+- 支持样式的继承
+  
+  ```js
+  export const BaseButton = styled.button`
+    padding: 8px 32px;
+    border: 1px solid skyblue;
+    border-radius: 5px;
+  `
+  // 继承BaseButton样式
+  export const WarnButton = styled(BaseButton)`
+    background-color: #fff;
+    border: 1px red dashed;
+    color: red;
+    &:hover{
+      color: #ffffff;
+      background-color: red;
+    }
+  `
+  ```
+  
+  使用继承样式组件
+  
+  ```jsx
+  import { Wrapper, SectionWrapper, WarnButton } from './style'
+  <WarnButton>warning</WarnButton>
+  ```
+  
+  ![](./img/2023-07-12%2002.40.18.gif)
+
+- styled设置主题
+  
+  Context组件，通过上下文 API 将主题注入到组件树中任意位置，供所有树中组件使用注入样式。
+  
+  ```jsx
+  <ThemeProvider theme={{ color: 'orange' }} >
+    <App />
+  </ThemeProvider>
+  ```
+  
+  在style.js文件中通过`props => props.theme.hoverColor`获取变量值
+  
+  ```jsx
+  export const Box = styled.div`
+    width: 50px;
+    height: 50px;
+    color: ${props => props.theme.color};
+    transition: all 0.5s ease-in-out;
+    &:hover{
+      background-color: ${props => props.theme.hoverColor}
+    }
+  `
+  ```
+  
+  ```jsx
+  <Box>123</Box>
+  ```
+
+![](./img/2023-07-14%2021.01.37.gif)
+
+- 使用Animation
+  
+  ```js
+  const rotate = keyframes`
+    from {
+      transform: rotate(0deg);
+    }
+  
+    to {
+      transform: rotate(360deg);
+    }
+  `;
+  
+  const Rotate = styled.div`
+    display: inline-block;
+    animation: ${rotate} 2s linear infinite;
+    padding: 2rem 1rem;
+    font-size: 1.2rem;
+  `;
+  
+  render(
+    <Rotate>&lt; 💅🏾 &gt;</Rotate>
+  );
+  ```
+  
+  
