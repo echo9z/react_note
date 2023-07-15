@@ -4,7 +4,8 @@ import React from 'react'
 // import ModuleStyle from './components/3_CSS module模块化/module-style'
 // import LessStyle from './components/4_Less编写方式/less-style'
 // import ScssStyle from './components/5_Scss编写方式/scss-style'
-import CssInJsComp from './components/6_Css-in-js/CssInJsComp'
+// import CssInJsComp from './components/6_Css-in-js/CssInJsComp'
+import ClassNames from './components/7_classnames/classnames';
 
 function App() {
   return (
@@ -14,7 +15,8 @@ function App() {
       {/* <ModuleStyle /> */}
       {/* <LessStyle />
       <ScssStyle /> */}
-      <CssInJsComp />
+      {/* <CssInJsComp /> */}
+      <ClassNames />
     </div>
   );
 }

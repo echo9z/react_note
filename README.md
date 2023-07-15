@@ -5835,7 +5835,7 @@ css modules确实解决了局部作用域的问题，也是很多人喜欢在Rea
    };
    ```
 
-### Css in js
+### css in js
 
 - 官方文档也有提到过Css in JS这种方案
   
@@ -6140,4 +6140,68 @@ render(
   
   ![](./img/2023-07-15%2000.44.19.gif)
 
-### classNames库
+### classnames库
+
+vue中添加class是一件简单的事：
+
+```js
+let vm = new Vue({
+	el:'#app',
+	data:{
+	  classColor:'textColor',
+	  classFont:'textFont', 
+	
+	  isGgcText:true,
+	  isLi:true,
+	},
+});
+
+<div :class="{ bgcText: isGgcText, liSty: isLi }"></div>
+<div :class="[classColor, classFont]"></div>
+<div :class="[{ bgcText: isGgcText }, classColor]"></div>
+```
+
+react中使用jsx来添加class，需要借助模板字符串和三元表达式
+
+```jsx
+<div className={`title ${isActive? "active": ""}`}></div>
+<div className={['title', (isActive ? "active": "")].join(" ")}></div>
+```
+
+安装classnames库
+
+```bash
+npm i -D classnames
+```
+
+借助第三方库：classnames 动态加载
+
+```js
+classNames('foo', 'bar'); // =>  'foo bar'
+classNames('foo',{ bar: true }); // =>   'foo bar'
+classNames({ 'foo-bar' : true }); //=>  'foo-bar'
+classNames({ 'foo-bar' : false }); //=>  ''
+classNames({ foo: true }, { bar: true }); //=> 'foo bar'
+classNames({ foo: true, bar: true }); //=> 'foo bar'
+classNames('foo', { bar: true, duck: false }, 'baz', { quux: true }); //=> 'foo bar baz quux'
+classNames(null, false, 'bar' , undefined, 0, 1, { baz: null }, ''): // => 'bar 1'
+```
+
+```jsx
+import React, { useState } from 'react'
+import classnames from 'classnames'
+import './style.css'
+
+export default function Classnames() {
+  const [isActive]=useState(true)
+  return (
+    <div>
+      <h3 className={`${isActive? 'active' : ''}`}>132up up</h3>
+
+      <div className={classnames({box: isActive})} >
+        123
+      </div>
+    </div>
+  )
+}
+```
