@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div>
+    <button id="loc">location</button>
+    <a id="his" href="https://echouu.com" >history</a>
+    <a id="hash" href="https://echouu.com"  >hash</a>
+    <br/>
+    <button id="back" onclick="history.back() ">回退</button>
+    <button id="advance" onclick="history.forward()">前进</button>
+  </div>
+  <script type="text/javascript" >
+    /**
+     * location可以获取或者设置浏览器地址栏的URL，页面跳转，会引起页面的刷新
+     *  location.hash //地址栏上#及后面的内容
+     *  location.host //主机名及端口号
+     *  location.hostname //主机名
+     *  location.pathname //url的路径---相对路径
+     *  location.port //端口号
+     *  location.protocol //协议
+     *  location.search //搜索的内容
+     * location.href = "https://www.jd.com"; // 跳转新url地址
+     * location.assign("https://www.jd.com") //assign()方法 都是设置跳转页面地址
+     * location.reload();//重新加载--刷新
+     * location.replace("http://www.jd.com");//跳转到新页面，没有后退至老url地址，没有历史记录
+     * 
+     * history发生当前页面跳转新的页面时
+     * history.back()  去上一条历史
+     * history.forward() 去下一条历史
+     * history.go(1 || -1) 相对当前  跳多少条记录   正 前走  负 后退
+     * history.length 历史列表中的 URL（页面）数量
+     * h5新增api，设置跳转新的url，阻止页面跳转，不会引起页面刷新
+     * pushState(data, title, url) 追加一条历史记录, data用于存储自定义数据，通常设为null+ title网页标题，基本上没有被支持，一般设为空+ url 以当前域为基础增加一条历史记录，不可跨域设置
+     * replaceState(data, title, url) 与pushState()基本相同，不同之处在于replaceState()，只是替换当前url，不会增加/减少历史记录。
+     * onpopstate事件，当前进或后退时则触发该事件 back()和forward()才能触发
+     * 
+     * hash值，不会引起页面刷新
+     * // 当前URL为http://www.test.com/#/something
+     * location.hash;       //输出 #/something
+     * location.hash = '#/test1';    //http://www.test.com/#/test1,并且会新增一条历史记录
+     * onhashchange事件，hash值发生变化时会触发该事件
+     **/
+
+    window.onload = function() {
+      document.querySelector("#loc").addEventListener("click", function(e) {
+        // location.href = "/123"
+        location.assign("/a")
+        // e.preventDefault()
+        console.log(e);
+      })
+
+      document.querySelector("#his").addEventListener("click", function(e) {
+        history.pushState(null, null, '/test')
+        e.preventDefault()
+        console.log(e);
+      });
+
+      document.querySelector("#hash").addEventListener("click", function(e) {
+        location.hash = '#/hash';
+        e.preventDefault()
+        console.log(e);
+      });
+    }
+    window.onpopstate = function() {
+      console.log('history');
+    }
+    onhashchange = function() {
+      console.log('hashchange');
+    }
+
+  </script>
+</body>
+</html>

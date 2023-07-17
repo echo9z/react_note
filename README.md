@@ -6146,14 +6146,14 @@ vue中添加class是一件简单的事：
 
 ```js
 let vm = new Vue({
-	el:'#app',
-	data:{
-	  classColor:'textColor',
-	  classFont:'textFont', 
-	
-	  isGgcText:true,
-	  isLi:true,
-	},
+    el:'#app',
+    data:{
+      classColor:'textColor',
+      classFont:'textFont', 
+
+      isGgcText:true,
+      isLi:true,
+    },
 });
 
 <div :class="{ bgcText: isGgcText, liSty: isLi }"></div>
@@ -6197,11 +6197,150 @@ export default function Classnames() {
   return (
     <div>
       <h3 className={`${isActive? 'active' : ''}`}>132up up</h3>
-
       <div className={classnames({box: isActive})} >
         123
       </div>
     </div>
   )
 }
+```
+
+## React 路由
+
+后端中，路由的概念是：一个路由对应着一个接口，根据路由的不同，返回不同的响应数据。
+
+前端路由的概念是依据 url 的不同，分配不同的界面组件，其本质是用户事件与事件处理函数之间的对应关系
+
+#### 前端路由原理
+
+前端路由分为：历史路由、哈希路由两种。二者都不会产生页面刷新，但是表现形式与本质原理都不一致。
+
+- url中的hash
+  
+  - url的hash也就是锚点#，本质上改变location.href属性
+    
+    `<a href="#/hash" >hash</a>`
+  
+  - 可以通过直接赋值`location.href=xxx`，页面不会刷新
+  * location.hash = '#/test1'; http://www.test.com/#/test1，并且会新增一条历史记录
+  
+  * onhashchange事件，hash值发生变化时会触发该事件
+  
+  ```js
+  <div>
+    <a href="#/about">about</a>
+    <a href="#/about">about</a>
+    <div class="router-view"></div>
+  </div>
+  const routerView = document.querySelector('.router-view')
+  
+  window.addEventListener('hashchange', () =>{
+      switch(location.hash){
+          case '#/home':
+              routerView.innerHTML = 'home'
+              breack;
+          case '#/about':
+              routerView.innerHTML = 'home'
+              breack;
+          default:
+              routerView.innerHTML = 'default'
+      }
+  })
+  ```
+* h5中的history
+  
+  * history.back() 去上一条历史
+  * history.forward() 去下一条历史
+  * history.go(1 || -1) 相对当前 跳多少条记录 正 前进 负 后退
+  * history.length 历史列表中的 URL（页面）数量
+
+* h5新增api，设置跳转新的url，阻止页面跳转，不会引起页面刷新
+  
+  - pushState(data, title, url) 追加一条历史记录, data用于存储自定义数据，通常设null+ title网页标题，基本上没有被支持，一般设为空+ url 以当前域为基础增加一条历史记录，不可跨域设置
+  
+  - replaceState(data, title, url) 与pushState()基本相同，不同之处在于replaceState()，只是替换当前url，不会增加/减少历史记录。
+  
+  - onpopstate事件，当前进或后退时则触发该事件 back()和forward()才能触发
+
+```js
+<div>
+  <a href="/home">home</a>
+  <a href="/about">about</a>
+  <div class="router-view"></div>
+</div>
+
+const routerView = document.querySelector('.router-view')
+
+const aElements = document.getElementsBytTagName('a')
+for(let item of aElements) {
+    item.addEventListener('click', (e) => {
+        e.preventDefault();
+        const href = item.getAttribute('href')
+        history.pushState({} , '', href)
+        historyChange();
+    })
+}
+
+function historyChange(){
+    switch(location.pathname){
+        case '/home':
+            routerView.innerHTML = 'home'
+            breack;
+        case '/about':
+            routerView.innerHTML = 'home'
+            breack;
+        default:
+            routerView.innerHTML = 'default'
+    }
+}
+// 页面发送前进或后退时
+window.addEventListener('popstate', historyChange)
+```
+
+### react-router-dom 基础使用
+
+  React 中实现前端路由的库是：react-router-dom，通过管理 url，实现组件与 url 的对应，通过 url 进行组件之间的切换。 
+routerV5版本 
+
+```bash
+npm install react-router-dom@5 -S
+```
+
+基本使用
+
+```jsx
+import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import About from './components/about';
+import Users from './components/users';
+import Home from './components/home';
+
+function App() {
+  return (
+    <Router>
+      <h2>router基本使用</h2>
+      <div>
+        <nav>
+          <ul>
+            <li><Link to="/">Home</Link></li>
+            <li><Link to="/users">users</Link></li>
+            <li><Link to="/about">Home</Link></li>
+          </ul>
+        </nav>
+        <Switch>
+          <Route exact path="/" >
+            <Home />
+          </Route>
+          <Route path="/about">
+            <About />
+          </Route>
+          <Route path="/users">
+            <Users />
+          </Route>
+        </Switch>
+      </div>
+    </Router>
+  );
+}
+
+export default App;
 ```
