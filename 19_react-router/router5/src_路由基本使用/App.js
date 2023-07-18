@@ -8,7 +8,6 @@ import About from './components/about';
 import Users from './components/users';
 import Home from './components/home';
 import './App.css'
-import Test from './components/test';
 
 function App() {
   const [isActive, setIsActive] = useState('home')
@@ -21,13 +20,8 @@ function App() {
           <ul>
             <li><Link to="/" onClick={() => setIsActive('home')}
               className={`${isActive === 'home'? 'active':''}`}>Home</Link></li>
-
-            <li><Link to="/users/detail/100" >/users/detail/100</Link></li>
-            <li><Link to="/users/detail">/users/detail</Link></li>
-            <li><Link to="/users/15" >/users/15</Link></li>
             <li><Link to="/users" onClick={() => setIsActive('users')}
               className={`${isActive === 'users'? 'active':''}`}>users</Link></li>
-            
             <li><Link to="/about" onClick={() => setIsActive('about')}
               className={`${isActive === 'about'? 'active':''}`}>about</Link></li>
           </ul>
@@ -40,16 +34,15 @@ function App() {
             exact:true  path=/user  to=/user/abc  不呈现组件
             exact:false  path=/user  to=/user/abc  呈现对应path=/user组件
            */}
-          <Route exact path="/" component={Home} />
-          <Route path="/about" component={About} />
-          <Route path="/users/detail/:id" component={Test} />
-          <Route path="/users/detail" component={Test} />
-          <Route path="/users/:id" component={Test} />
-          <Route path="/users" component={Users} />
-          
-          {/* <Route path="/:id">
-            <Test />
-          </Route> */}
+          <Route exact path="/" >
+            <Home />
+          </Route>
+          <Route path="/about">
+            <About />
+          </Route>
+          <Route path="/users">
+            <Users />
+          </Route>
         </Switch>
       </div>
     </Router>

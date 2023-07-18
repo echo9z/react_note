@@ -6344,3 +6344,243 @@ function App() {
 
 export default App;
 ```
+
+嵌套路由
+
+```jsx
+import { useState } from 'react'
+import { 
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link } from "react-router-dom";
+import About from './components/about';
+import Users from './components/users';
+import Home from './components/home';
+import './App.css'
+
+function App() {
+  const [isActive, setIsActive] = useState('home')
+  
+  return (
+    <Router>
+      <h2>router嵌套路由</h2>
+      <div>
+        <nav>
+          <ul>
+            <li><Link to="/" onClick={() => setIsActive('home')}
+              className={`${isActive === 'home'? 'active':''}`}>Home</Link></li>
+            <li><Link to="/users" onClick={() => setIsActive('users')}
+              className={`${isActive === 'users'? 'active':''}`}>users</Link></li>
+            <li><Link to="/about" onClick={() => setIsActive('about')}
+              className={`${isActive === 'about'? 'active':''}`}>about</Link></li>
+          </ul>
+        </nav>
+        {/* 一级路由出口 */}
+        <Switch>
+          <Route exact path="/" >
+            <Home />
+          </Route>
+          <Route path="/about">
+            <About />
+          </Route>
+          <Route path="/users">
+            <Users />
+          </Route>
+        </Switch>
+      </div>
+    </Router>
+  );
+}
+
+export default App;
+
+```
+
+```jsx
+// users.jsx
+import {useRouteMatch, Route, Switch, Link, useParams} from 'react-router-dom'
+
+export default function Users() {
+  const match = useRouteMatch()
+  // path: route中的匹配规则，url请求地址后路径字符串
+  // <Route path={`/:id`} 请求的路径 http://localhost:80/users; path='/:id' url='/users'
+  console.log(match.path, match.url)
+  return (
+    <div>
+      <h2>Users</h2>
+      <ul>
+        <li><Link to={`${match.url}/abc`}>users/acb</Link></li>
+        <li><Link to={`${match.url}/123`}>users/123</Link></li>
+        <li><Link to={`${match.url}/props-v-state`}>props-v-state</Link></li>
+      </ul>
+      {/* 二级路由出口 */}
+      <Switch>
+        <Route exact path={match.path} />
+        <Route path={`${match.path}/:userId`} component={User}/>
+      </Switch>
+    </div>
+  )
+}
+
+function User() {
+  // 获取路由中的动态参数
+  const {userId} = useParams()
+  return (
+    <div>
+      <h3>{userId}</h3>
+    </div>
+  )
+}
+```
+
+#### React Router中的组件主要分为三类：
+
+1. 路由器，例如 BrowserRouter 和 HashRouter
+2. 路由匹配器： 例如Route和Switch
+3. 导航链接：例如Link, NavLink, and Redirect
+
+#### 路由器
+
+每个 React Router 应用程序的核心应该是路由器组件。react-router-dom 提供BrowserRouter和HashRouter路由器。
+
+- BrowserRouter 使用常规URL路径，创建一个像example.com/some/path这样真实的 URL
+
+- HashRouter 将当前位置存储在URL的哈希部分，因此URL看起来类似于example.com/#/your/page
+
+将顶级的App元素包装在路由器下：
+
+```js
+import React from "react";
+import ReactDOM from "react-dom";
+import { BrowserRouter } from "react-router-dom";
+
+function App() {
+  return <h1>Hello React Router</h1>;
+}
+
+ReactDOM.render(
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>,
+  document.getElementById("root")
+)
+```
+
+#### 路由匹配器
+
+有两种路由匹配组件，Switch 和 Route。当渲染Switch 组件时，查找Route子元素中path与当前URL匹配的元素。将找到的第一个Route呈现渲染并忽略所有的其他路由。（注意：比如/user、/user/:id、/user/detail、/user/detail/:id，将包含更多特定路径的Route放在最前面）
+
+如果没有匹配的Route，Switch将什么都不会渲染(null)。
+
+```jsx
+import { useState } from 'react'
+import { BrowserRouter as Router,Switch,Route,Link } from "react-router-dom";
+import About from './components/about';
+import Users from './components/users';
+import Home from './components/home';
+import './App.css'
+import Test from './components/test';
+
+function App() {
+  const [isActive, setIsActive] = useState('home')
+  
+  return (
+    <Router>
+      <h2>router基本使用</h2>
+      <div>
+        <nav>
+          <ul>
+            <li><Link to="/" onClick={() => setIsActive('home')}
+              className={`${isActive === 'home'? 'active':''}`}>Home</Link></li>
+
+            <li><Link to="/users" onClick={() => setIsActive('users')}
+              className={`${isActive === 'users'? 'active':''}`}>users</Link></li>
+            <li><Link to="/users/15" >/users/15</Link></li>
+            <li><Link to="/users/detail/100" >/users/detail/100</Link></li>
+            <li><Link to="/users/detail">/users/detail</Link></li>
+            
+            <li><Link to="/about" onClick={() => setIsActive('about')}
+              className={`${isActive === 'about'? 'active':''}`}>about</Link></li>
+          </ul>
+        </nav>
+        <Switch>
+          <Route exact path="/" component={Home} />
+          <Route path="/about" component={About} />
+          <Route path="/users/detail/:id" component={Test} />
+          <Route path="/users/detail" component={Test} />
+          <Route path="/users/:id" component={Test} />
+          <Route path="/users" component={Users} />
+        </Switch>
+      </div>
+    </Router>
+  );
+}
+
+export default App;
+```
+
+注意： Route path匹配的是URL的开头而不是整个URL,所以`<Route path="/">` 会始终与URL匹配，所以我们通常将这个Route放在`<Switch>`的最后，还有一个解决方案就是使用`<Route exact path="/">`，使用 exact 将使Route匹配整条 URL 而不仅仅是开头。
+
+
+
+单独只写Route匹配组件，查找Route元素中path与当前URL匹配的元素。如果第一个Rout元素满足，后面还存在其他满足Route元素，则满足Route路由都进行渲染。🌰：
+
+```jsx
+import { useState } from 'react'
+import { BrowserRouter as Router,Switch,Route,Link } from "react-router-dom";
+import About from './components/about';
+import Home from './components/home';
+import './App.css'
+import Test from './components/test';
+
+function App() {
+  const [isActive, setIsActive] = useState('home')
+  
+  return (
+    <Router>
+      <div>
+          <ul>
+            <li><Link to="/" onClick={() => setIsActive('home')}
+              className={`${isActive === 'home'? 'active':''}`}>Home</Link></li>
+            <li><Link to="/about" onClick={() => setIsActive('about')}
+              className={`${isActive === 'about'? 'active':''}`}>about</Link></li>
+          </ul>
+          <Route exact path="/" >
+            <Home />
+          </Route>
+          <Route path="/about">
+            <About />
+          </Route>
+          <Route path="/:id">
+            <Test />
+          </Route>
+      </div>
+    </Router>
+  );
+}
+
+export default App;
+```
+
+请求/about时，匹配到/about 个动态路由/:id都满足，渲染两个路由组件
+
+![](./img/2023-07-18%2018.13.56.gif)
+
+加上Switch组件，找到的第一个Route呈现渲染
+
+```jsx
+    ......
+  <Switch>
+    <Route exact path="/" >
+      <Home />
+    </Route>
+    <Route path="/about">
+      <About />
+    </Route>
+    <Route path="/:id">
+      <Test />
+    </Route>
+  </Switch>
+    ......
+```
