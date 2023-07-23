@@ -6361,7 +6361,7 @@ import './App.css'
 
 function App() {
   const [isActive, setIsActive] = useState('home')
-  
+
   return (
     <Router>
       <h2>router嵌套路由</h2>
@@ -6394,7 +6394,6 @@ function App() {
 }
 
 export default App;
-
 ```
 
 ```jsx
@@ -6484,7 +6483,7 @@ import Test from './components/test';
 
 function App() {
   const [isActive, setIsActive] = useState('home')
-  
+
   return (
     <Router>
       <h2>router基本使用</h2>
@@ -6499,7 +6498,7 @@ function App() {
             <li><Link to="/users/15" >/users/15</Link></li>
             <li><Link to="/users/detail/100" >/users/detail/100</Link></li>
             <li><Link to="/users/detail">/users/detail</Link></li>
-            
+
             <li><Link to="/about" onClick={() => setIsActive('about')}
               className={`${isActive === 'about'? 'active':''}`}>about</Link></li>
           </ul>
@@ -6522,8 +6521,6 @@ export default App;
 
 注意： Route path匹配的是URL的开头而不是整个URL,所以`<Route path="/">` 会始终与URL匹配，所以我们通常将这个Route放在`<Switch>`的最后，还有一个解决方案就是使用`<Route exact path="/">`，使用 exact 将使Route匹配整条 URL 而不仅仅是开头。
 
-
-
 单独只写Route匹配组件，查找Route元素中path与当前URL匹配的元素。如果第一个Rout元素满足，后面还存在其他满足Route元素，则满足Route路由都进行渲染。🌰：
 
 ```jsx
@@ -6536,7 +6533,7 @@ import Test from './components/test';
 
 function App() {
   const [isActive, setIsActive] = useState('home')
-  
+
   return (
     <Router>
       <div>
@@ -6583,4 +6580,177 @@ export default App;
     </Route>
   </Switch>
     ......
+```
+
+#### Route props
+
+component、render、children所有的渲染方式都会提供相同的三个路由属性。
+
+- match
+- location
+- history
+
+#### Route 渲染内容的三种方式
+
+> Route 渲染优先级：children>component>render。
+
+##### component
+
+当路径匹配时才会渲染component组件，同时与route props一起渲染
+
+```jsx
+import React from "react";
+import ReactDOM from "react-dom";
+import { BrowserRouter as Router, Route } from "react-router-dom";
+
+function User(props) {
+  console.log(props); // 路由组件接收到三个固定的属性
+  return <h1>Hello {props.match.params.username}!</h1>;
+}
+
+ReactDOM.render(
+  <Router>
+    <Route path="/about/:username" component={User} />
+  </Router>,
+);
+```
+
+![](./img/iShot_2023-07-19_16.20.47.png)
+
+##### render:func
+
+    使用 render 可以方便地进行内联渲染和包装，而无需进行上文解释的不必要的组件重装。
+
+    可以传入一个函数，以在位置匹配时调用，而不是使用 component 创建一个新的 React 元素。render 渲染方式接收所有与 component 方式相同的 route props。
+
+```jsx
+import React from 'react'
+import { Route } from 'react-router-dom'
+
+export default function FadingRoute({component: Component, ...rest}) {
+// export default function FadingRoute(props) {
+  // console.log({...rest});
+  // ...rest类似于剩余参数，比如props {component computedMatch location path}这些对象属性，
+  // 先结构component, 在通过..rest剩余参数将computedMatch location path 合并到...rest对象中
+  return (
+    <Route
+      {...rest}
+      render={routeProps => (
+        <Component {...routeProps} />
+      )}
+    />
+  )
+}
+```
+
+使用：
+
+```jsx
+import { BrowserRouter as Router,Switch,Route,NavLink } from "react-router-dom";
+import About from './pages/about';
+import Users from './pages/users';
+import Home from './pages/home';
+import './App.css'
+import FadingRoute from './components/FadingRoute';
+
+function App() {
+  return (
+    <Router>
+      <div>
+         <ul>
+          <li><NavLink exact to="/" >Home</NavLink></li>
+          <li><NavLink exact to="/about/123">about</NavLink></li>
+        </ul>
+
+        <Switch>
+          <Route exact path="/" component={Home} />
+          <FadingRoute path="/about/:id" component={About} />
+        </Switch>
+      </div>
+    </Router>
+  );
+}
+export default App;
+```
+
+##### children:func
+
+children 属性与 component 和 render 属性接收相同的 route props，当pathnam与path值不匹配的时候，children 的 match 为 null
+
+允许您根据路由是否匹配来动态调整 UI。例如，如果路由匹配，我们将添加一个 `active` 类
+
+```jsx
+import React from 'react'
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom'
+
+export default function ListItemLink({to, children, ...rest}) {
+  console.log({...rest});
+  return (
+    <Route
+      path={to}
+      children={(rootProps) => { // 结构
+        console.log(rootProps)
+        return (
+        <li>
+          <Link to={to} {...rest}
+            className={rootProps.match ? "active" : ""}
+          >{children}</Link>
+        </li>)
+      }}
+    />
+  )
+}
+
+ReactDOM.render(
+  <Router>
+    <ul>
+      <ListItemLink to="/abc ">a</ListItemLink>
+    </ul>
+  </Router>,
+);
+```
+
+#### 导航链接
+
+Link&NavLink组件
+
+`Link` 组件：用于指定导航链接，会渲染成 a 标签
+
+- `to` 属性，将来会渲染成 a 标签的 href 属性
+
+```jsx
+<Link to="/test">test</Link>
+// 渲染为：
+<a href="/test">test</a>
+```
+
+除了 Link 组件外，路由库中还提供了 `NavLink` 组件，可以在路由匹配时获得一个高亮类名，从而指定高亮类样式效果
+
+- 使用方式同 Link 组件，只是额外获得一个高亮类名
+
+- `activeClassName` 属性：用于指定高亮的类名，默认 `active`
+
+- `exact` 属性：精确匹配，表示必须精确匹配（to 属性值和浏览器地址栏中的 pathname 相同），类名才生效
+  
+  - 默认情况下，React 路由中的 NavLink 的 to 属性在匹配的时候，默认是 **模糊匹配**
+  - **模糊匹配**，表示：只要 浏览器地址栏中的 patchname（比如：/search/a）是以 NavLink to（/search） 属性的值开头的，此时，就会匹配成功
+
+```jsx
+<NavLink to="/abc">abczz</NavLink>
+// 渲染为：
+<a href="/abc" class="active">abczz</a>
+
+// exact 是否精确匹配
+// 模糊匹配:
+// 浏览器地址栏中的 pathname 为：/search/a
+// 匹配成功的 to 属性为：
+// 1 /search         ==> 模糊匹配成功
+// 2 /search/a    ==> 完全相同，匹配成功
+// 3 /sear            ==> 匹配失败，与一级路径 /search不相等
+
+// 精确匹配：
+// 浏览器地址栏中的 pathname 为：/search/a
+// 注意：添加 exact 属性后，变为精确匹配，此时，patchname 只能为 /search
+// React 中如果属性是 布尔值 可以只写属性名称，不用写后面的 = 
+<NavLink activeClassName='is-active' exact to="/search">search</NavLink>
 ```

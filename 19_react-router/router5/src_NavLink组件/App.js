@@ -9,8 +9,6 @@ import Users from './pages/users';
 import Home from './pages/home';
 import './App.css'
 import Test from './pages/test';
-import FadingRoute from './components/FadingRoute';
-import ListItemLink from './components/ListItemLink';
 
 function App() {
   const [isActive, setIsActive] = useState('home')
@@ -43,8 +41,6 @@ function App() {
             <li><NavLink exact to="/users" >users</NavLink></li>
             
             <li><NavLink exact to="/about/123">about</NavLink></li>
-            <ListItemLink to="/abc ">a</ListItemLink>
-            {/* <About children='aaa' /> */}
           </ul>
         </nav>
         {/* 理解一级路由出口 */}
@@ -56,14 +52,14 @@ function App() {
             exact:false  path=/user  to=/user/abc  呈现对应path=/user组件
            */}
           <Route exact path="/" component={Home} />
-          {/* <Route path="/about/:username" component={About} >
-            <About a={1} />
-          </Route> */}
+          <Route path="/about/:username" component={About} >
+            {/* <About a={1} /> */}
+          </Route>
           <Route path="/users/detail/:id" component={Test} />
           <Route path="/users/detail" component={Test} />
           <Route path="/users/:id" component={Test} />
           <Route path="/users" component={Users} />
-          <FadingRoute path="/about/:id" component={About} />
+          
           {/* <Route path="/:id">
             <Test />
           </Route> */}
