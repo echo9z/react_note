@@ -11,6 +11,7 @@ import './App.css'
 import Test from './pages/test';
 import FadingRoute from './components/FadingRoute';
 import ListItemLink from './components/ListItemLink';
+import NoMatch from './pages/no-match';
 
 function App() {
   const [isActive, setIsActive] = useState('home')
@@ -19,34 +20,32 @@ function App() {
     <Router>
       <h2>router基本使用</h2>
       <div>
-        <nav>
-          <ul>
-            {/* 
-              // exact 是否精确匹配
-              // 模糊匹配:
-              // 浏览器地址栏中的 pathname 为：/search/a
-              // 匹配成功的 to 属性为：
-              // 1 /search 		==> 模糊匹配成功
-              // 2 /search/a	==> 完全相同，匹配成功
-              // 3 /sear			==> 匹配失败，与一级路径 /search不相等
+        <ul>
+          {/* 
+            // exact 是否精确匹配
+            // 模糊匹配:
+            // 浏览器地址栏中的 pathname 为：/search/a
+            // 匹配成功的 to 属性为：
+            // 1 /search 		==> 模糊匹配成功
+            // 2 /search/a	==> 完全相同，匹配成功
+            // 3 /sear			==> 匹配失败，与一级路径 /search不相等
 
-              // 精确匹配：
-              // 浏览器地址栏中的 pathname 为：/search/a
-              // 注意：添加 exact 属性后，变为精确匹配，此时，patchname 只能为 /search
-              // React 中如果属性是 布尔值 可以只写属性名称，不用写后面的 = 
-             */}
-            <li><NavLink exact to="/" >Home</NavLink></li>
+            // 精确匹配：
+            // 浏览器地址栏中的 pathname 为：/search/a
+            // 注意：添加 exact 属性后，变为精确匹配，此时，patchname 只能为 /search
+            // React 中如果属性是 布尔值 可以只写属性名称，不用写后面的 = 
+            */}
+          <li><NavLink exact to="/" >Home</NavLink></li>
 
-            <li><NavLink exact to="/users/detail/100" >/users/detail/100</NavLink></li>
-            <li><NavLink exact to="/users/detail">/users/detail</NavLink></li>
-            <li><NavLink exact to="/users/15" >/users/15</NavLink></li>
-            <li><NavLink exact to="/users" >users</NavLink></li>
-            
-            <li><NavLink exact to="/about/123">about</NavLink></li>
-            <ListItemLink to="/abc ">a</ListItemLink>
-            {/* <About children='aaa' /> */}
-          </ul>
-        </nav>
+          <li><NavLink exact to="/users/detail/100" >/users/detail/100</NavLink></li>
+          <li><NavLink exact to="/users/detail">/users/detail</NavLink></li>
+          <li><NavLink exact to="/users/15" >/users/15</NavLink></li>
+          <li><NavLink exact to="/users" >users</NavLink></li>
+          
+          <li><NavLink exact to="/about/123">about</NavLink></li>
+          <ListItemLink to="/abc ">a</ListItemLink>
+          {/* <About children='aaa' /> */}
+        </ul>
         {/* 理解一级路由出口 */}
         <Switch>
           {/* exact当为true时，进行精确匹配
@@ -67,6 +66,9 @@ function App() {
           {/* <Route path="/:id">
             <Test />
           </Route> */}
+
+          {/* 以上路由规则全都不匹配时，404页面; 放在最后，兜底*/}
+          <Route path="*" component={NoMatch}/>
         </Switch>
       </div>
     </Router>

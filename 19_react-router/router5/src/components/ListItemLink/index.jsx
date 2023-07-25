@@ -10,11 +10,11 @@ export default function ListItemLink({to, children, ...rest}) {
       children={(rootProps) => { // 结构
         console.log(rootProps)
         return (
-        <li>
-          <Link to={to} {...rest}
-            className={rootProps.match ? "active" : ""}
-          >{children}</Link>
-        </li>)
+          <li>
+            <Link to={to} {...rest}
+              className={rootProps.match ? "active" : ""}
+            >{children}</Link>
+          </li>)
       }}
     />
   )

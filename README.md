@@ -6468,7 +6468,7 @@ ReactDOM.render(
 
 #### 路由匹配器
 
-有两种路由匹配组件，Switch 和 Route。当渲染Switch 组件时，查找Route子元素中path与当前URL匹配的元素。将找到的第一个Route呈现渲染并忽略所有的其他路由。（注意：比如/user、/user/:id、/user/detail、/user/detail/:id，将包含更多特定路径的Route放在最前面）
+有两种路由匹配组件，**Switch** 和 **Route**。当渲染Switch 组件时，查找Route子元素中path与当前URL匹配的元素。将找到的第一个Route呈现渲染并忽略所有的其他路由。（注意：比如`/user`、`/user/:id`、/user/detail、/user/detail/:id，将包含更多特定路径的Route放在最前面）
 
 如果没有匹配的Route，Switch将什么都不会渲染(null)。
 
@@ -6519,9 +6519,37 @@ function App() {
 export default App;
 ```
 
-注意： Route path匹配的是URL的开头而不是整个URL,所以`<Route path="/">` 会始终与URL匹配，所以我们通常将这个Route放在`<Switch>`的最后，还有一个解决方案就是使用`<Route exact path="/">`，使用 exact 将使Route匹配整条 URL 而不仅仅是开头。
+    注意： Route path匹配的是URL的开头而不是整个URL，`<Route path="/">` 会始终与URL匹配，所以我们通常将这个Route放在`<Switch>`的最后，还有一个解决方案就是使用`<Route exact path="/">`，使用 exact 将使Route匹配整条 URL 而不仅仅是开头。
 
-单独只写Route匹配组件，查找Route元素中path与当前URL匹配的元素。如果第一个Rout元素满足，后面还存在其他满足Route元素，则满足Route路由都进行渲染。🌰：
+##### 路由匹配规则
+
+模糊匹配
+
+- 问题：当 Link组件的 to 属性值为 “/login”时，为什么 默认路由 也被匹配成功?
+- 默认情况下，React 路由是**模糊匹配**模式
+- 模糊匹配规则：只要请求url的pathname 与Route中的path 开头就会匹配成功
+
+```js
+<Link to="/login">登录页面</Link>
+<Route path="/" component={Home} /> // 匹配成功
+<Route path="/:dynamic" component={Home} /> 
+// pathname 代表Link组件的to属性（也就是 location.pathname）
+// path 代表Route组件的path属性
+```
+
+精确匹配
+
+- 给 Route 组件添加 `exact` 属性，让其变为**精确匹配**模式
+- 精确匹配：只有当 path 和 pathname 完全匹配时才会展示该路由
+
+```jsx
+<Link to="/login">登录页面</Link>
+<Route exact path="/" component={Home} />
+```
+
+    单独只写Route匹配组件，查找Route元素中path与当前URL匹配的元素。如果第一个Rout元素满足，后面还存在其他满足Route元素，则满足Route路由都进行渲染。
+
+下面🌰：
 
 ```jsx
 import { useState } from 'react'
@@ -6753,4 +6781,50 @@ Link&NavLink组件
 // 注意：添加 exact 属性后，变为精确匹配，此时，patchname 只能为 /search
 // React 中如果属性是 布尔值 可以只写属性名称，不用写后面的 = 
 <NavLink activeClassName='is-active' exact to="/search">search</NavLink>
+```
+
+#### 404页面
+
+路由规则全都不匹配时，通过`path="*"`进行任意匹配，没有匹配到
+
+```jsx
+import { BrowserRouter as Router, Switch, Route, NavLink } from "react-router-dom";
+import About from './pages/about';
+import Users from './pages/users';
+import Home from './pages/home';
+import NoMatch from './pages/no-match';
+
+function App() {
+  return (
+    <Router>
+      <div>
+        <ul>
+          <li><NavLink exact to="/" >Home</NavLink></li>
+          <li><NavLink exact to="/users" >users</NavLink></li>
+          <li><NavLink exact to="/about">about</NavLink></li>
+        </ul>
+
+        <Switch>
+          <Route exact path="/" component={Home} />
+          <Route path="/users" component={Users} />
+          <Route path="/about" component={About} />
+          {/* 以上路由规则全都不匹配时，404页面; 放在最后，兜底*/}
+          <Route path="*" component={NoMatch}/>
+        </Switch>
+      </div>
+    </Router>
+  );
+}
+
+function NoMatch() {
+  const location = useLocation()
+  return (
+    <div>
+      <h2>404</h2>
+      <h3>no path <code>{location.pathname}</code></h3>
+    </div>
+  )
+}
+
+export default App;
 ```
