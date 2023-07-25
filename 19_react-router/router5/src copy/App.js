@@ -26,15 +26,16 @@ function App() {
         </ul>
         {/* 理解一级路由出口 */}
         <Switch>
-          <Redirect exact from='/' to='/home' />
-          <Route path="/home" component={Home} />
+          <Redirect from='/' to='/home' />
+          <Route exact path="/home" component={Home} />
+          <Route path="/users/detail/:id" component={Test} />
+          <Route path="/users/detail" component={Test} />
+          <Route path="/users/:id" component={Test} />
           <Route path="/users" component={Users} />
-          <FadingRoute path="/about" component={About} />
+          <FadingRoute path="/about/:id" component={About} />
 
-          {/* 以上路由规则全都不匹配时，重定向到; 放在最后，兜底*/}
-          <Redirect exact to='/home' />
           {/* 以上路由规则全都不匹配时，404页面; 放在最后，兜底*/}
-          {/* <Route path="*" component={NoMatch}/> */}
+          <Route path="*" component={NoMatch}/>
         </Switch>
       </div>
     </Router>

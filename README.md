@@ -6532,7 +6532,7 @@ export default App;
 ```js
 <Link to="/login">登录页面</Link>
 <Route path="/" component={Home} /> // 匹配成功
-<Route path="/:dynamic" component={Home} /> 
+<Route path="/:dynamic" component={Home} /> // 匹配成功
 // pathname 代表Link组件的to属性（也就是 location.pathname）
 // path 代表Route组件的path属性
 ```
@@ -6546,6 +6546,20 @@ export default App;
 <Link to="/login">登录页面</Link>
 <Route exact path="/" component={Home} />
 ```
+
+exact当为true时，进行精确匹配
+
+比如请求`http://localhost:80/user/abc`，路由表中匹配`path=/user`，与`location.pathname=/user/abc` 进行精确匹配；
+
+如果exact为false呈现对应组件，如果为true不呈现组件
+
+|     |     |     |     |
+| --- | --- | --- | --- |
+|     |     |     |     |
+
+exact:true  path=/user to=/user/abc 不呈现组件
+
+exact:false  path=/user to=/user/abc 呈现对应path=/user组件
 
     单独只写Route匹配组件，查找Route元素中path与当前URL匹配的元素。如果第一个Rout元素满足，后面还存在其他满足Route元素，则满足Route路由都进行渲染。
 
@@ -6827,4 +6841,78 @@ function NoMatch() {
 }
 
 export default App;
+```
+
+#### Redirect重定向
+
+    重定向到新 URL将覆盖历史记录堆栈中的当前位置，就像服务器端重定向 （HTTP 3xx） 一样。
+
+- to：重定向到新 URL
+
+```jsx
+    <Router>
+      <h2>router基本使用</h2>
+      <div>
+        <ul>
+          <li><NavLink exact to="/" >Home</NavLink></li>
+          <li><NavLink exact to="/users" >users</NavLink></li>
+          <li><NavLink exact to="/about">about</NavLink></li>
+        </ul>
+
+        <Switch>
+          <Redirect exact from='/' to='/home' />
+          <Route path="/home" component={Home} />
+          <Route path="/users" component={Users} />
+          <Route path="/about" component={About} />
+
+          {/* 以上路由规则全都不匹配时，重定向到/home; 放在最后，兜底*/}
+          <Redirect to='/home' />
+          {/* 以上路由规则全都不匹配时，404页面; 放在最后，兜底*/}
+          {/* <Route path="*" component={NoMatch}/> */}
+        </Switch>
+      </div>
+    </Router>
+```
+
+- to为object对象
+
+```jsx
+<Redirect
+  to={{
+    pathname: "/login",
+    search: "?q=your+face",
+    state: { referrer: currentLocation }
+  }}
+/>
+```
+
+    将通过路径名 `'/login'` 指向的 `Login` 组件中的 `this.props.location.state.referrer` 访问此新的 `referrer` 属性值
+
+- from：请求原 UR
+
+```jsx
+<Switch>
+  <Redirect from="/old-path" to="/new-path" />
+  <Route path="/new-path">
+    <Comp />
+  </Route>
+</Switch>
+```
+
+注意：from这只能用于在 `<Switch>` 内渲染 `<Redirect>` 时匹配位置。
+
+- push为 `true` 时，重定向会将一个新条目推送到历史记录中，而不是替换当前条目。
+
+- exact完全匹配 `from`; 等同于路线Route组件中的excat
+
+```jsx
+<Switch>
+  <Redirect exact push from="/" to="/home" />
+  <Route path="/home">
+    <Home />
+  </Route>
+  <Route path="/about">
+    <About />
+  </Route>
+</Switch>
 ```
