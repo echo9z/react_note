@@ -6553,13 +6553,10 @@ exact当为true时，进行精确匹配
 
 如果exact为false呈现对应组件，如果为true不呈现组件
 
-|     |     |     |     |
-| --- | --- | --- | --- |
-|     |     |     |     |
-
-exact:true  path=/user to=/user/abc 不呈现组件
-
-exact:false  path=/user to=/user/abc 呈现对应path=/user组件
+| exact       | Route path | Link to      |                  |
+| ----------- | ---------- | ------------ | ---------------- |
+| exact:true  | path=/user | to=/user/abc | 不呈现组件            |
+| exact:false | path=/user | to=/user/abc | 呈现对应path=/user组件 |
 
     单独只写Route匹配组件，查找Route元素中path与当前URL匹配的元素。如果第一个Rout元素满足，后面还存在其他满足Route元素，则满足Route路由都进行渲染。
 
@@ -6886,7 +6883,7 @@ export default App;
 />
 ```
 
-    将通过路径名 `'/login'` 指向的 `Login` 组件中的 `this.props.location.state.referrer` 访问此新的 `referrer` 属性值
+    将通过路径名 `'/login'` 指向的 `Login` 路由组件中的 `this.props.location.state.referrer` 访问此新的 `referrer` 属性值
 
 - from：请求原 UR
 
