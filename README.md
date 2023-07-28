@@ -5875,7 +5875,7 @@ npm install styled-components
 基本使用，创建css style.js
 
 ```js
-import styled, {css} from 'styled-components'
+import styled from 'styled-components'
 // 导出
 export const Wrapper = styled.div`
   h2{
@@ -6343,94 +6343,6 @@ function App() {
 }
 
 export default App;
-```
-
-嵌套路由
-
-```jsx
-import { useState } from 'react'
-import { 
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Link } from "react-router-dom";
-import About from './components/about';
-import Users from './components/users';
-import Home from './components/home';
-import './App.css'
-
-function App() {
-  const [isActive, setIsActive] = useState('home')
-
-  return (
-    <Router>
-      <h2>router嵌套路由</h2>
-      <div>
-        <nav>
-          <ul>
-            <li><Link to="/" onClick={() => setIsActive('home')}
-              className={`${isActive === 'home'? 'active':''}`}>Home</Link></li>
-            <li><Link to="/users" onClick={() => setIsActive('users')}
-              className={`${isActive === 'users'? 'active':''}`}>users</Link></li>
-            <li><Link to="/about" onClick={() => setIsActive('about')}
-              className={`${isActive === 'about'? 'active':''}`}>about</Link></li>
-          </ul>
-        </nav>
-        {/* 一级路由出口 */}
-        <Switch>
-          <Route exact path="/" >
-            <Home />
-          </Route>
-          <Route path="/about">
-            <About />
-          </Route>
-          <Route path="/users">
-            <Users />
-          </Route>
-        </Switch>
-      </div>
-    </Router>
-  );
-}
-
-export default App;
-```
-
-```jsx
-// users.jsx
-import {useRouteMatch, Route, Switch, Link, useParams} from 'react-router-dom'
-
-export default function Users() {
-  const match = useRouteMatch()
-  // path: route中的匹配规则，url请求地址后路径字符串
-  // <Route path={`/:id`} 请求的路径 http://localhost:80/users; path='/:id' url='/users'
-  console.log(match.path, match.url)
-  return (
-    <div>
-      <h2>Users</h2>
-      <ul>
-        <li><Link to={`${match.url}/abc`}>users/acb</Link></li>
-        <li><Link to={`${match.url}/123`}>users/123</Link></li>
-        <li><Link to={`${match.url}/props-v-state`}>props-v-state</Link></li>
-      </ul>
-      {/* 二级路由出口 */}
-      <Switch>
-        <Route exact path={match.path} />
-        <Route path={`${match.path}/:userId`} component={User}/>
-      </Switch>
-    </div>
-  )
-}
-
-function User() {
-  // 获取路由中的动态参数
-  const {userId} = useParams()
-  return (
-    <div>
-      <h3>{userId}</h3>
-    </div>
-  )
-}
 ```
 
 #### React Router中的组件主要分为三类：
@@ -6912,4 +6824,92 @@ export default App;
     <About />
   </Route>
 </Switch>
+```
+
+#### 嵌套路由(二级路由)
+
+```jsx
+import { useState } from 'react'
+import { 
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link } from "react-router-dom";
+import About from './components/about';
+import Users from './components/users';
+import Home from './components/home';
+import './App.css'
+
+function App() {
+  const [isActive, setIsActive] = useState('home')
+
+  return (
+    <Router>
+      <h2>router嵌套路由</h2>
+      <div>
+        <nav>
+          <ul>
+            <li><Link to="/" onClick={() => setIsActive('home')}
+              className={`${isActive === 'home'? 'active':''}`}>Home</Link></li>
+            <li><Link to="/users" onClick={() => setIsActive('users')}
+              className={`${isActive === 'users'? 'active':''}`}>users</Link></li>
+            <li><Link to="/about" onClick={() => setIsActive('about')}
+              className={`${isActive === 'about'? 'active':''}`}>about</Link></li>
+          </ul>
+        </nav>
+        {/* 一级路由出口 */}
+        <Switch>
+          <Route exact path="/" >
+            <Home />
+          </Route>
+          <Route path="/about">
+            <About />
+          </Route>
+          <Route path="/users">
+            <Users />
+          </Route>
+        </Switch>
+      </div>
+    </Router>
+  );
+}
+
+export default App;
+```
+
+```jsx
+// users.jsx
+import {useRouteMatch, Route, Switch, Link, useParams} from 'react-router-dom'
+
+export default function Users() {
+  const match = useRouteMatch()
+  // path: route中的匹配规则，url请求地址后路径字符串
+  // <Route path={`/:id`} 请求的路径 http://localhost:80/users; path='/:id' url='/users'
+  console.log(match.path, match.url)
+  return (
+    <div>
+      <h2>Users</h2>
+      <ul>
+        <li><Link to={`${match.url}/abc`}>users/acb</Link></li>
+        <li><Link to={`${match.url}/123`}>users/123</Link></li>
+        <li><Link to={`${match.url}/props-v-state`}>props-v-state</Link></li>
+      </ul>
+      {/* 二级路由出口 */}
+      <Switch>
+        <Route exact path={match.path} />
+        <Route path={`${match.path}/:userId`} component={User}/>
+      </Switch>
+    </div>
+  )
+}
+
+function User() {
+  // 获取路由中的动态参数
+  const {userId} = useParams()
+  return (
+    <div>
+      <h3>{userId}</h3>
+    </div>
+  )
+}
 ```
