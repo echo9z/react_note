@@ -6913,3 +6913,44 @@ function User() {
   )
 }
 ```
+
+#### 获取url动态Params参数
+
+```jsx
+import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import About from './components/about';
+import Home from './components/home';
+
+function App() {
+  return (
+    <Router>
+      <div>
+        <ul>
+          <li><NavLink to="/" >Home</NavLink></li>
+          <li><NavLink to="/about/123">about</NavLink></li>
+        </ul>
+
+        <Switch>
+          <Route exact path="/" component={Home} />
+          <Route path="/about/:id" component={About} />
+        </Switch>
+      </div>
+    </Router>
+  );
+}
+
+function About(props) {
+  // 方式一：通过props路由组件传递的match属性
+  console.log(props.match.params.id);
+  // 方式二：useParams hooks函数
+  const {id} = useParams()
+  return (
+    <div>
+      About {props.match.params.id};
+      hooks {id}
+    </div>
+  )
+}
+
+export default App;
+```
