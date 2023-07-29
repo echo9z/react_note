@@ -15,25 +15,15 @@ export default function Message() {
       <ul>
         {
           arr.map((item) => <li key={item.id}>
-            <Link to={{
-              pathname: `${url}/detail`,
-              // search: `?id=${item.id}&title=${item.content}`, // url后添加?id=1&title=message
-              // hash: "#the-hash", // 在 url添加 #the-hash
-              state: { 
-                id: item.id,
-                title: item.content
-              } // 路由组件中，通过location.state
-            }} >{item.content}</Link>
+            {/* 向路由组件传递search参数 */}
+            <Link to={`${url}/detail?id=${item.id}&title=${item.content}`} >{item.content}</Link>
           </li>)
         }
       </ul>
       <Switch>
         {/* search参数无需声明接收，query get传递查询参数 */}
         <Route path={`${path}/detail`} component={Detail} />
-        <Redirect from={`${path}`} to={{
-          pathname: `${url}/detail`,
-          state: { id: 1, title: 'message01' }
-        }} />
+        <Redirect from={`${path}`} to={`${url}/detail?id=1&title=message01`} />
       </Switch>
     </div>
   )
