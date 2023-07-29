@@ -1,6 +1,6 @@
 import React,{ useState } from 'react'
 import { useRouteMatch, Link, Switch, Route, Redirect } from 'react-router-dom'
-import Info from './detail'
+import Detail from './detail'
 
 export default function Message() {
   const {path, url} = useRouteMatch()
@@ -15,13 +15,13 @@ export default function Message() {
       <ul>
         {
           arr.map((item) => <li key={item.id}>
-            <Link to={`${url}/detail/${item.id}`} >{item.content}</Link>
+            <Link to={`${url}/detail?id=${item.id}&title=${item.content}`} >{item.content}</Link>
           </li>)
         }
       </ul>
       <Switch>
-        <Route path={`${path}/detail/:messageId`} component={Info} />
-        <Redirect from={`${path}`} to={`${url}/detail/1`} />
+        <Route path={`${path}/detail`} component={Detail} />
+        <Redirect from={`${path}`} to={`${url}/detail?id=1&title=message01`} />
       </Switch>
     </div>
   )
