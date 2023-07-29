@@ -1,0 +1,8 @@
+.cart-goods-list {
+  position: fixed;
+  left: 0;
+  right: 0;
+  overflow-y: auto;
+  top: 45px;
+  bottom: 50px;
+}/*# sourceMappingURL=index.css.map */

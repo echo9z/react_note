@@ -4392,7 +4392,7 @@ function App() {
 
 `useMemo`接受两个参数，第一个参数是`callback`函数，返回值用于产生**保存值**。 第二个参数是一个数组，作为`dep`依赖项，数组里面的依赖项发生变化，重新执行第一个函数，产生**新的值**。
 
-当一个父组件中调用了一个子组件的时候，父组件的 state 发生变化，会导致父组件更新，而子组件虽然没有发生改变，但也会进行更新。
+    当一个父组件中调用了一个子组件的时候，父组件的 state 发生变化，会导致父组件更新，而子组件虽然没有发生改变，但也会进行更新。
 
 简单的理解下，当一个页面内容非常复杂，模块非常多的时候，函数式组件会**从头更新到尾**，只要一处改变，所有的模块都会进行刷新，这种情况显然是没有必要的。
 
@@ -6916,9 +6916,12 @@ function User() {
 
 #### 获取url动态Params参数
 
+路由链接(携带参数)：`<Link to='/demo/test/tom/18'}>`
+注册路由(声明接收)：`<Route path="/demo/test/:name/:age" component={Test}/>`
+接收参数：this.props.match.params 或 const {name, age} = useParams()
+
 ```jsx
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
-import About from './components/about';
 import Home from './components/home';
 
 function App() {
@@ -6927,12 +6930,14 @@ function App() {
       <div>
         <ul>
           <li><NavLink to="/" >Home</NavLink></li>
-          <li><NavLink to="/about/123">about</NavLink></li>
+          {/* 向路由传递params 参数 */}
+          <li><NavLink to="/about/123/ohmyhash">about</NavLink></li>
         </ul>
 
         <Switch>
           <Route exact path="/" component={Home} />
-          <Route path="/about/:id" component={About} />
+          {/* 声明接收params 参数 */}
+          <Route path="/about/:id/:detail" component={About} />
         </Switch>
       </div>
     </Router>
@@ -6943,14 +6948,16 @@ function About(props) {
   // 方式一：通过props路由组件传递的match属性
   console.log(props.match.params.id);
   // 方式二：useParams hooks函数
-  const {id} = useParams()
+  const {id, detail} = useParams()
   return (
     <div>
       About {props.match.params.id};
-      hooks {id}
+      hooks {id} - {detail}
     </div>
   )
 }
 
 export default App;
 ```
+
+#### 获取url Query参数

@@ -1,0 +1,12 @@
+.selection-scss {
+  margin-top: 20px;
+  border: 1px solid red;
+}
+.selection-scss .title-scss {
+  font-size: 18px;
+  background-color: lightpink;
+}
+.selection-scss .content-scss {
+  font-size: 32px;
+  color: red;
+}/*# sourceMappingURL=scss-style.css.map */

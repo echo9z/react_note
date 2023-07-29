@@ -1,0 +1,56 @@
+@charset "UTF-8";
+.cart-goods-item {
+  display: flex;
+  padding: 10px 5px;
+  border-bottom: 1px solid #ccc;
+}
+.cart-goods-item .left .checkbox {
+  width: 16px;
+  height: 16px;
+  margin: 0 4px 0 0;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  position: relative;
+  border-radius: 50%;
+  border: 1px solid rgb(118, 118, 118);
+  box-sizing: border-box;
+  @apply mr-1;
+}
+.cart-goods-item .left .checkbox:checked::before {
+  content: "✓";
+  color: #fff;
+  background: #1d7bff;
+  position: relative;
+  top: -5px;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 50%;
+}
+.cart-goods-item .left img {
+  width: 120px;
+  height: 120px;
+  margin-right: 8px;
+  border-radius: 5px;
+}
+.cart-goods-item .left .custom-control-label::before,
+.cart-goods-item .left .custom-control-label::after {
+  top: 50px;
+}
+.cart-goods-item .right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.cart-goods-item .right .bottom {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+}
+.cart-goods-item .right .bottom .price {
+  color: red;
+  font-weight: bold;
+}/*# sourceMappingURL=index.css.map */
