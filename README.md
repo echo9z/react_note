@@ -6964,8 +6964,9 @@ export default App;
 
 路由链接(携带参数)：`<Link to='/demo/test?name=tom&age=18'}>Home</Link>`
 注册路由(无需声明，正常注册即可)：`<Route path="/demo/test" component={Test}/>`
-接收参数：`this.props.location.search`
-备注：获取到的search是urlencoded编码字符串，借助node模块中querystring解析
+
+- 接收参数：`this.props.location.search`
+  备注：获取到的search是urlencoded编码字符串，借助node模块中querystring解析
 
 ```jsx
 import { BrowserRouter as Router, Switch, Route, Link, useLocation } from "react-router-dom";
@@ -7061,12 +7062,12 @@ function App() {
 function About(props) {
   // 方式一：通过props路由组件传递的location.state属性
   console.log(props.location.state);
-  const search = props.location.state
+  const state1 = props.location.state
   // 方式二：useLocation hooks函数，返回location对象
   const { state } = useLocation()
   return (
     <div>
-      About {state.id};
+      About {state1.id};
       hooks {state.id} - {state.detail}
     </div>
   )
