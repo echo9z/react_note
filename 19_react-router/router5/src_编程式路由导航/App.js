@@ -12,14 +12,12 @@ import Home from './pages/home';
 // import './App.css'
 // import Test from './pages/test';
 import FadingRoute from './components/FadingRoute';
-import Header from './components/Header';
 import NoMatch from './pages/no-match';
 
 function App() {
   return (
     <Router>
       <h2>router基本使用</h2>
-      <Header />
       <AppWrapper>
         <ul className='left'>
           <li><NavLink exact to="/" >Home</NavLink></li>

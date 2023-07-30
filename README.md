@@ -41,19 +41,19 @@ react  有100真实dom，变化后101dom，对比虚拟dom原来前100次dom一�
 ### react 第一个案例
 
 ```jsx
-  <div id="app"></div>
-  <!-- 先引入react核心库 react-dom操作dom库 babel,jsx转换js库  -->
-  <script type="text/javascript" src="../lib/16.8.4/react.development.js"></script>
-  <script type="text/javascript" src="../lib/16.8.4/react-dom.development.js"></script>
-  <script type="text/javascript" src="../lib/16.8.4/babel.min.js"></script>
+<div id="app"></div>
+<!-- 先引入react核心库 react-dom操作dom库 babel,jsx转换js库  -->
+<script type="text/javascript" src="../lib/16.8.4/react.development.js"></script>
+<script type="text/javascript" src="../lib/16.8.4/react-dom.development.js"></script>
+<script type="text/javascript" src="../lib/16.8.4/babel.min.js"></script>
 
-  <!-- text/babel 写的是jsx，让babel进行编译转译为js -->
-  <script type="text/babel">
-    // 1.创建虚拟dom
-    const VDOM = <h1>hello,React</h1>/* 此处不需要写引号，不是字符串 */
-    // 2.渲染虚拟dom到页面 ReactDOM函数 (VDom, 选自器)
-    ReactDOM.render(VDOM, document.getElementById('app'))
-  </script>
+<!-- text/babel 写的是jsx，让babel进行编译转译为js -->
+<script type="text/babel">
+  // 1.创建虚拟dom
+  const VDOM = <h1>hello,React</h1>/* 此处不需要写引号，不是字符串 */
+  // 2.渲染虚拟dom到页面 ReactDOM函数 (VDom, 选自器)
+  ReactDOM.render(VDOM, document.getElementById('app'))
+</script>
 ```
 
 > 16.8 与 18.0 render变化
@@ -74,23 +74,23 @@ root.render(<h1>123456</h1>)
 - jsx创建虚拟dom
 
 ```jsx
-  <div id="app"></div>
-  <!-- 先引入react核心库 react-dom操作dom库 babel,jsx转换js库  -->
-  <script type="text/javascript" src="../lib/16.8.4/react.development.js"></script>
-  <script type="text/javascript" src="../lib/16.8.4/react-dom.development.js"></script>
-  <script type="text/javascript" src="../lib/16.8.4/babel.min.js"></script>
+<div id="app"></div>
+<!-- 先引入react核心库 react-dom操作dom库 babel,jsx转换js库  -->
+<script type="text/javascript" src="../lib/16.8.4/react.development.js"></script>
+<script type="text/javascript" src="../lib/16.8.4/react-dom.development.js"></script>
+<script type="text/javascript" src="../lib/16.8.4/babel.min.js"></script>
 
-  <!-- text/babel 写的是jsx，让babel进行编译转译为js -->
-  <script type="text/babel">
-    // 1.创建虚拟dom
-    const VDOM = ( /* 此处不需要写引号，不是字符串 */
-      <h1 id='text'>
-        <span>hello,React</span>
-      </h1>
-    )
-    // 2.渲染虚拟dom到页面 ReactDOM函数 (VDom, 选自器)
-    ReactDOM.render(VDOM, document.getElementById('app'))
-  </script>
+<!-- text/babel 写的是jsx，让babel进行编译转译为js -->
+<script type="text/babel">
+  // 1.创建虚拟dom
+  const VDOM = ( /* 此处不需要写引号，不是字符串 */
+    <h1 id='text'>
+      <span>hello,React</span>
+    </h1>
+  )
+  // 2.渲染虚拟dom到页面 ReactDOM函数 (VDom, 选自器)
+  ReactDOM.render(VDOM, document.getElementById('app'))
+</script>
 ```
 
 - js创建虚拟dom
@@ -98,20 +98,20 @@ root.render(<h1>123456</h1>)
 `<h1 class='t-ty' > <span>hello,react</span> </h1>`
 
 ```js
-  <div id="app"></div>
-  <!-- 先引入react核心库 react-dom操作dom库 babel,jsx转换js库  -->
-  <script type="text/javascript" src="../lib/16.8.4/react.development.js"></script>
-  <script type="text/javascript" src="../lib/16.8.4/react-dom.development.js"></script>
-  <!-- <script type="text/javascript" src="../lib/16.8.4/babel.min.js"></script> -->
+<div id="app"></div>
+<!-- 先引入react核心库 react-dom操作dom库 babel,jsx转换js库  -->
+<script type="text/javascript" src="../lib/16.8.4/react.development.js"></script>
+<script type="text/javascript" src="../lib/16.8.4/react-dom.development.js"></script>
+<!-- <script type="text/javascript" src="../lib/16.8.4/babel.min.js"></script> -->
 
-  <script type="text/javascript">
-    // 1.创建虚拟dom createElement(标签名, 标签属性, 标签内容)
-    const VDOM = React.createElement('h1', { id: 'text', className: 't-ty'},
-      React.createElement('span', { className: ''}, 'hello,react')
-    )
-    // 2.渲染虚拟dom到页面 ReactDOM函数 (VDom, 选自器)
-    ReactDOM.render(VDOM, document.getElementById('app'))
-  </script>
+<script type="text/javascript">
+  // 1.创建虚拟dom createElement(标签名, 标签属性, 标签内容)
+  const VDOM = React.createElement('h1', { id: 'text', className: 't-ty'},
+    React.createElement('span', { className: ''}, 'hello,react')
+  )
+  // 2.渲染虚拟dom到页面 ReactDOM函数 (VDom, 选自器)
+  ReactDOM.render(VDOM, document.getElementById('app'))
+</script>
 ```
 
 - 使用 react 创建如下元素
@@ -152,29 +152,29 @@ root.render(element)
 3. 虚拟dom是react在内存中创建，会被react转化为真实对象，呈现在页面上
 
 ```js
-  <div id="app"></div>
-  <div id="demo"></div>
-  <!-- 先引入react核心库 react-dom操作dom库 babel,jsx转换js库  -->
-  <script type="text/javascript" src="../lib/16.8.4/react.development.js"></script>
-  <script type="text/javascript" src="../lib/16.8.4/react-dom.development.js"></script>
-  <script type="text/javascript" src="../lib/16.8.4/babel.min.js"></script>
+<div id="app"></div>
+<div id="demo"></div>
+<!-- 先引入react核心库 react-dom操作dom库 babel,jsx转换js库  -->
+<script type="text/javascript" src="../lib/16.8.4/react.development.js"></script>
+<script type="text/javascript" src="../lib/16.8.4/react-dom.development.js"></script>
+<script type="text/javascript" src="../lib/16.8.4/babel.min.js"></script>
 
-  <!-- text/babel 写的是jsx，让babel进行编译转译为js -->
-  <script type="text/babel">
-    // 1.创建虚拟dom
-    const VDOM = ( /* 此处不需要写引号，不是字符串 */
-      <h1 id='text'>
-        <span>hello,React</span>
-      </h1>
-    )
-    // 2.渲染虚拟dom到页面 ReactDOM函数 (VDom, 选自器)
-    ReactDOM.render(VDOM, document.getElementById('app'))
+<!-- text/babel 写的是jsx，让babel进行编译转译为js -->
+<script type="text/babel">
+  // 1.创建虚拟dom
+  const VDOM = ( /* 此处不需要写引号，不是字符串 */
+    <h1 id='text'>
+      <span>hello,React</span>
+    </h1>
+  )
+  // 2.渲染虚拟dom到页面 ReactDOM函数 (VDom, 选自器)
+  ReactDOM.render(VDOM, document.getElementById('app'))
 
-    const TDOM = document.getElementById('demo')
-    console.log('虚拟dom', VDOM);
-    console.log('真实dom',TDOM);
-    // debugger 打断点
-  </script>
+  const TDOM = document.getElementById('demo')
+  console.log('虚拟dom', VDOM);
+  console.log('真实dom',TDOM);
+  // debugger 打断点
+</script>
 ```
 
 ### react 脚手架
@@ -381,18 +381,18 @@ const element = (
 - jsx中标签元素
 
 ```js
-   <div id="app"></div>
-   <script type="text/babel">  
-      const VDOM1 = ( // jsx多行 使用()包裹
-      // 必须要有根节点
-      <React.Fragment>
-        <test>test</test> // 首字母小写，该标签会转为html中同名元素标签，没测抛出没找到先关元素，不影响视渲染
-        // <Good >123</Good> 报错，首字母大写，react就会渲染，没有就是报错影响视图渲染
-      </React.Fragment>
-    )
+<div id="app"></div>
+<script type="text/babel">  
+  const VDOM1 = ( // jsx多行 使用()包裹
+  // 必须要有根节点
+  <React.Fragment>
+    <test>test</test> // 首字母小写，该标签会转为html中同名元素标签，没测抛出没找到先关元素，不影响视渲染
+    // <Good >123</Good> 报错，首字母大写，react就会渲染，没有就是报错影响视图渲染
+  </React.Fragment>
+)
 
-    ReactDOM.render(VDOM1, document.getElementById('app'))
-   </script>
+ReactDOM.render(VDOM1, document.getElementById('app'))
+</script>
 ```
 
 jsx语法规则总结：
@@ -6215,6 +6215,8 @@ export default function Classnames() {
 
 前端路由分为：历史路由、哈希路由两种。二者都不会产生页面刷新，但是表现形式与本质原理都不一致。
 
+##### hash路由
+
 - url中的hash
   
   - url的hash也就是锚点#，本质上改变location.href属性
@@ -6247,6 +6249,9 @@ export default function Classnames() {
       }
   })
   ```
+
+##### history路由
+
 * h5中的history
   
   * history.back() 去上一条历史
@@ -6686,9 +6691,11 @@ Link&NavLink组件
   - 默认情况下，React 路由中的 NavLink 的 to 属性在匹配的时候，默认是 **模糊匹配**
   - **模糊匹配**，表示：只要 浏览器地址栏中的 patchname（比如：/search/a）是以 NavLink to（/search） 属性的值开头的，此时，就会匹配成功
 
+- `replace`属性： `true` 时，单击该链接将替换历史记录堆栈中的当前条目，而不是添加新条目
+
 ```jsx
 <NavLink to="/abc">abczz</NavLink>
-// 渲染为：
+// 渲为：
 <a href="/abc" class="active">abczz</a>
 
 // exact 是否精确匹配
@@ -6704,6 +6711,9 @@ Link&NavLink组件
 // 注意：添加 exact 属性后，变为精确匹配，此时，patchname 只能为 /search
 // React 中如果属性是 布尔值 可以只写属性名称，不用写后面的 = 
 <NavLink activeClassName='is-active' exact to="/search">search</NavLink>
+
+// replace模式
+<Link to="/test" replace >test</Link>
 ```
 
 #### 404页面
@@ -7075,3 +7085,135 @@ function About(props) {
 
 export default App;
 ```
+
+#### 编程式导航go、push、replace
+
+- 通过`useHistory` hook 来拿到路由提供的 history 对象，用于获取浏览器历史记录的相关信息。常用操作：
+  - `push(path, [state])`：跳转到某个页面，参数 path 表示要跳转的路径，传递state参数
+  - `replace(patch, [state])`：跳转到某个页面，会替换当前的历史记录
+  - `go(n)`： 前进或后退到某个页面，参数 n 表示前进或后退页面数量（比如：-1 表示后退到上一页）
+  - goBack()：等于 go(-1)
+  - goForward()：等于 go(1)
+
+```jsx
+import { BrowserRouter as Router, Switch, Route, Link, useLocation } from "react-router-dom";
+import Home from './components/home';
+
+function App() {
+  return (
+    <Router>
+      <div>
+        <button onClick={() => history.goBack()}>后退</button>
+        <button onClick={() => history.goForward()}>前进</button>
+        <ul>
+          <li><NavLink to="/" >Home</NavLink></li>
+          <li><NavLink to={{ pathname: `/home/detail`,
+              state: { id: 123, detail: ohmyhash } // 路由组件中，通过location.state
+          }}>about</NavLink>  
+            <button onClick={() => {
+              history.push(`${url}/detail`, { 
+                id: item.id,
+                title: item.content
+              })
+            }}>push</button> |
+            <button onClick={() => {
+              history.replace(`${url}/detail`, { 
+                id: item.id,
+                title: item.content
+              })
+            }}>replace</button>
+          </li>
+        </ul>
+
+        <Switch>
+          <Route exact path="/" component={Home} />
+          <Route path="/home" component={About} />
+        </Switch>
+      </div>
+    </Router>
+  );
+}
+
+function About(props) {
+  const { state } = useLocation()
+  return (
+    <div>
+      About {state1.id};
+      hooks {state.id} - {state.detail}
+    </div>
+  )
+}
+
+export default App;
+```
+
+`push(path)`和 `replace(path)` 跳转路由的区别：
+
+比如：访问了 3 个页面：['/login', '/home', '/search']，当前所在页面为：'/search'
+
+1. 通过 `push('/a')` 方法访问了一个新页面：'/a'，此时，就相当于往数组中 push 了一条数据，
+   
+   - 浏览器中的记录为：['/login', '/home', '/search', '/a']
+
+2. 此时，如果又通过 `replace('/a')` 方法访问了一个新页面：'/a'，此时，就相当于把当前页面地址，替换为 '/a'
+   
+   - 浏览器中的记录为：['/login', '/home', '/a']
+
+以replace为例：
+
+- 携带params参数：history.replace(\`/home/\${id}/\${title}\`)
+
+- 携带search参数：history.replace(\`/home?id=\${id}&title=\${title}\`)
+
+- 携带state参数：history.replace('/home', { id: 1, title: 'ohmyhash'})
+
+#### Route 路由配置
+
+#### withRouter v6已弃用
+
+在非路由组件（一般组件）中使用router相关操作，通过withRouter进行包裹处理，让一步组件具备路由组件的特有属性或api
+
+`withRouter` 会在包装组件，将 `match` 、 `location` 和 `history` 道具传递给包装的组件props
+
+```jsx
+import React from 'react'
+import { withRouter, useHistory } from 'react-router-dom'
+
+function Header(props) {
+  // const history = useHistory()
+  console.log(props, 'Header')
+  const {history} = props
+  return (
+    <div>
+      <button onClick={() => history.goBack()}>后退</button>
+      <button onClick={() => history.goForward()}>前进</button>
+    </div>
+  )
+}
+const wrappedHeader = withRouter(Header)
+
+export default function App() {
+  return (
+    <Router>
+        <wrappedHeader />
+        <ul>
+          <li><NavLink exact to="/" >Home</NavLink></li>
+          <li><NavLink exact to="/users" >users</NavLink></li>
+          <li><NavLink exact to="/about">about</NavLink></li>
+        </ul>
+        <div>
+          <Switch>
+            <Redirect exact from='/' to='/home' />
+            <Route path="/home" component={Home} />
+            <Route path="/users" component={Users} />
+
+            {/* 以上路由规则全都不匹配时，404页面; 放在最后，兜底*/}
+            <Route path="*" component={NoMatch}/>
+          </Switch>
+        </div>
+    </Router>
+  );
+}
+```
+
+![](./img/iShot_2023-07-31_01.54.47.png)
