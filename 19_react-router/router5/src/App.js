@@ -6,14 +6,15 @@ import {
   Redirect,
   NavLink } from "react-router-dom";
 import styled from 'styled-components'
-import About from './pages/about';
-import Users from './pages/users';
-import Home from './pages/home';
+// import About from './pages/about';
+// import Users from './pages/users';
+// import Home from './pages/home';
 // import './App.css'
 // import Test from './pages/test';
-import FadingRoute from './components/FadingRoute';
+// import FadingRoute from './components/FadingRoute';
 import Header from './components/Header';
-import NoMatch from './pages/no-match';
+// import NoMatch from './pages/no-match';
+import routes from './router';
 
 function App() {
   return (
@@ -30,12 +31,17 @@ function App() {
         <div className='right'>
           <Switch>
             <Redirect exact from='/' to='/home' />
-            <Route path="/home" component={Home} />
+            {routes.map((route, idx) => 
+              <Route key={idx} path={route.path} render={routeProps => (
+                <route.component {...routeProps} routes={route.routes} />
+              )} />
+            )}
+            {/* <Route path="/home" component={Home} />
             <Route path="/users" component={Users} />
-            <FadingRoute path="/about" component={About} />
+            <FadingRoute path="/about" component={About} /> */}
 
             {/* 以上路由规则全都不匹配时，404页面; 放在最后，兜底*/}
-            <Route path="*" component={NoMatch}/>
+            {/* <Route path="*" component={NoMatch}/> */}
           </Switch>
         </div>
       </AppWrapper>

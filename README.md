@@ -6350,7 +6350,7 @@ function App() {
 export default App;
 ```
 
-#### React Router中的组件主要分为三类：
+### Router中的组件主要分为三类：
 
 1. 路由器，例如 BrowserRouter 和 HashRouter
 2. 路由匹配器： 例如Route和Switch
@@ -6358,8 +6358,21 @@ export default App;
 
 #### 路由器
 
-每个 React Router 应用程序的核心应该是路由器组件。react-router-dom 提供BrowserRouter和HashRouter路由器。
+ React Router 应用程序的核心应该是路由器组件。react-router-dom 提供BrowserRouter和HashRouter路由器。
 
+1. 底层原理不一样：
+     BrowserRouter使用的是H5的history API，不兼容IE9及以下版本。
+     HashRouter使用的是URL的哈希值。
+
+2. path表现形式不一样
+     BrowserRouter的路径中没有#,例如：localhost:3000/demo/test
+     HashRouter的路径包含#,例如：localhost:3000/#/demo/test
+
+3. 刷新后对路由state参数的影响
+     (1) BrowserRouter没有任何影响，因为state保存在history对象中。
+     (2) HashRouter刷新后会导致路由state参数的丢失！
+
+4. 备注：HashRouter可以用于解决一些路径错误相关的问题。
 - BrowserRouter 使用常规URL路径，创建一个像example.com/some/path这样真实的 URL
 
 - HashRouter 将当前位置存储在URL的哈希部分，因此URL看起来类似于example.com/#/your/page
@@ -6716,7 +6729,7 @@ Link&NavLink组件
 <Link to="/test" replace >test</Link>
 ```
 
-#### 404页面
+### 404页面
 
 路由规则全都不匹配时，通过`path="*"`进行任意匹配，没有匹配到
 
@@ -6762,7 +6775,7 @@ function NoMatch() {
 export default App;
 ```
 
-#### Redirect重定向
+### Redirect重定向
 
     重定向到新 URL将覆盖历史记录堆栈中的当前位置，就像服务器端重定向 （HTTP 3xx） 一样。
 
@@ -6836,7 +6849,7 @@ export default App;
 </Switch>
 ```
 
-#### 嵌套路由(二级路由)
+### 嵌套路由(二级路由)
 
 ```jsx
 import { useState } from 'react'
@@ -6924,7 +6937,7 @@ function User() {
 }
 ```
 
-#### 获取url动态Params参数
+### 获取url动态Params参数
 
 路由链接(携带参数)：`<Link to='/demo/test/tom/18'}>Home</Link>`
 注册路由(声明接收)：`<Route path="/demo/test/:name/:age" component={Test}/>`
@@ -6970,7 +6983,7 @@ function About(props) {
 export default App;
 ```
 
-#### 获取url Query参数
+### 获取url Query参数
 
 路由链接(携带参数)：`<Link to='/demo/test?name=tom&age=18'}>Home</Link>`
 注册路由(无需声明，正常注册即可)：`<Route path="/demo/test" component={Test}/>`
@@ -7029,7 +7042,7 @@ export default App;
 
 ![](./img/iShot_2023-07-30_01.38.38.png)
 
-#### 向组件传递state参数
+### 向组件传递state参数
 
 路由链接(携带参数)：`<Link to={{pathname:'/demo/test',state:{name:'tom',age:18}}}>详情</Link>`
 注册路由(无需声明，正常注册即可)：`<Route path="/demo/test" component={Test}/>`
@@ -7086,7 +7099,7 @@ function About(props) {
 export default App;
 ```
 
-#### 编程式导航go、push、replace
+### 编程式导航go、push、replace
 
 - 通过`useHistory` hook 来拿到路由提供的 history 对象，用于获取浏览器历史记录的相关信息。常用操作：
   - `push(path, [state])`：跳转到某个页面，参数 path 表示要跳转的路径，传递state参数
@@ -7167,9 +7180,150 @@ export default App;
 
 - 携带state参数：history.replace('/home', { id: 1, title: 'ohmyhash'})
 
-#### Route 路由配置
+### Route 路由配置
 
-#### withRouter v6已弃用
+配置route路由表
+
+```js
+// 定义路由组件
+import Home from '../pages/home';
+import NoMatch from '../pages/no-match';
+
+import News from '../pages/home/news';
+import Message from '../pages/home/message';
+import Detail from '../pages/home/message/detail';
+import HomeView from '../pages/home/home-view';
+
+const routes = [
+  {
+    path: '/home',
+    component: Home,
+    routes: [
+      {
+        path: '/home/news',
+        component: News
+      },
+      {
+        path: '/home/message',
+        component: Message,
+        routes: [
+          {
+            path: '/home/message/detail',
+            component: Detail,
+          }
+        ]
+      },
+      {
+        path: '/home/:info',
+        component: HomeView
+      },
+    ]
+  },
+  {
+    path: '*',
+    component: NoMatch,
+  },
+]
+
+export default routes
+```
+
+```jsx
+import { BrowserRouter as Router, Switch, Route, Redirect, NavLink } from "react-router-dom";
+import routes from './router';
+
+function RouteWithSubRoutes(route) {
+  return (
+    <Route path={route.path}
+      render={props => (
+        <route.component {...props} routes={route.routes} />
+      )}
+    />
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <h2>router基本使用</h2>
+      <ul className='left'>
+        <li><NavLink exact to="/" >Home</NavLink></li>
+      </ul>
+      <div className='right'>
+        <Switch>
+          <Redirect exact from='/' to='/home' />
+          {routes.map((route, idx) => 
+            <RouteWithSubRoutes key={idx} {...route} />
+          )}
+        </Switch>
+      </div>
+    </Router>
+  );
+}
+
+export default App;
+
+// /home/message
+import { useRouteMatch, Link, Switch, Route, Redirect, useHistory } from 'react-router-dom'
+import Detail from './detail'
+
+export default function Message({ routes }) {
+  const {path, url} = useRouteMatch()
+  const history = useHistory()
+  const [arr, setArr] = useState([
+    {id:1, content: 'message01'},
+    {id:2, content: 'message02'},
+    {id:3, content: 'message03'},
+  ])
+  return (
+    <div>
+      <button onClick={() => history.goBack()}>后退</button>
+      <button onClick={() => history.goForward()}>前进</button>
+      <ul>
+        {
+          arr.map((item) => <li key={item.id}>
+            <Link to={{
+              pathname: `${url}/detail`,
+              // search: `?id=${item.id}&title=${item.content}`, // url后添加?id=1&title=message
+              // hash: "#the-hash", // 在 url添加 #the-hash
+              state: { 
+                id: item.id,
+                title: item.content
+              } // 路由组件中，通过location.state
+            }} >{item.content}</Link>
+          </li>)
+        }
+      </ul>
+      <Switch>
+        {
+          routes.map((route, idx) => <RouteWithSubRoutes key={idx} {...route} />)
+        }
+        <Redirect from={`${path}`} to={{
+          pathname: `${url}/detail`,
+          state: { id: 1, title: 'message01' }
+        }} />
+      </Switch>
+    </div>
+  )
+}
+
+// /home/message/detail
+import { useLocation } from 'react-router-dom'
+export default function Detail() {
+  const state = useLocation().state || {}
+  return (
+    <div>
+      <ul>
+        <li>Id: {state.id || null}</li>
+        <li>Title: {state.title || null}</li>
+        <li>Content: 变得更强</li>
+      </ul>
+    </div>
+  )
+}
+```
+
+### withRouter v6已弃用
 
 在非路由组件（一般组件）中使用router相关操作，通过withRouter进行包裹处理，让一步组件具备路由组件的特有属性或api
 

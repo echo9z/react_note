@@ -1,7 +1,7 @@
 import React from 'react'
 import {useRouteMatch, Route, Switch, Link, useParams} from 'react-router-dom'
 
-export default function Users() {
+export default function Users({ routes }) {
   const match = useRouteMatch() // 获取路由匹配对象
   // path: route中的匹配规则，url请求地址后路径字符串
   // <Route path={`/:id`} 请求的路径 http://localhost:80/users; path='/:id' url='/users'
@@ -16,13 +16,20 @@ export default function Users() {
       </ul>
       <Switch>
         <Route exact path={match.path} />
-        <Route exact path={`${match.path}/:userId`} component={User}/>
+        {
+          routes.map((route, idx) => (
+            <Route key={idx} exact={route.exact} path={route.path} render={routeProps => (
+              <route.component {...routeProps} routes={route.routes} />
+            )}/>
+          ))
+        }
+        {/* <Route exact path={`${match.path}/:userId`} component={User}/> */}
       </Switch>
     </div>
   )
 }
 
-function User() {
+export function User() {
   // 获取路由中的动态参数
   const {userId} = useParams()
   return (

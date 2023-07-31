@@ -2,7 +2,7 @@ import React,{ useState } from 'react'
 import { useRouteMatch, Link, Switch, Route, Redirect, useHistory } from 'react-router-dom'
 import Detail from './detail'
 
-export default function Message() {
+export default function Message({ routes }) {
   const {path, url} = useRouteMatch()
   const history = useHistory()
   const [arr, setArr] = useState([
@@ -11,6 +11,7 @@ export default function Message() {
     {id:3, content: 'message03'},
   ])
   console.log(path);
+  console.log(routes);
   return (
     <div>
       <button onClick={() => history.goBack()}>后退</button>
@@ -42,7 +43,15 @@ export default function Message() {
       </ul>
       <Switch>
         {/* search参数无需声明接收，query get传递查询参数 */}
-        <Route path={`${path}/detail`} component={Detail} />
+        {/* <Route path={`${path}/detail`} component={Detail} /> */}
+        {
+          routes.map((route, idx) => 
+            <Route key={idx} path={route.path} render={routeProps => (
+              <route.component {...routeProps} routes={route.routes} />
+            )}/>
+          )
+        }
+        
         <Redirect from={`${path}`} to={{
           pathname: `${url}/detail`,
           state: { id: 1, title: 'message01' }
