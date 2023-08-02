@@ -1,11 +1,11 @@
 import React,{ useState } from 'react'
 import { useRouteMatch, Link, Switch, Route, Redirect, useHistory } from 'react-router-dom'
-import Detail from './detail'
+// import Detail from './detail'
 
 export default function Message({ routes }) {
   const {path, url} = useRouteMatch()
   const history = useHistory()
-  const [arr, setArr] = useState([
+  const [arr/* , setArr */] = useState([
     {id:1, content: 'message01'},
     {id:2, content: 'message02'},
     {id:3, content: 'message03'},

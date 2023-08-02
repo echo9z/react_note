@@ -7371,3 +7371,51 @@ export default function App() {
 ```
 
 ![](./img/iShot_2023-07-31_01.54.47.png)
+
+## Redux状态管理
+
+[Redux](https://cn.redux.js.org/introduction/getting-started/#redux-toolkit)：是 JavaScript 应用的状态容器，提供可预测的状态管理
+
+[React-redux](https://react-redux.js.org/introduction/getting-started)：react接入redux库，实现在 React 中使用 Redux 进行状态管理
+
+[Redux Toolkit](https://redux-toolkit.js.org/introduction/getting-started)：官方提供的一个开箱即用的工具集，宗旨在简化 Redux 的使用和代码质量，提供一些常用的工具函数和模板代码
+
+背景介绍：
+
+- 2014 年 Facebook 提出了 Flux 架构的概念（前端状态管理的概念），引发了很多的实现
+- 2015 年，Redux 出现，将 Flux 与*函数式编程*结合一起，很短时间内就成为了最热门的前端架构
+- Flux 是最早的前端的状态管理工具，它提供了状态管理的思想，也提供对应的实现
+- 除了 Flux、Redux 之外，还有：Mobx、Zustand等状态管理工具
+
+为什么需要Redux?
+
+![](./img/iShot_2023-08-02_01.23.43.png)
+
+
+
+- 不使用 Redux (图左边) ：
+  - 只能使用父子组件通讯、状态提升等 React 自带机制
+  - 处理远房亲戚(非父子)关系的组件通讯时乏力
+  - 组件之间的数据流混乱，出现 Bug 时难定位
+- 使用 Redux (图右边)：
+  - **集中式存储和管理应用的状态**
+  - 处理组件通讯问题时，**无视组件之间的层级关系**
+  - 简化大型复杂应用中组件之间的通讯问题
+  - 数据流清晰，易于定位 Bug
+
+
+
+### Redux-核心要素
+
+1. 三个核心概念是什么
+   
+   - 为了让**代码各部分职责清晰、明确**，Redux 代码被分为三个核心概念：action/reducer/store
+
+2. 三个核心概念的职责分别是什么
+   
+   - action -> reducer -> store
+   - **action**（动作）：描述要做的事情
+   - **reducer**（函数）：更新状态
+   - **store**（仓库）：整合 action 和 reducer
+   
+   

@@ -1,8 +1,8 @@
 import React from 'react'
 import {useRouteMatch, Redirect, Route, Switch, NavLink } from 'react-router-dom'
-import News from './news'
-import Message from './message'
-import HomeView from './home-view'
+// import News from './news'
+// import Message from './message'
+// import HomeView from './home-view'
 
 import { HomeWrapper } from './style.js'
 export default function Home({ routes }) {
