@@ -4723,7 +4723,7 @@ function useFriendStatus(friendID) {
 
 #### useSyncExternalStore
 
-**useSyncExternalStore**:是一个推荐用于`读取`和`订阅外部数据源`的 `hook`，其方式与选择性的 `hydration` 和时间切片等并发渲染功能兼容
+**useSyncExternalStore**:是一个用于`读取`和`订阅外部数据源`的 `hook`，其方式与选择性的 `hydration` 和时间切片等并发渲染功能兼容
 
 ```jsx
 const state = useSyncExternalStore(subscribe, getSnapshot[, getServerSnapshot])
@@ -7478,8 +7478,6 @@ sum(obj1)
 
     React中就要求我们无论是**函数还是class声明一个组件**，这个组件都必须**像纯函数一样，保护它们的props不被修改**
 
-
-
 ### 背景介绍
 
 - 2014 年 Facebook 提出了 Flux 架构的概念（前端状态管理的概念），引发了很多的实现
@@ -7505,12 +7503,193 @@ sum(obj1)
 
 1. 三个核心概念是什么
    
-   - 为了让**代码各部分职责清晰、明确**，Redux 代码被分为三个核心概念：action/reducer/store
+   为了让**代码各部分职责清晰、明确**，Redux 代码被分为三个核心概念：action/reducer/store
 
 2. 三个核心概念的职责分别是什么
    
    > action -> reducer -> store
-   
-   - **action**（动作）：描述要做的事情
-   - **reducer**（函数）：更新状态
-   - **store**（仓库）：整合 action 和 reducer
+
+    **store**：store 用于维护 state，可以将 action 与 reducer 联系到一起，是整个 redux 的核心部分。
+
+    **action**：是负责将数据从应用传递到 store 的对象。触发 action 是唯一可以改变 state 的方法。给 store 发送 aciton 方式：`store.dispatch()`。
+
+    **reducer**：reducer 只是一些纯函数，接收到数据更改要求（action），返回新的 state 给 store。reducer 可以实现复用、顺序控制等。
+
+    应用中所有的 state 都以一个对象树的形式储存在一个单一的 store 中。state 中的数据是只读的，惟一改变 state 的办法是使用 dispatch 派发 action，具体的更新方式位于对应的 reducer（返回一个新的 state）。
+
+Redux 的设计原则：
+
+- 单一数据源：与 MVC 不同（Model 之间互相监听、触发），Redux 认为一个应用只需要一个唯一数据源，这会导致产生一个极大的 JS 对象，Redux 通过 combineReducers() 解决
+- 状态只读：redux 没有真正意义上的 store，即无法用代码定义，reducer 也只是返回一个全新的状态
+- 状态修改由纯函数完成：每个 reducer 都是纯函数，没有副作用，使得 redux 变得容易测试。
+
+#### Store
+
+比有一个列表需要管理:
+
+- 如果我们**没有定义统一的规范来操作这段数据**，那么**整个数据的变化就是无法跟踪的**
+
+- 比如页面的某处通过products.push的方式增加了一条数据
+
+- 比如另一个页面通过products[0].age = 25修改了一条数据
+
+整个应用程序错综复杂，当出现bug时，很难跟踪到底哪里发生的变化
+
+```js
+const intialState = {
+    friends: [
+        { name : "lilei", age: 30 },
+        { name : "why" , age : 18 },
+        { name :"kobe" ,age: 40 }
+    ]
+}
+```
+
+#### action
+
+Redux要求我们通过action来更新数据:
+
+- 所有数据的变化，必须通过派发 (dispatch) action来更新
+
+- action是一个普通的JavaScript对象，用来描述这次更新的type和content;
+
+比如下面就是几个更新friends的action:
+
+- 强制使用action的好处是可以清晰的知道数据到底发生了什么样的变化，所有的数据变化都是可跟追、可预测的
+   当然，目前我们的action是固定的对象:
+   应用中，通过函数来定义，返回一个action;
+
+```js
+const action1 = { type: "ADD_FRIEND", info: { name: "lucy", age: 20 }}
+const action2 ={ type: "INC AGE"，index: 0 }
+const action3 = { type: "CHANGE NAME", playload: { index: 0, newName: "tom" }}
+
+<button onClick={() => store.dispatch({ type:'add', payload: {num: 1} })} >加1</button>
+<button onClick={() => store.dispatch({ type:'sub', payload: {num: 1} })} >减1</button>
+```
+
+#### reducer
+
+但是如何将state和action联系在一起呢? 答案就是reducer
+
+- reducer是一个**纯函数**
+
+- reducer做的事情就是将传入的**state和action结合起来生成一个新的state**
+
+```js
+const initCount = { count: 1 }
+const sumReducer = (state = initCount, action) => {
+  console.log(state.count);
+  switch (action.type) {
+    case 'add':
+      return {
+        ...state,
+        count: state.count + action.payload.num,
+      } 
+    case 'sub':
+      return {
+        ...state,
+        count: state.count - action.payload.num,
+      }
+    default:
+      console.log('未执行操作')
+      return state
+  }
+}
+const totalReducer = (state = { num: 0 }, action) => {
+  switch (action.type) {
+    case 'total':
+      return {
+        ...state,
+        count: state.count + action.payload.num,
+      }
+    default: // 每个reducer中的witch都必须有default兜底
+      console.log('未执行操作')
+      return state
+  }
+}
+// combine 合并多个 reducer，将多个case进行合并
+const rootReducers = Redux.combineReducers({
+  counter: sumReducer,
+  total: totalReducer,
+})
+
+// 创建store
+const store = Redux.createStore(
+  rootReducers,
+  window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+)
+```
+
+基本使用
+
+```js
+import { createStore } from 'redux'
+
+// 初始数据
+const initialState = {
+  count: 0,
+  name: 'ok',
+}
+// 定义reducer函数：纯函数
+/**
+ * 参数1：store中目前保存的state值
+ * 参数2：本次需要更新的action（display传入action对象）
+ * 返回值：返回最新state值
+ */
+function reducer(state = initialState, action) {
+  console.log('reducer', state, action)
+  switch (action.type) {
+    case 'change/count':
+      return { ...state, 
+        count: state.count + action.payload.value };
+    case 'change/name':
+      return { ...state, 
+        name: state.name + action.payload.value }
+    default:
+      return state;
+  }
+}
+// 创建store
+const store = createStore(reducer)
+
+export default store
+```
+
+修改store中state数据
+
+```jsx
+// 修改store中的数据：派发一个action
+const action1 = { type: 'change/count', payload: { value: 10 } }
+store.dispatch(action1)
+console.log(store.getState());
+
+const action2 = { type: 'change/name', payload: { value: "tom" }}
+store.dispatch(action2)
+console.log('name', store.getState().name);
+```
+
+订阅store中state
+
+```js
+import store from './store/index.mjs';
+
+// 订阅store中state, 返回取消订阅函数
+const unsubscribe = store.subscribe(() => {
+  // 当state中的数据变化，执行回调
+  console.log('state中的数据变化', store.getState());
+})
+
+// 修改store中的数据：派发一个action
+const action1 = { type: 'change/count', payload: { value: 10 }}
+store.dispatch(action1)
+
+// 取消订阅
+unsubscribe()
+
+// 下面dispatch修改state数据，就不会被监听到
+const action2 = { type: 'change/name', payload: { value: "tom" }}
+store.dispatch(action2)
+```
+
+![](img/iShot_2023-08-06_03.56.26.png)
