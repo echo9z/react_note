@@ -3986,7 +3986,7 @@ const App = () => {
 
 `useEffect`可以弥补函数组件没有生命周期的缺点。可以在`useEffect`第一个参数回调函数中，做一些请求数据，事件监听等操作，第二个参数作为`dep`依赖项，当依赖项发生变化，重新执行第一个函数。
 
-##### 1.useEffect不传递第二个参数`dep`依赖项
+##### 1.useEffect不传递第二个参数dep依赖项
 
 默认，不传递第二个参数`dep`依赖项，无论什么情况，都会执行
 
@@ -7523,6 +7523,10 @@ Redux 的设计原则：
 - 状态只读：redux 没有真正意义上的 store，即无法用代码定义，reducer 也只是返回一个全新的状态
 - 状态修改由纯函数完成：每个 reducer 都是纯函数，没有副作用，使得 redux 变得容易测试。
 
+```bash
+npm install redux --save
+```
+
 #### Store
 
 比有一个列表需要管理:
@@ -7621,7 +7625,7 @@ const store = Redux.createStore(
 )
 ```
 
-基本使用
+1.基本使用
 
 ```js
 import { createStore } from 'redux'
@@ -7693,3 +7697,149 @@ store.dispatch(action2)
 ```
 
 ![](img/iShot_2023-08-06_03.56.26.png)
+
+2.优化文件结构
+
+将action中的type进行单独封装到一个常量文件导出
+
+```js
+export const CHANGE_COUNT = 'change/count'
+export const CHANGE_NAME = 'change/name'
+```
+
+触发dispatch，将action达目的封装一个函数文件
+
+```js
+// 单独封装一个actionCreator文件
+// ./actionCreator.js
+import { CHANGE_COUNT, CHANGE_NAME } from "./constants.mjs"
+export const changeCountAction = (value) => {
+  return {
+    type: CHANGE_COUNT,
+    payload: { value }
+  }
+}
+export const changeNameAction = (value) => {
+  return {
+    type: CHANGE_NAME,
+    payload: { value }
+  }
+}
+```
+
+将reducer单独封装到一个文件中
+
+- 第一次调用 reducer `reducer(undefined, {type: "@@redux/INITv.a.4.t.t.p"})`
+- 因为传入的状态值是 undefined ，并且是一个随机的 action type，所以：
+  - 状态值因为 undefined，所以，我们设置的默认值就会生效 `state`
+  - 因为是一个随机的 action type，那就一定会走 default，返回默认值 `initialState`
+  - Redux 内部拿到状态值，就用这个状态值，来作为了 store 中状态的默认值
+  - 因此，将来当我们调用 `store.getState()` 方法来获取 Redux 状态值就是默认值
+
+```js
+import { CHANGE_COUNT, CHANGE_NAME } from "./constants.mjs"
+
+// 初始数据
+const initialState = {
+  count: 0,
+  name: 'ok',
+}
+// 定义reducer函数：纯函数
+/**
+ * 参数1：store中目前保存的state值
+ * 参数2：本次需要更新的action（display传入action对象）
+ * 返回值：返回最新state值
+ */
+export default function reducer(state = initialState, action) {
+  console.log('reducer', state, action)
+  switch (action.type) {
+    case CHANGE_COUNT:
+      return { ...state, 
+        count: state.count + action.payload.value };
+    case CHANGE_NAME:
+      return { ...state, 
+        name: action.payload.value }
+    default:
+      return state;
+  }
+}
+```
+
+store的index文件
+
+```js
+import { createStore } from 'redux'
+import reducer from './reducer.mjs'
+// 创建store
+const store = createStore(reducer)
+
+export default store
+```
+
+测试调用store
+
+```js
+import store from './store/index.mjs';
+import {changeCountAction, changeNameAction} from './store/actionCreator.mjs'
+// console.log(store.getState());
+
+// 订阅store中state, 返回取消订阅函数
+const unsubscribe = store.subscribe(() => {
+  // 当state中的数据变化，执行回调
+  console.log('state中的数据变化', store.getState());
+})
+
+// 修改store中的数据：派发一个action
+// const action1 = { type: 'change/count', payload: { value: 10 }}
+store.dispatch(changeCountAction(100))
+
+// 取消订阅
+unsubscribe()
+// 下面dispatch修改state数据，就不会被监听到
+// const action2 = { type: 'change/name', payload: { value: "tom" }}
+store.dispatch(changeNameAction('lilei'))
+```
+
+redux代码优化:
+
+1. 将派发的action 生成过程放到一个actionCreators西教中
+
+2. 将定义的所有actionCreators的函数，放到一个独立的文件中: actionCreators.js
+
+3. actionCreators和reducer西数中使用字符电常量是一致前，所以将常量地取到一个独立onstants的文件中
+
+4. 将reducer和默认值(initialstate)放到一个独立的reducer.js 文件中，而不是在index.js
+
+redux目录结构
+
+![](./img/iShot_2023-08-07_01.53.49.png)
+
+#### Redux的三大原则
+
+单一数据源
+
+- 整个应用程序的**state被存储在一颗object tree中**，并且这个object tree只存储在一个 store 中:
+
+- Redux并没有强制让我们不能创建多个Store，但是那样做并不利于数据的维护，
+
+- 单一的数据源可以让整个应用程序的state变得方便维护、追踪、修改
+
+State是只读的
+
+- 唯一修改State的方法一定是触发action，不要试图在其他地方通过任何的方式来修改State:
+
+- 确保了View或网络请求都不能直接修改state，它们只能通过action来描述自己想要如何修改state:
+
+- 可以保证所有的修改都被集中化处理，并且按照严格的顺序来执行，所以不需要担心race condition (竟态)的问题
+
+重用纯函数来执行修改
+
+- 通过reducer将 旧state和 actions联系在一起，并且返回一个新的State:
+
+- 随着应用程序的复杂度增加，我们可以将reducer拆分成多个小的reducers，分别操作不同state tree的一部分
+
+- 但是所有的reducer都应该是纯函数，不能产生任何的副作用;
+
+#### Redux使用流程
+
+![](./img/iShot_2023-08-07_19.38.44.png)
