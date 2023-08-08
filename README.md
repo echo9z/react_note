@@ -7840,6 +7840,176 @@ State是只读的
 
 - 但是所有的reducer都应该是纯函数，不能产生任何的副作用;
 
+🌰：结合react中使用
+
+```jsx
+// constants.js
+export const ADD = 'addition';
+export const SUB = 'subscribe';
+
+// creatorAction.js
+import * as actionType from './constants';
+export const addAction = (value) => {
+  return { type: actionType.ADD, payload: { value } }
+}
+export const subAction = (value) => {
+  return { type: actionType.SUB, payload: { value } }
+}
+export const userAction = (value) => {
+  return { type: actionType.CHANGE_USER, payload: { value } }
+}
+
+// reducer
+import { combineReducers } from 'redux' 
+import * as actionType from './constants';
+// 初始化state值
+const initialState = {
+  count: 0
+}
+
+const aReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case actionType.ADD:
+      return {...state, count: state.count + action.payload.value };
+    case actionType.SUB:
+      return {...state, count: state.count - action.payload.value }
+    default:
+      return state
+  }
+}
+
+const bReducer = (state = { userInfo: {} }, action) => {
+  switch (action.type) {
+    case actionType.CHANGE_USER:
+       return {...state, userInfo: action.payload.value };
+    default:
+      return state
+  }
+}
+
+// 合并多个 reducer 为一个 根reducer
+const rootReducer = combineReducers({
+  a: aReducer,
+  b: bReducer
+})
+export default rootReducer 
+
+
+```
+
+```jsx
+// home组件
+
+import { useEffect, useState } from 'react'
+import store from '../store';
+import { addAction, subAction } from '../store/creatorAction';
+
+export default function Home() {
+  // 在react中单独使用redux 进行数据状态管理
+  const [count, setCount] = useState(store.getState().a.count)
+  useEffect(() => {
+    // 挂载是订阅store
+    const unsubscribe = store.subscribe(() => {
+      setCount(store.getState().a.count)
+    })
+    return () => {
+      unsubscribe() // 组件卸载时，取消订阅
+    }
+  }, [])
+
+  return (
+    <div>
+      <h2 style={{color: 'red'}}>Home Count:{count}</h2>
+      <button onClick={() => store.dispatch(addAction(1))}>+1</button>
+      <button onClick={() => store.dispatch(addAction(5))}>+5</button>
+      <button onClick={() => store.dispatch(subAction(1))}>-1</button>
+    </div>
+  )
+}
+
+// User组件
+import { useEffect, useState } from 'react'
+import store from '../store';
+import { addAction, subAction } from '../store/creatorAction';
+
+export default function User() {
+  const [count, setCount] = useState(store.getState().a.count)
+  useEffect(() => {
+    const unsubscribe = store.subscribe(() => {
+      setCount(store.getState().a.count)
+    })
+    return () => {
+      unsubscribe()
+    }
+  }, [])
+
+  return (
+    <div>
+      <h2 style={{color: 'red'}}>User Count:{count}</h2>
+      <button onClick={() => store.dispatch(addAction(10))}>+10</button>
+      <button onClick={() => store.dispatch(subAction(5))}>-5</button>
+    </div>
+  )
+}
+
+import { useEffect, useState, useSyncExternalStore } from 'react'
+import Home from './components/home'
+import User from './components/user'
+import About from './components/about'
+import store from './store';
+import './App.css';
+
+function App() {
+  // 订阅store，当store的count发送变化时，更新count
+  // redux 通过store.getState() 获取store中所有state数据
+  const count = useSyncExternalStore(store.subscribe, 
+    () => store.getState().a.count) // react 18中的api
+  return (
+    <div className="App">
+      <h2>App count:{count}</h2>
+      <div>
+        <Home/>
+        <User/>
+        <About />
+      </div>
+    </div>
+  );
+}
+
+export default App;
+```
+
+![](img/2023-08-09%2004.18.27.gif)
+
 #### Redux使用流程
 
 ![](./img/iShot_2023-08-07_19.38.44.png)
+
+### React-redux
+
+- React 和 Redux 是两个独立的库，两者之间职责独立。为了实现在 React 中使用 Redux 进行状态管理 ，就需要一种机制，将这两个独立的库关联在一起。就用到 React-Redux 这个绑定库。
+
+- 作用：**为 React 接入 Redux，实现在 React 中使用 Redux 进行状态管理**。
+
+#### 基本使用
+
+1. 安装 react-redux：`yarn add react-redux`
+2. 从 react-redux 中导入 Provider 组件
+3. 导入创建好的 redux 仓库
+4. 使用 Provider 包裹整个应用
+5. 将导入的 store 设置为 Provider 的 store 属性值
+
+src/index.js 中：
+
+```js
+// 导入 Provider 组件
+import { Provider } from 'react-redux'
+// 导入创建好的 store
+import store from './store'
+const root = ReactDOM.createRoot(document.querySelector('#root'))
+root.render(
+  <Provider store={store}>
+    <App />
+  </Provider>
+)
+```

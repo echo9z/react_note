@@ -3,10 +3,10 @@ import store from '../store';
 import { addAction, subAction } from '../store/creatorAction';
 
 export default function User() {
-  const [count, setCount] = useState(store.getState().a.count)
+  const [count, setCount] = useState(store.getState().count)
   useEffect(() => {
     const unsubscribe = store.subscribe(() => {
-      setCount(store.getState().a.count)
+      setCount(store.getState().count)
     })
     return () => {
       unsubscribe()

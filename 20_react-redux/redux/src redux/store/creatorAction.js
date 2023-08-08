@@ -7,7 +7,3 @@ export const addAction = (value) => {
 export const subAction = (value) => {
   return { type: actionType.SUB, payload: { value } }
 }
-
-export const userAction = (value) => {
-  return { type: actionType.CHANGE_USER, payload: { value } }
-}

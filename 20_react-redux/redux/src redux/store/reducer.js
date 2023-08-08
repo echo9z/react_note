@@ -1,4 +1,3 @@
-import { combineReducers } from 'redux' 
 import * as actionType from './constants';
 // 初始化state值
 const initialState = {
@@ -10,7 +9,7 @@ const initialState = {
  * 参数2：本次需要更新的action（display传入action对象）
  * 返回值：返回最新state值
  */
-const aReducer = (state = initialState, action) => {
+const reducer = (state = initialState, action) => {
   switch (action.type) {
     case actionType.ADD:
       return {...state, count: state.count + action.payload.value };
@@ -20,19 +19,4 @@ const aReducer = (state = initialState, action) => {
       return state
   }
 }
-
-const bReducer = (state = { userInfo: {} }, action) => {
-  switch (action.type) {
-    case actionType.CHANGE_USER:
-      return {...state, userInfo: action.payload.value };
-    default:
-      return state
-  }
-}
-
-// 合并多个 reducer 为一个 根reducer
-const rootReducer = combineReducers({
-  a: aReducer,
-  b: bReducer
-})
-export default rootReducer 
+export default reducer 

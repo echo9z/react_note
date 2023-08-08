@@ -3,15 +3,13 @@ import store from '../store';
 import { addAction, subAction } from '../store/creatorAction';
 
 export default function Home() {
-  // 在react中单独使用redux 进行数据状态管理
-  const [count, setCount] = useState(store.getState().a.count)
+  const [count, setCount] = useState(store.getState().count)
   useEffect(() => {
-    // 挂载是订阅store
     const unsubscribe = store.subscribe(() => {
-      setCount(store.getState().a.count)
+      setCount(store.getState().count)
     })
     return () => {
-      unsubscribe() // 组件卸载时，取消订阅
+      unsubscribe()
     }
   }, [])
 
