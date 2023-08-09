@@ -1,3 +1,4 @@
+import { combineReducers } from 'redux'
 import { CHANGE_COUNT, CHANGE_NAME } from "./constants.mjs"
 
 // 初始数据
@@ -11,7 +12,7 @@ const initialState = {
  * 参数2：本次需要更新的action（display传入action对象）
  * 返回值：返回最新state值
  */
-export default function reducer(state = initialState, action) {
+function aReducer(state = initialState, action) {
   console.log('reducer', state, action)
   switch (action.type) {
     case CHANGE_COUNT:
@@ -24,3 +25,15 @@ export default function reducer(state = initialState, action) {
       return state;
   }
 }
+function bReducer(state = initialState, action) {
+  console.log('reducer', state, action)
+  switch (action.type) {
+    default:
+      return state;
+  }
+}
+
+export default combineReducers({
+  aReducer: aReducer,
+  bReducer: bReducer
+})

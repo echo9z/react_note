@@ -7737,6 +7737,7 @@ export const changeNameAction = (value) => {
   - 因此，将来当我们调用 `store.getState()` 方法来获取 Redux 状态值就是默认值
 
 ```js
+import { combineReducers } from 'redux'
 import { CHANGE_COUNT, CHANGE_NAME } from "./constants.mjs"
 
 // 初始数据
@@ -7750,7 +7751,7 @@ const initialState = {
  * 参数2：本次需要更新的action（display传入action对象）
  * 返回值：返回最新state值
  */
-export default function reducer(state = initialState, action) {
+function aReducer(state = initialState, action) {
   console.log('reducer', state, action)
   switch (action.type) {
     case CHANGE_COUNT:
@@ -7763,6 +7764,18 @@ export default function reducer(state = initialState, action) {
       return state;
   }
 }
+function bReducer(state = initialState, action) {
+  console.log('reducer', state, action)
+  switch (action.type) {
+    default:
+      return state;
+  }
+}
+
+export default combineReducers({
+  aReducer: aReducer,
+  bReducer: bReducer
+})
 ```
 
 store的index文件
@@ -7893,8 +7906,6 @@ const rootReducer = combineReducers({
   b: bReducer
 })
 export default rootReducer 
-
-
 ```
 
 ```jsx
@@ -7999,7 +8010,7 @@ export default App;
 4. 使用 Provider 包裹整个应用
 5. 将导入的 store 设置为 Provider 的 store 属性值
 
-src/index.js 中：
+1.src/index.js 中：
 
 ```js
 // 导入 Provider 组件
@@ -8012,4 +8023,67 @@ root.render(
     <App />
   </Provider>
 )
+```
+
+2.在类中使用结合react-redux高阶组件，将state 和dispatch
+
+```jsx
+import { PureComponent } from 'react'
+import { connect } from 'react-redux'
+import {addAction, subAction} from '../store/creatorAction'
+export class About extends PureComponent {
+  render() {
+    const { count, addNumber, subNumber } = this.props; // 对应map中的对象属性count
+    return (
+      <div>
+        <h2>About Count: {count}</h2>
+        <button onClick={() => addNumber(5)}>+5</button>
+        <button onClick={() => subNumber(5)}>-5</button>
+      </div>
+    )
+  }
+}
+
+// connect(fn1, fn2) 返回值是一个高阶组件，返回的是一个函数
+// 在类组件中需要调用connect函数时，传入两个参数fn1，fn2
+// fn1返回store中需要的state数据
+const mapStateToProps = (state) => ({
+  count: state.a.count // 这里的count传递到props中this.props.count
+}) 
+// fn2返回dispatch所处理的函数
+const mapDispatchToProps = (dispatch) => ({
+  // 这里的count传递到props中this.props.addNumber 和 subNumber
+  addNumber(num) {
+    dispatch(addAction(num))
+  },
+  subNumber(num) {
+    dispatch(subAction(num))
+  },
+})
+
+// 这里会将fn1中返回对象，<About {...this.props} {...fn映射的对象} />
+export default connect(mapStateToProps, mapDispatchToProps)(About) 
+// connect传递两个函数，最终作为高阶组件返回
+```
+
+在hooks中使用，使用`useSelector`获取state数据，`useDispatch`派发action
+
+```jsx
+// import { useEffect, useState } from 'react'
+import { useSelector ,useDispatch } from 'react-redux'
+// import store from '../store';
+import { addAction, subAction } from '../store/creatorAction';
+
+export default function Detail() {
+  const count = useSelector(state => state.a.count)
+  const dispatch = useDispatch()
+
+  return (
+    <div>
+      <h2 style={{color: 'red'}}>Detail Count:{count}</h2>
+      <button onClick={() => dispatch(addAction(10))}>+10</button>
+      <button onClick={() => dispatch(subAction(5))}>-5</button>
+    </div>
+  )
+}
 ```

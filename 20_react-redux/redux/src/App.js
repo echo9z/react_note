@@ -2,6 +2,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import Home from './components/home'
 import User from './components/user'
 import About from './components/about'
+import Detail from './components/detail'
 import store from './store';
 import './App.css';
 
@@ -29,6 +30,7 @@ function App() {
       <div>
         <Home/>
         <User/>
+        <Detail/>
         <About />
       </div>
     </div>
