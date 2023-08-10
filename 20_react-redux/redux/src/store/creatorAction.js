@@ -11,3 +11,7 @@ export const subAction = (value) => {
 export const userAction = (value) => {
   return { type: actionType.CHANGE_USER, payload: { value } }
 }
+
+export const articlesAction = (value) => {
+  return { type: actionType.CHANGE_ART, payload: { value } }
+}

@@ -2399,7 +2399,7 @@ ReactDOM.render(<MyComponent { ...p } />, document.getElementById('app3'))
 
 - props 是实现组件通讯的关键，它通过使用组件绑定属性，组件内部使用 props 来传值。
 
-#### 1. 件通讯-props 注意事项
+#### 1. 组件通讯-props 注意事项
 
 > props 是单项数据流只读，但是可以传递任意数据。
 
@@ -6350,7 +6350,7 @@ function App() {
 export default App;
 ```
 
-### Router中的组件主要分为三类：
+### Router中主要的三类组件
 
 1. 路由器，例如 BrowserRouter 和 HashRouter
 2. 路由匹配器： 例如Route和Switch
@@ -8087,3 +8087,7 @@ export default function Detail() {
   )
 }
 ```
+
+#### 组件中的异步操作
+
+比如网络请求数据交其redux管理

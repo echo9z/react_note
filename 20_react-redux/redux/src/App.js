@@ -1,6 +1,6 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import Home from './components/home'
-import User from './components/user'
+import Article from './components/article'
 import About from './components/about'
 import Detail from './components/detail'
 import store from './store';
@@ -29,9 +29,9 @@ function App() {
       <h2>App count:{count}</h2>
       <div>
         <Home/>
-        <User/>
         <Detail/>
         <About />
+        <Article/>
       </div>
     </div>
   );

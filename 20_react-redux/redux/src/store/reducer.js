@@ -2,7 +2,8 @@ import { combineReducers } from 'redux'
 import * as actionType from './constants';
 // 初始化state值
 const initialState = {
-  count: 0
+  count: 0,
+  articles: []
 }
 
 /**
@@ -16,6 +17,8 @@ const aReducer = (state = initialState, action) => {
       return {...state, count: state.count + action.payload.value };
     case actionType.SUB:
       return {...state, count: state.count - action.payload.value }
+    case actionType.CHANGE_ART:
+      return {...state, articles: action.payload.value }
     default:
       return state
   }
