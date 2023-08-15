@@ -1,12 +1,6 @@
 import { createStore, compose, applyMiddleware, combineReducers } from 'redux'
 import thunk from 'redux-thunk'
-import articleReducer from './article';
-import countReducer from './count';
-// 将多个reducer进行合并
-const rootReducers = combineReducers({
-  articleRe: articleReducer,
-  countRe: countReducer
-})
+import rootReducers from './reducer'
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 // 支持异步dispatch派发异步操作

@@ -1,7 +1,7 @@
 import { PureComponent } from 'react'
 import { connect } from 'react-redux'
-import { fetchArticlesAction } from '../store/creatorAction'
-import axios from 'axios'
+import { fetchArticlesAction } from '../store/article'
+// import axios from 'axios'
 
 export class Article extends PureComponent {
   componentDidMount() {
@@ -29,7 +29,7 @@ export class Article extends PureComponent {
 }
 
 const mapStateToProps = (state) => ({
-  articles: state.a.articles
+  articles: state.articleRe.articles
 })
 // fn2返回dispatch所处理的函数
 const mapDispatchToProps = (dispatch) => ({

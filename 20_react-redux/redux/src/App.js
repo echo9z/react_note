@@ -10,7 +10,7 @@ function App() {
   // 订阅store，当store的count发送变化时，更新count
   // redux 通过store.getState() 获取store中所有state数据
   const count = useSyncExternalStore(store.subscribe, 
-    () => store.getState().a.count)
+    () => store.getState().countRe.count)
 
   // const add = () => {
   //   // dispatch 传入一个action对象

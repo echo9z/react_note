@@ -1,6 +1,6 @@
 import { PureComponent } from 'react'
 import { connect } from 'react-redux'
-import {addAction, subAction} from '../store/creatorAction'
+import {addAction, subAction} from '../store/count'
 
 export class About extends PureComponent {
   render() {
@@ -25,8 +25,8 @@ export class About extends PureComponent {
 // 在类组件中需要调用connect函数时，传入两个参数fn1，fn2
 // fn1返回store中需要的state数据
 const mapStateToProps = (state) => ({
-  count: state.a.count, // 这里的count传递到props中this.props.count
-  articles: state.a.articles
+  count: state.countRe.count, // 这里的count传递到props中this.props.count
+  articles: state.articleRe.articles
 })
 // fn2返回dispatch所处理的函数
 const mapDispatchToProps = (dispatch) => ({

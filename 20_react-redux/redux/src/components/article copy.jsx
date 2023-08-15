@@ -1,6 +1,6 @@
 import { PureComponent } from 'react'
 import { connect } from 'react-redux'
-import { articlesAction } from '../store/creatorAction'
+import { articlesAction } from '../store/actionCreators'
 import axios from 'axios'
 
 export class Article extends PureComponent {

@@ -7996,6 +7996,8 @@ export default App;
 
 ![](./img/iShot_2023-08-07_19.38.44.png)
 
+
+
 ### React-redux
 
 - React 和 Redux 是两个独立的库，两者之间职责独立。为了实现在 React 中使用 Redux 进行状态管理 ，就需要一种机制，将这两个独立的库关联在一起。就用到 React-Redux 这个绑定库。
@@ -8237,3 +8239,115 @@ const mapDispatchToProps = (dispatch) => ({
 
 export default connect(mapStateToProps, mapDispatchToProps)(Article) 
 ```
+
+### Redux模块拆分
+
+通过combineReducers将多个reducer进行合并
+
+```js
+import { createStore, compose, applyMiddleware, combineReducers } from 'redux'
+import thunk from 'redux-thunk'
+import articleReducer from './article';
+import countReducer from './count';
+
+// 将多个reducer进行合并
+const rootReducers = combineReducers({
+  articleRe: articleReducer,
+  countRe: countReducer
+})
+
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
+// 支持异步dispatch派发异步操作
+// 添加多个中间件applyMiddleware(xxx,xxx,xxx)，通过composeEnhancers组合一个增强函数
+const store = createStore(rootReducers, composeEnhancers(applyMiddleware(thunk)))
+
+export default store
+```
+
+aritcle模块
+
+```js
+// actionCreator.js
+import * as actionType from './constants';
+import axios from 'axios'
+
+export const articlesAction = (value) => {
+  return { type: actionType.CHANGE_ART, payload: { value } }
+}
+export const fetchArticlesAction = (value) => {
+  return async (dispatch, getState) => {
+    const {data} = await axios.get('https://www.echouu.com/api/articles/list?page=1&pageSize=5')
+    const article = data.data.list
+    dispatch(articlesAction(article))
+  }
+}
+
+// constants.js
+export const CHANGE_ART = 'change/articles';
+
+// reducer.js
+import * as actionType from './constants';
+// 初始化state值
+const initialState = {
+  articles: []
+}
+const articleReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case actionType.CHANGE_ART:
+      return {...state, articles: action.payload.value }
+    default:
+      return state
+  }
+}
+export default articleReducer
+
+// index.js 
+import reducer from './reducer';
+export default reducer
+export * from './actionCreators';
+```
+
+count模块
+
+```js
+// actionCreator.js
+import * as actionType from './constants';
+
+export const addAction = (value) => {
+  return { type: actionType.ADD, payload: { value } }
+}
+export const subAction = (value) => {
+  return { type: actionType.SUB, payload: { value } }
+}
+
+// constants.js
+export const ADD = 'addition';
+export const SUB = 'subscribe';
+
+// reducer.js
+import * as actionType from './constants';
+// 初始化state值
+const initialState = {
+  count: 0,
+}
+const countReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case actionType.ADD:
+      return {...state, count: state.count + action.payload.value };
+    case actionType.SUB:
+      return {...state, count: state.count - action.payload.value }
+    default:
+      return state
+  }
+}
+export default countReducer 
+
+// index.js 
+import reducer from './reducer';
+export default reducer
+export * from './actionCreators';
+```
+
+形成不同的模块，便于管理维护
+
+![](img/iShot_2023-08-16_03.23.13.png)

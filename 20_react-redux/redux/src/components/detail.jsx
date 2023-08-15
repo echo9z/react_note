@@ -1,10 +1,10 @@
 // import { useEffect, useState } from 'react'
 import { useSelector ,useDispatch } from 'react-redux'
 // import store from '../store';
-import { addAction, subAction } from '../store/creatorAction';
+import { addAction, subAction } from '../store/count';
 
 export default function Detail() {
-  const count = useSelector(state => state.a.count)
+  const count = useSelector(state => state.countRe.count)
   const dispatch = useDispatch()
 
   return (
