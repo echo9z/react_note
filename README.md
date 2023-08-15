@@ -8090,4 +8090,150 @@ export default function Detail() {
 
 #### 组件中的异步操作
 
-比如网络请求数据交其redux管理
+同步操作通过dispatch action，state就会被立即更新，但待开发中，redux中保存的多数来自服务器数据，需要异步请求，再将数据保存到store中。
+
+在class组件的componentDidMount中发送，所有有以下结构：
+
+![](./img/iShot_2023-08-11_01.55.56.png)
+
+```jsx
+import { PureComponent } from 'react'
+import { connect } from 'react-redux'
+import { articlesAction } from '../store/creatorAction'
+import axios from 'axios'
+
+export class Article extends PureComponent {
+  componentDidMount() {
+    const {changeArticle} = this.props
+    axios.get('https://www.echouu.com/api/articles/list?page=1&pageSize=5').then(res => {
+      const article = res.data.data.list
+      changeArticle(article)
+    })
+  }
+  render() {
+    const { articles } = this.props; // 对应map中的对象属性count
+    return (
+      <div>
+        <h2>Article Page</h2>
+        <div>{ articles.map((item) => <li key={item.id}>{item.title}</li>) }</div>
+      </div>
+    )
+  }
+}
+
+const mapStateToProps = (state) => ({
+  articles: state.a.articles
+})
+
+const mapDispatchToProps = (dispatch) => ({
+  changeArticle(art) {
+    dispatch(articlesAction(art))
+  },
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Article) 
+```
+
+上面代码存在缺陷：
+
+- 必须将网络请求的异步代码放到组件的生命周期中来完成
+
+- 网络请求到的数据也属于状态管理的一部分，另一种方式应该是将其也交给redux来管理
+
+![](./img/iShot_2023-08-11_02.04.52.png)
+
+默认情况下的dispatch(action对象)，action需要是一个JavaScript的对象
+
+redux-thunk可以让dispatch(action函数)，action可以是一个函数;
+
+该函数会被调用，并且会传给这个函数一个dispatch函数和getState函数
+
+- dispatch函数用于我们之后再次派发action;
+
+- getState函数考虑到我们之后的一些操作需要依赖原来的状态，用于获取之前的一些状态;
+
+dispatch将action派发成action对象，但是redux中dispatch派发成一个函数dispatch(() =>{})是不支持的，需要安装[reduxjs/redux-thunk](https://github.com/reduxjs/redux-thunk)中间件
+
+```bash
+npm i redux-thunk --save
+```
+
+异步操作使用自定义中间件`redux-thunk`
+
+```js
+import { createStore, compose, applyMiddleware, combineReducers } from 'redux'
+import thunk from 'redux-thunk'
+import rootReducers from './reducer'
+
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
+// 支持异步dispatch派发异步操作
+// 添加多个中间件applyMiddleware(xxx,xxx,xxx)
+const store = createStore(rootReducers, composeEnhancers(applyMiddleware(thunk)))
+
+export default store
+```
+
+在action中返回一个函数，通过thunk中间自动执行函数，发起异步请求数据
+
+```js
+import * as actionType from './constants';
+import axios from 'axios'
+
+export const articlesAction = (value) => {
+  return { type: actionType.CHANGE_ART, payload: { value } }
+}
+
+export const fetchArticlesAction = (value) => {
+  // dispatch 派发只能是一个对象dispatch(object)
+  // 如果是一个普通action，需要返回action对象
+  // 对象中不能直接返回服务器请求的异步数据
+  // 如果返回的是一个函数，那么redux是不支持的，需要react-thunk，thunk会自动执行函数
+  // 传递的函数有两个参数：dispatch派发action，getState()返回store中的数据
+  return async (dispatch, getState) => {
+    const {data} = await axios.get('https://xxxx/api/articles/list?page=1&pageSize=5')
+    const article = data.data.list
+    dispatch(articlesAction(article))
+    console.log("🚀 ~ file: creatorAction.js:28 ~ axios.get ~ article:", article)
+  }
+}
+```
+
+在组件中调用dispatch触发一个action
+
+```jsx
+import { PureComponent } from 'react'
+import { connect } from 'react-redux'
+import { fetchArticlesAction } from '../store/creatorAction'
+import axios from 'axios'
+
+export class Article extends PureComponent {
+  componentDidMount() {
+    // dispatch一个action
+    this.props.changeArticle()
+  }
+  
+  render() {
+    const { articles } = this.props; // 对应map中的对象属性count
+    return (
+      <div>
+        <h2>Article Page</h2>
+        <div>
+          { articles.map((item) => <li key={item.id}>{item.title}</li>) }
+        </div>
+      </div>
+    )
+  }
+}
+
+const mapStateToProps = (state) => ({
+  articles: state.a.articles
+})
+
+const mapDispatchToProps = (dispatch) => ({
+  changeArticle() {
+    dispatch(fetchArticlesAction())
+  },
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Article) 
+```

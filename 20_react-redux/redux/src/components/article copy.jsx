@@ -1,16 +1,15 @@
 import { PureComponent } from 'react'
 import { connect } from 'react-redux'
-import { fetchArticlesAction } from '../store/creatorAction'
+import { articlesAction } from '../store/creatorAction'
 import axios from 'axios'
 
 export class Article extends PureComponent {
   componentDidMount() {
-    /* const {changeArticle} = this.props
+    const {changeArticle} = this.props
     axios.get('https://www.echouu.com/api/articles/list?page=1&pageSize=5').then(res => {
       const article = res.data.data.list
       changeArticle(article)
-    }) */
-    this.props.changeArticle()
+    })
   }
   
   render() {
@@ -33,8 +32,8 @@ const mapStateToProps = (state) => ({
 })
 // fn2返回dispatch所处理的函数
 const mapDispatchToProps = (dispatch) => ({
-  changeArticle() {
-    dispatch(fetchArticlesAction())
+  changeArticle(art) {
+    dispatch(articlesAction(art))
   },
 })
 
