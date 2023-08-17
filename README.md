@@ -7992,11 +7992,11 @@ export default App;
 
 ![](img/2023-08-09%2004.18.27.gif)
 
-#### Redux使用流程
+#### Redux数据流程
+
+![](./img/ReduxDataFlowDiagram.gif)
 
 ![](./img/iShot_2023-08-07_19.38.44.png)
-
-
 
 ### React-redux
 
@@ -8154,6 +8154,8 @@ redux-thunk可以让dispatch(action函数)，action可以是一个函数;
 
 - getState函数考虑到我们之后的一些操作需要依赖原来的状态，用于获取之前的一些状态;
 
+#### Redux中异步操作
+
 dispatch将action派发成action对象，但是redux中dispatch派发成一个函数dispatch(() =>{})是不支持的，需要安装[reduxjs/redux-thunk](https://github.com/reduxjs/redux-thunk)中间件
 
 ```bash
@@ -8213,7 +8215,7 @@ export class Article extends PureComponent {
     // dispatch一个action
     this.props.changeArticle()
   }
-  
+
   render() {
     const { articles } = this.props; // 对应map中的对象属性count
     return (
@@ -8276,7 +8278,7 @@ export const articlesAction = (value) => {
 }
 export const fetchArticlesAction = (value) => {
   return async (dispatch, getState) => {
-    const {data} = await axios.get('https://www.echouu.com/api/articles/list?page=1&pageSize=5')
+    const {data} = await axios.get('https://xxx/api/articles/list?page=1&pageSize=5')
     const article = data.data.list
     dispatch(articlesAction(article))
   }
@@ -8351,3 +8353,126 @@ export * from './actionCreators';
 形成不同的模块，便于管理维护
 
 ![](img/iShot_2023-08-16_03.23.13.png)
+
+### Redux Toolkit
+
+    Redux Toolkit 是官方推荐的编写 Redux 逻辑的方法
+    前面学习Redux的时候应该已经发现，redux的编写逻辑过于的繁琐和麻烦，并且代码通常分拆在多个文件中(虽然也可以放到一个文件管理，但是代码量过多，不利于管理)
+
+    Redux Toolkit包旨在成为编写Redux逻辑的标准方式，从而解决上面提到的问题
+
+安装toolkit以及react-redux
+
+```bash
+npm install @reduxjs/toolkit react-redux
+```
+
+**Redux Toolkit核心API主要下面几个：**
+
+- configureStore: 包装createStore以提供简化的配置选项和良好的默认值，它可以自动组合slice reducer，添加你提供的任何 Redux 中间件，redux-thunk默认包含，并启用 Redux DevTools Extension。
+
+- createSlice: 接受reducer函数的对象、切片名称和初始状态值，并自动生成切片reducer，并带有相应的actions。
+
+- createAsyncThunk: 接受一个动作类型字符串和一个返回承诺的函数，并生成一个pending/fulfilled/rejected基于该承诺分派动作类型的 thunk。
+
+1.通过configureStore创建store
+
+```js
+import { configureStore } from '@reduxjs/toolkit'
+import counterReducer from '../features/counter/counterSlice'
+import articleSlice from '../features/article/articleSlice'
+
+export const store = configureStore({
+  reducer: { // 多个reducer模块管理
+    counter: counterReducer,
+    article: articleSlice
+  }
+})
+```
+
+2.createSlice创建切片对象
+
+```js
+// counter模块
+import { createSlice } from '@reduxjs/toolkit'
+
+const initialState = {
+  count: 0,
+}
+
+// createSlice创建切片对象，包含 reducer函数的对象、切片名称和state初始状态值
+export const counterSlice = createSlice({
+  name: 'counter',
+  initialState,
+  reducers: {
+    increment: (state) => {
+      state.count += 1;
+    },
+    decrement: (state) => {
+      state.count -= 1;
+    },
+    // 通过dispatch(add(payload))派发
+    add: (state, action) => {
+      state.count += action.payload.num
+    },
+    sub: (state, action) => {
+      state.count -= action.payload.num
+    }
+  }
+})
+
+// 导出action
+export const { increment, decrement, add, sub } = counterSlice.actions
+
+// 导出reducer
+export default counterSlice.reducer
+```
+
+3.creatAsyncThunk执行异步操作
+
+```js
+// article模块
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import axios from 'axios'
+// 代替原有reducer
+const initialState = {
+  articleList: [],
+  status: 'idle',
+}
+
+// createAsyncThunk 创建一个异步请求action，返回Promise， 通过dispatch(fetchArticle())触发
+export const fetchArticle = createAsyncThunk(
+  'article/fetchArticle',
+  async () => {
+    const {data} = await axios.get('https://www.echouu.com/api/articles/list?page=1&pageSize=5')
+    const article = data.data.list
+    return article // action.payload
+  }
+)
+
+// 导出Slice切片，包含 reducer函数的对象、切片名称和state初始状态值
+export const articleSlice = createSlice({
+  name: 'article',
+  initialState,
+  reducers: {},
+  extraReducers(builder) {
+    builder
+      .addCase(fetchArticle.pending, (state, action) => {
+        state.status = 'loading'
+      })
+      .addCase(fetchArticle.fulfilled, (state, action) => {
+        state.status = 'succeeded'
+        state.articleList.push(...action.payload)
+      })
+      .addCase(fetchArticle.rejected, (state, action) => {
+        state.status = 'failed'
+      })
+  }
+})
+
+// 导出action
+// export const { } = articleSlice.actions
+
+// 导出reducer
+export default articleSlice.reducer
+```
