@@ -11,6 +11,7 @@ export const fetchArticle = createAsyncThunk(
   'article/fetchArticle',
   async () => {
     const {data} = await axios.get('https://www.echouu.com/api/articles/list?page=1&pageSize=5')
+    // throw new Error() 手动抛出异常fetchArticle返回
     const article = data.data.list
     return article // action.payload
   }

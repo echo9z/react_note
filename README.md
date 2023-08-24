@@ -7853,7 +7853,7 @@ State是只读的
 
 - 但是所有的reducer都应该是纯函数，不能产生任何的副作用;
 
-🌰：结合react中使用
+🌰：在react中使用
 
 ```jsx
 // constants.js
@@ -7910,7 +7910,6 @@ export default rootReducer
 
 ```jsx
 // home组件
-
 import { useEffect, useState } from 'react'
 import store from '../store';
 import { addAction, subAction } from '../store/creatorAction';
@@ -7939,28 +7938,36 @@ export default function Home() {
 }
 
 // User组件
-import { useEffect, useState } from 'react'
+import { PureComponent } from 'react'
 import store from '../store';
 import { addAction, subAction } from '../store/creatorAction';
 
-export default function User() {
-  const [count, setCount] = useState(store.getState().a.count)
-  useEffect(() => {
-    const unsubscribe = store.subscribe(() => {
-      setCount(store.getState().a.count)
+export default class App extends PureComponent {
+  constructor() {
+    super();
+    this.state = {
+      count: store.getState().count
+    };
+  }
+  componentDidMount() {
+    this.unsubscribe = store.subscribe(() => {
+      // 通过订阅获取最新的count值
+      this.setState({ count: store.getState().count });
     })
-    return () => {
-      unsubscribe()
-    }
-  }, [])
-
-  return (
-    <div>
-      <h2 style={{color: 'red'}}>User Count:{count}</h2>
-      <button onClick={() => store.dispatch(addAction(10))}>+10</button>
-      <button onClick={() => store.dispatch(subAction(5))}>-5</button>
-    </div>
-  )
+  }
+  componentWillUnmount() {
+    this.unsubscribe()
+  }
+  render() {
+    const { count } = this.props
+    return (
+      <div>
+        <h2 style={{color: 'red'}}>User Count:{count}</h2>
+        <button onClick={() => store.dispatch(addAction(10))}>+10</button>
+        <button onClick={() => store.dispatch(subAction(5))}>-5</button>
+      </div>
+    )
+  }
 }
 
 import { useEffect, useState, useSyncExternalStore } from 'react'
@@ -8370,10 +8377,32 @@ npm install @reduxjs/toolkit react-redux
 **Redux Toolkit核心API主要下面几个：**
 
 - configureStore: 包装createStore以提供简化的配置选项和良好的默认值，它可以自动组合slice reducer，添加你提供的任何 Redux 中间件，redux-thunk默认包含，并启用 Redux DevTools Extension。
+  
+  - reducer属性，多个切片简化器的对象，将此对象传递给 Redux `combineReducers` 来自动创建根简化器
+  - middleware：拓展其他中间件
+  - devTools:是否配置devTools工具，默认为true
 
 - createSlice: 接受reducer函数的对象、切片名称和初始状态值，并自动生成切片reducer，并带有相应的actions。
+  
+  - name：触发action时，以slice名词开头`counter/add`
+  
+  - initialState：初始化值
+  
+  - reducers：相当于之前reducer函数
+    
+    - 对象类型，保函多个函数
+    
+    - 函数的参数：参数一state、参数二action，调用action传递的参数
 
-- createAsyncThunk: 接受一个动作类型字符串和一个返回承诺的函数，并生成一个pending/fulfilled/rejected基于该承诺分派动作类型的 thunk。
+- createAsyncThunk: 接受一个action类型字符串和一个返回Promise的函数，并生成一个pending/fulfilled/rejected基于该承诺分派动作类型的 thunk。
+  
+  createAsyncThunk创建出来的action被dispatch时，会存在三种状态
+  
+  - pending：action被触发时，没有得到结果
+  
+  - fulfilled：异步执行完成返回值的结果
+  
+  - rejected：异步执行过程中失败或抛出异常
 
 1.通过configureStore创建store
 
@@ -8383,6 +8412,7 @@ import counterReducer from '../features/counter/counterSlice'
 import articleSlice from '../features/article/articleSlice'
 
 export const store = configureStore({
+  devTools: process.env.NODE_ENV !== 'production',
   reducer: { // 多个reducer模块管理
     counter: counterReducer,
     article: articleSlice
@@ -8405,13 +8435,13 @@ export const counterSlice = createSlice({
   name: 'counter',
   initialState,
   reducers: {
-    increment: (state) => {
+    increment: (state) => { // 相当于redux中的每个case语句
       state.count += 1;
     },
     decrement: (state) => {
       state.count -= 1;
     },
-    // 通过dispatch(add(payload))派发
+    // 通过dispatch(add({ num:10 }))派发，action.payload={ num: 10 }
     add: (state, action) => {
       state.count += action.payload.num
     },
@@ -8422,6 +8452,7 @@ export const counterSlice = createSlice({
 })
 
 // 导出action
+// 调用每个action increment() 返回衣服action对象 {type: 'counter/increment', payload: undefined}
 export const { increment, decrement, add, sub } = counterSlice.actions
 
 // 导出reducer
@@ -8444,7 +8475,7 @@ const initialState = {
 export const fetchArticle = createAsyncThunk(
   'article/fetchArticle',
   async () => {
-    const {data} = await axios.get('https://www.echouu.com/api/articles/list?page=1&pageSize=5')
+    const { data } = await axios.get('https://www.echouu.com/api/articles/list?page=1&pageSize=5')
     const article = data.data.list
     return article // action.payload
   }
@@ -8475,4 +8506,85 @@ export const articleSlice = createSlice({
 
 // 导出reducer
 export default articleSlice.reducer
+```
+
+在组件中使用redux数据，通过react-redux与react结合将store全局共享
+
+```js
+// 导入 Provider 组件
+import { Provider } from 'react-redux'
+// 导入创建好的 store
+import store from './store'
+
+const root = ReactDOM.createRoot(document.querySelector('#root'))
+root.render(
+  <Provider store={store}>
+    <App />
+  </Provider>
+)
+```
+
+class组件中使用
+
+```jsx
+import { PureComponent } from 'react'
+import { connect } from 'react-redux'
+import { fetchArticle } from './articleSlice'
+
+export class Article extends PureComponent {
+  componentDidMount() {
+    this.props.changeArticle() // 触发redux中进行异步请求
+  }
+
+  render() {
+    const { articles } = this.props; // 对应map中的对象属性count
+    return (
+      <div>
+        <h2>Article Page</h2>
+        <div>
+          {
+            articles.map((item) => <li key={item.id}>{item.title}</li>)
+          }
+        </div>
+      </div>
+    )
+  }
+}
+
+const mapStateToProps = (state) => ({
+  articles: state.article.articleList
+})
+// fn2返回dispatch所处理的函数
+const mapDispatchToProps = (dispatch) => ({
+  changeArticle() {
+    dispatch(fetchArticle())
+  },
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Article) 
+```
+
+function组件中使用
+
+```jsx
+import { useDispatch, useSelector } from 'react-redux';
+// action
+import { increment, decrement, add, sub } from './counterSlice';
+
+export default function Counter() {
+  const count = useSelector(state => state.counter.count)
+  const dispatch = useDispatch()
+
+  return (
+    <div>
+      <h2>Counter Page {count}</h2>
+      <div>
+        <button onClick={() => dispatch(increment())}>+1</button>
+        <button onClick={() => dispatch(decrement())}>-1</button>
+        <button onClick={() => dispatch(add({ num: 10 }))}>+10</button>
+        <button onClick={() => dispatch(sub({ num: 10 }))}>-10</button>
+      </div>
+    </div>
+  )
+}
 ```

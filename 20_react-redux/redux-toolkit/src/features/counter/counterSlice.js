@@ -9,8 +9,8 @@ export const counterSlice = createSlice({
   name: 'counter',
   initialState,
   reducers: {
-    increment: (state) => {
-      state.count += 1;
+    increment: (state) => { // dispatch(increment()) action
+      state.count += 1; // 内部使用 immerjs 的库，原来需要返回完整新的state对象
     },
     decrement: (state) => {
       state.count -= 1;
