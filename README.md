@@ -8701,9 +8701,7 @@ export default function Counter() {
 }
 ```
 
-redux 中的数据是不可变得
-
-redux/toolkit中state数据是不可变
+#### redux/toolkit中state数据是不可变
 
 在传统的redux中需要将state先拷贝一份，再将修改的属性进行覆盖
 
@@ -8720,7 +8718,12 @@ reducer(state, action){
 
 在组件中通过订阅，当redux中state数据发送变化时，触发订阅回调
 
-subscribe(() => { this.setState({ count: store.getState().count }) }}))
+```js
+subscribe(() => { 
+  this.setState({ count: store.getState().count }) 
+})
+```
+
 如果直接修改state的属性如：state.count = state.count + 5，无法监听到变化subscribe回调也不执行
 
 在redux/toolkit中是直接修改state的属性，使用了immerjs
