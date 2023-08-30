@@ -28,7 +28,7 @@ const mapStateToProps = (state) => ({
 // fn2返回dispatch所处理的函数
 const mapDispatchToProps = (dispatch) => ({
   changeArticle() {
-    dispatch(fetchArticle())
+    dispatch(fetchArticle({ name: 'article' }))
   },
 })
 

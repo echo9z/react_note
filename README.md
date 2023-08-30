@@ -7970,6 +7970,7 @@ export default class App extends PureComponent {
   }
 }
 
+// app组件
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import Home from './components/home'
 import User from './components/user'
@@ -8249,6 +8250,10 @@ const mapDispatchToProps = (dispatch) => ({
 export default connect(mapStateToProps, mapDispatchToProps)(Article) 
 ```
 
+#### Redux异步流程图
+
+![](./img/ReduxAsyncDataFlowDiagram.gif)
+
 ### Redux模块拆分
 
 通过combineReducers将多个reducer进行合并
@@ -8404,6 +8409,30 @@ npm install @reduxjs/toolkit react-redux
   
   - rejected：异步执行过程中失败或抛出异常
 
+```js
+createAsyncThunk(type, payloadCreator, Options)
+
+// payloadCreator回调函数
+// 第一参数是arg: {status: 'active', sortBy: 'name'}
+// 第二个参数store：一个对象，包含通常传递给 Redux thunk 函数的所有参数
+
+export const fetchArticle = createAsyncThunk(
+  'article/fetchArticle',
+  async (extra, { dispatch, getState }) => {
+    console.log("🚀 ~ extra, dispatch, getState:", extra, dispatch, getState())
+    const {data} = await axios.get('https://www.echouu.com/api/articles/list?page=1&pageSize=5')
+    const article = data.data.list
+    // 通过触发action
+    dispatch(changeArticleList(article))
+  }
+)
+
+// 触发thunk异步函数时传递参数
+dispatch(fetchArticle({status: 'active', sortBy: 'name'})
+```
+
+#### 基本使用
+
 1.通过configureStore创建store
 
 ```js
@@ -8486,6 +8515,14 @@ export const articleSlice = createSlice({
   name: 'article',
   initialState,
   reducers: {},
+  // extraReducers: {
+  //   // 这种写法 obj = { name: 'fulfilled' } [obj.name]() {}
+  //   [fetchArticle.fulfilled](state, action) {
+  //     state.status = 'succeeded'
+  //     state.articleList.push(...action.payload)
+  //   }
+  // },
+  // 官方推荐
   extraReducers(builder) {
     builder
       .addCase(fetchArticle.pending, (state, action) => {
@@ -8588,3 +8625,71 @@ export default function Counter() {
   )
 }
 ```
+
+redux 中的数据是不可变得
+
+redux/toolkit中state数据是不可变
+
+在传统的redux中需要将state先拷贝一份，再将修改的属性进行覆盖
+
+```js
+reducer(state, action){
+ switch(action.type){
+ case 'add':
+ return { ...state, count: state.count + action.payload}
+ default:
+ return state
+ }
+}
+```
+
+在组件中通过订阅，当redux中state数据发送变化时，触发订阅回调
+
+subscribe(() => { this.setState({ count: store.getState().count }) }}))
+如果直接修改state的属性如：state.count = state.count + 5，无法监听到变化subscribe回调也不执行
+
+在redux/toolkit中是直接修改state的属性，使用了immerjs
+
+```js
+export const counterSlice = createSlice({
+ name: 'counter',
+ initialState: { count 0 },
+ reducers: {
+   increment: (state) => { // 相当于redux中的每个case语句
+     state.count += 1;
+   },
+ }
+}
+```
+
+比如：浅拷贝问题
+
+```js
+const a = [
+ {
+   name: 'tom',
+   gender: 'man'
+ },
+ {
+   name: 'john',
+   gender: 'man'
+ }
+]
+// 用 a 来新建一个数组 b
+const b = [...a];
+// 修改 b 的其中一个数据
+b[0].gender = 'women';
+// 当打印a数组，发现修改 b 中数据影响到 a 数组；数组 a 新建数组 b 的过程中，执行过程其实是一个浅拷贝
+```
+
+在之前case浅拷贝返回新的state对象，但事实上浅拷贝存在问题
+
+- 比如过大对象，一个对象有几百个属性，进行浅拷贝会造成性能的浪费
+
+- 比如浅拷贝后的对象，在深层次改变对象或属性时，依然会对之前的对象影响
+
+在redux/toolkit中底层使用了immerjs的一个库来保证数据的不可变性
+
+算法: Persistent Data Structure（持久化数据结构或一致性数据结构） 
+
+- 用一种数据结构来保存数据；当数据被修改时，会返回一个对象，但是新的对象会尽可能的利用之前的数据结构而不会对内存造成浪费
