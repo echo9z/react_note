@@ -3003,6 +3003,81 @@ function Child() {
 }
 ```
 
+contextType 类组件使用
+
+指定组件的contextType属性（**只能指向一个Context对象**），就可以在组件内甚至render中使用**this.context**读取Context的值。
+
+```js
+const ContextComponent = React.createContext({
+  theme: 'pink',
+  toggle: () => {}
+})
+
+class App extends React.Component {
+  state = {
+    count: 0,
+    theme: 'pink',
+  }
+  toggle = () => {
+    this.setState(state => {
+      return {
+        count: ++state.count,
+        theme: state.theme === 'pink' ? 'skyblue': 'pink',
+      }
+    })
+  }
+
+  render () {
+    return (
+      <div>
+        <h1>App根组件{this.state.count}</h1>
+        {/* 注入的state数据 */}
+        <ContextComponent.Provider value={{
+          count: this.state.count,
+          theme: this.state.theme,
+          toggle: this.toggle
+        }}>
+          <Parent />
+        </ContextComponent.Provider>
+      </div>
+    )
+  }
+}
+//parent组件
+function Parent() {
+  return (
+    <div>
+      <h2>父组件</h2>
+      <Child />
+    </div>
+  );
+}
+
+class Child extends React.Component {
+  // 指定contextType的新写法
+  static contextType = ContextComponent;
+  render() {
+    return (
+      <div>
+        <h3>child组件：{this.context.count}</h3>
+        <button onClick={this.context.toggle}
+          style={{backgroundColor: this.context.theme}} >
+          toggle
+        </button>
+      </div>
+    )
+  }
+}
+
+ReactDOM.render(<App />, document.getElementById('app'))
+```
+
+contextType和Consumer的使用
+
+- contextType只对一个Context有效，如果一个组件只使用一个context，请使用contextType，如果一个组件需要读取多个context，那就需要使用Consumer。
+- contextType简化了Consumer的使用，直接赋值即可。
+- contextType可以在组件任意地方读取context，Consumber只能在的子元素函数中使用。
+
 **总结：**
 
 - 使用`creatContext()`创建一个上下文对象，包含：`Provider` `Consumer` 组件。
