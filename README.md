@@ -7447,6 +7447,22 @@ export default function App() {
 
 ![](./img/iShot_2023-07-31_01.54.47.png)
 
+### Router V6
+
+与React router5.x版本相比，改变了什么？
+
+1. 内置组件的变化：移除`<Switch/>`，新增`<Routes/>`等等
+
+2. 语法变化：`component={About} 变为 `element={<About/>}`
+
+3. 新增多个hook：`useParams`、`useNavigate`、`useMatch`
+
+4. 官方明确推荐函数式组件
+
+
+
+
+
 ## Redux状态管理
 
 [Redux](https://cn.redux.js.org/introduction/getting-started/#redux-toolkit)：是 JavaScript 应用的状态容器，提供可预测的状态管理
@@ -8771,3 +8787,137 @@ b[0].gender = 'women';
 算法: Persistent Data Structure（持久化数据结构或一致性数据结构） 
 
 - 用一种数据结构来保存数据；当数据被修改时，会返回一个对象，但是新的对象会尽可能的利用之前的数据结构而不会对内存造成浪费
+
+### Redux中间件
+
+在前面使用异步请求的中间件比如react-thunk、redux-devtools-extension中间件
+
+#### 中间件的触发时机
+
+- Redux 中间件执行时机：**在 dispatching action 和 到达 reducer 之间**。
+
+- 没有中间件：`dispatch(action) => reducer`
+
+![](./img/redux中间件-触发时机1.jpg)
+
+- 使用中间件：`dispatch(action) => 执行中间件代码 => reducer`
+
+![](./img/redux中间件-触发时机2.jpg)
+
+- 原理：封装了 redux 自己的 dispatch 方法
+  - 没有中间件：`store.dispatch()` 就是 Redux 库自己提供的 dispatch 方法，用来发起状态更新
+  - 使用中间件：`store.dispatch()` 就是中间件封装处理后的 dispatch，但是，最终一定会调用 Redux 自己的 dispatch 方法发起状态更新
+
+#### redux-logger中间件
+
+添加redux-logger中间件记录日志，在每次做dispatch日志触发，进行log打印
+
+1. 安装：`yarn add redux-logger`
+
+2. 如果是reduxjs-toolkit中添加中间件
+   
+   ```js
+   import logger from 'redux-logger'
+   
+   const store = configureStore({
+     reducer,
+     middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(logger),
+     devTools: process.env.NODE_ENV !== 'production',
+   })
+   ```
+   
+   未使用toolkit
+   
+   ```js
+   import thunk from 'redux-thunk'
+   
+   const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
+   // 支持异步dispatch派发异步操作
+   // 添加多个中间件applyMiddleware(xxx,xxx,xxx)，通过composeEnhancers组合一个增强函数
+   const store = createStore(rootReducers, composeEnhancers(applyMiddleware(thunk)))
+   
+   export default store
+   ```
+
+执行dispatch触发输出的日志：
+
+![](./img/iShot_2023-09-01_15.57.25.png)
+
+了解：redux 中间件原理
+
+- Redux 中间件原理：创建一个函数，**包装 store.dispatch**，使用新创建的函数作为新的 dispatch
+
+- 比如下图，logger 就是一个中间件，使用该中间件后 store.dispatch 就是包装后的新 dispatch
+
+- redux 中间件采用了 **洋葱模型** 来实现
+  
+  ![](./img/redux-中间件3.png)
+
+了解redux-logger基本原理
+
+```js
+import { createStore, applyMiddleware } from 'redux'
+import todos from './reducers'
+
+function logger({ getState }) {
+  // next 表示：下一个中间件，如果只使用一个中间，那么 next 就是 store.dispatch（redux 自己的 dispatch 函数）
+  // 那么，next 就表示原始的 dispatch
+  // 也就是：logger中间件包装了 store.dispatch
+  return next => action => {
+    console.log('will dispatch', action)
+    const returnValue = next(action)
+
+    console.log('state after dispatch', getState())
+    return returnValue
+  }
+}
+
+const store = createStore(todos, ['Use Redux'], applyMiddleware(logger))
+```
+
+了解redux-thunk基本原理
+
+```js
+function thunk({ getState }) {
+  // Redux 中间件的写法：const myMiddleware = store => next => action => { /* 此处写 中间件 的代码 */ }
+  return (next) => (action) => {
+    // redux-thunk 的核心代码：
+    // 判断 action 的类型是不是函数
+
+    // 如果是函数，就调用该函数（action），并且传入了 dispatch 和 getState
+    if (typeof action === 'function') {
+      return action(dispatch, getState);
+    }
+
+    // 如果不是函数，就调用下一个中间件（next），将 action 传递过去
+    // 如果没有其他中间件，那么，此处的 next 指的就是：Redux 自己的 dispatch 方法
+    return next(action);
+  };
+}
+
+// 所以，在使用了 redux-thunk 中间件以后，那么，redux 就既可以处理 对象形式的 action 又可以处理 函数形式的 action 了
+// 1 处理对象形式的 action
+dispatch({ type: 'todos/clearAll' }) 
+
+// 2 处理函数型的 action
+export const clearAllAsync = () => {
+  return (dispatch, getState) => {
+    // 在此处，执行异步操作
+    setTimeout(() => {
+      // 异步操作完成后，如果想要修改 redux 中的状态，就必须要
+      // 分发一个 对象形式的 action（同步的 action）
+      dispatch({ type: types.CLEAR_ALL })
+    }, 1000)
+  }
+}
+
+dispatch(clearAllAsync())
+```
+
+state数据状态管理方案
+
+- UI相关的组件内部可以维护的状态，在组件内部自己来维护
+
+- 大部分需要共享的状态，都交给redux来管理和维护
+
+- 从服务器请求的数据 (包括请求的操”)，交给redux来维护
