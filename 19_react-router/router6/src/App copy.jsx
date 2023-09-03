@@ -1,27 +1,13 @@
 // import { useState } from 'react'
 import { styled } from 'styled-components'
-import { NavLink, Routes, Route, Navigate, useRoutes } from 'react-router-dom'
+import { NavLink, Routes, Route, Navigate } from 'react-router-dom'
 import Home from './pages/home'
 import About from './pages/about'
 
 import './App.css'
 
 function App() {
-  // 根据路由表生成对应的路由规则
-  const element = useRoutes([
-    {
-      path: '/home',
-      element: <Home />
-    },
-    {
-      path: '/about',
-      element: <About />
-    },
-    {
-      path: '/',
-      element: <Navigate to='/home' />
-    },
-  ])
+  
   const computedClassName = ({isActive}) => {
     // isActive NavLink是否被点击了
     return isActive ? 'activemq': ''
@@ -38,23 +24,22 @@ function App() {
 
         <div className='right'>
           {/* 路由注册  v5中Switch变为 Routes, 必须使用Routes包裹 */}
-          {/* <Routes> */}
+          <Routes>
             {/* 一级路由 */}
-            {/* <Route path='/home' element={<Home />}>
+            <Route path='/home' element={<Home />}>
               <Route path='/home/a' element={<About />} />
             </Route>
-            <Route path='/about' element={<About />} /> */}
+            <Route path='/about' element={<About />} />
             {/* v5中Redirect组件进行重定向，在v6中 Navigate */}
             {/* <Redirect path='/' to='/home' /> */}
-            {/* <Route path='/' element={<Navigate to='/home' />} /> */}
-          {/* </Routes> */}
-          {/* 使用useRoutes生成路由表 */}
-          {element}
+            <Route path='/' element={<Navigate to='/home' />} />
+          </Routes>
         </div>
       </AppWrapper>
     </>
   )
 }
+
 
 
 export const AppWrapper = styled.div`

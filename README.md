@@ -6630,9 +6630,9 @@ export default App;
 
 component、render、children所有的渲染方式都会提供相同的三个路由属性。
 
-- match
-- location
-- history
+- match 对应路由表中配置的信息
+- location 当前路由的url pathname，url中的查询参数
+- history 一些编程式导航go、push history对象
 
 #### Route 渲染内容的三种方式
 
@@ -7453,11 +7453,180 @@ export default function App() {
 
 1. 内置组件的变化：移除`<Switch/>`，新增`<Routes/>`等等
 
-2. 语法变化：`component={About} 变为 `element={<About/>}`
+2. 语法变化：`component={About}` 变为 `element={\<About/>}`
 
 3. 新增多个hook：`useParams`、`useNavigate`、`useMatch`
 
 4. 官方明确推荐函数式组件
+
+
+
+`<Routes/> 与 <Route/>`
+
+1. v6版本中移出了先前的`<switch>`，引入了新的替代者: `<Routes>`
+
+2. `<Routes>`和 `<Route>`要配合使用，目必须要用`<Routes>`包裹`<Route>`
+
+3. `<Route>`相当于一个if语句，如果其路径与当前 URL 匹配，则呈现其对应的组件.
+
+4. `<Route casesensitive>` 属性用于指定: 配时是否区分大小写 (默认为 false)
+
+5. 当URL发生变化时，`<Routes>`都会查看其所有子`<Route>` 元素以找到最佳匹配并呈现组件。
+
+6. `<Route>`也可以嵌套使用，且可配合` useRoutes()`配置“路由表”，但需要通过`<outlet>`组件来染其子路由
+
+7. 示例：
+   
+   ```jsx
+   <Routes>
+     /* path属性用于定义路径，element属性用于定义当前路径所对应的组件 */
+     <Route path="/login" element={<Login />}></Route>
+     /* 用于定义嵌套路由，home是一级路由，对应的路径/home */
+     <Route path="home" element={<Home />}>
+       /* test1 和 test2 是二级路由，对应的路径是/home/test1 或 /home/test2 */
+       <Route path="test1" element={<Test/>]></Route>
+       <Route path="test2" element={<Test2/>}/></Route>
+      </Route>
+      
+     // Route也可以不写element属性，这时就是用于展示嵌套的路由，所对应的路径是/users/xxx
+     <Route path="users">
+     	<Route path="xxx" element=(<Demo />] /></Route>
+     </Route>
+   </Routes>
+   ```
+
+`<NavLink>`
+
+在v5的时候，使用activeClassName指定选中类名，在v6需要将class类名写一个函数
+
+```jsx
+<ul className='left'>
+  {/* 在v5的时候，使用activeClassName指定选中类名，在v6需要将class类名写一个函数 */}
+  <li><NavLink to='/home' className={computedClassName} >Home</NavLink></li>
+  <li><NavLink to='/about' className={computedClassName} >about</NavLink></li>
+</ul>
+
+const computedClassName = ({isActive}) => {
+    // isActive NavLink是否被点击了
+    return isActive ? 'activemq': ''
+  }
+```
+
+`useRoutes`根据路由表生成对应的路由规则
+
+```jsx
+function App() {
+  // 根据路由表生成对应的路由规则
+  const element = useRoutes([
+    {
+      path: '/home',
+      element: <Home />
+    },
+    {
+      path: '/about',
+      element: <About />
+    },
+    {
+      path: '/',
+      element: <Navigate to='/home' />
+    },
+  ])
+  const computedClassName = ({isActive}) => {
+    // isActive NavLink是否被点击了
+    return isActive ? 'activemq': ''
+  }
+  return (
+    <>
+      <h2>router V6</h2>
+      <AppWrapper>
+        <ul className='left'>
+          {/* 在v5的时候，使用activeClassName指定选中类名，在v6需要将class类名写一个函数 */}
+          <li><NavLink to='/home' className={computedClassName} >Home</NavLink></li>
+          <li><NavLink to='/about' className={computedClassName} >about</NavLink></li>
+        </ul>
+
+        <div className='right'>
+          {/* 路由注册  v5中Switch变为 Routes, 必须使用Routes包裹 */}
+          {/* <Routes>
+            <Route path='/home' element={<Home />}>
+              <Route path='/home/a' element={<About />} />
+            </Route>
+            <Route path='/about' element={<About />} />
+            <Redirect path='/' to='/home' />
+            <Route path='/' element={<Navigate to='/home' />} /> 
+          </Routes> */}
+          {/* 替代了上面 使用useRoutes生成路由表 */}
+          {element}
+        </div>
+      </AppWrapper>
+    </>
+  )
+}
+```
+
+
+
+沿用router v5方式去写
+
+```jsx
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
+import App from './App.jsx'
+import './index.css'
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </React.StrictMode>,
+)
+```
+
+```jsx
+import { NavLink, Routes, Route, Navigate } from 'react-router-dom'
+import Home from './pages/home'
+import About from './pages/about'
+import './App.css'
+
+function App() {
+  return (
+    <>
+      <h2>router V6</h2>
+      <AppWrapper>
+        <ul className='left'>
+          <li><NavLink to='/home'>Home</NavLink></li>
+          <li><NavLink to='/about'>about</NavLink></li>
+        </ul>
+
+        <div className='right'>
+          {/* 路由注册  v5中Switch变为 Routes, 必须使用Routes包裹 */}
+          <Routes>
+            <Route path='/home' element={<Home />} />
+            <Route path='/about' element={<About />} />
+            {/* v5中Redirect组件进行重定向，在v6中 Navigate */}
+            {/* <Redirect path='/' to='/home' /> */}
+            <Route path='/' element={<Navigate to='/home' />} />
+          </Routes>
+        </div>
+      </AppWrapper>
+    </>
+  )
+}
+```
+
+
+
+
+
+通过`createBrowserRouter`创建路由对象
+
+```js
+
+```
+
+
 
 
 
@@ -8920,4 +9089,4 @@ state数据状态管理方案
 
 - 大部分需要共享的状态，都交给redux来管理和维护
 
-- 从服务器请求的数据 (包括请求的操”)，交给redux来维护
+- 从服务器请求的数据 (包括请求的操作)，交给redux来维护
