@@ -1,27 +1,15 @@
 // import { useState } from 'react'
 import { styled } from 'styled-components'
-import { NavLink, Routes, Route, Navigate, useRoutes } from 'react-router-dom'
-import Home from './pages/home'
-import About from './pages/about'
-
+import { NavLink, useRoutes, useInRouterContext } from 'react-router-dom'
+import router from './router'
+import Header from './components/Header'
 import './App.css'
 
 function App() {
   // 根据路由表生成对应的路由规则
-  const element = useRoutes([
-    {
-      path: '/home',
-      element: <Home />
-    },
-    {
-      path: '/about',
-      element: <About />
-    },
-    {
-      path: '/',
-      element: <Navigate to='/home' />
-    },
-  ])
+  const element = useRoutes(router)
+  const rtCtx = useInRouterContext()
+  console.log("🚀 rtCtx:", rtCtx)
   const computedClassName = ({isActive}) => {
     // isActive NavLink是否被点击了
     return isActive ? 'activemq': ''
@@ -29,10 +17,12 @@ function App() {
   return (
     <>
       <h2>router V6</h2>
+      <Header />
       <AppWrapper>
         <ul className='left'>
           {/* 在v5的时候，使用activeClassName指定选中类名，在v6需要将class类名写一个函数 */}
           <li><NavLink to='/home' className={computedClassName} >Home</NavLink></li>
+          <li><NavLink to='/users' className={computedClassName} >users</NavLink></li>
           <li><NavLink to='/about' className={computedClassName} >about</NavLink></li>
         </ul>
 

@@ -7459,9 +7459,25 @@ export default function App() {
 
 4. 官方明确推荐函数式组件
 
+BrowserRouter|HashRouter包裹路由组件
 
+```jsx
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
+import App from './App.jsx'
+import './index.css'
 
-`<Routes/> 与 <Route/>`
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </React.StrictMode>,
+)
+```
+
+#### `<Routes/> 与 <Route/>`
 
 1. v6版本中移出了先前的`<switch>`，引入了新的替代者: `<Routes>`
 
@@ -7487,15 +7503,15 @@ export default function App() {
        <Route path="test1" element={<Test/>]></Route>
        <Route path="test2" element={<Test2/>}/></Route>
       </Route>
-      
+   
      // Route也可以不写element属性，这时就是用于展示嵌套的路由，所对应的路径是/users/xxx
      <Route path="users">
-     	<Route path="xxx" element=(<Demo />] /></Route>
+         <Route path="xxx" element=(<Demo />] /></Route>
      </Route>
    </Routes>
    ```
 
-`<NavLink>`
+#### `<NavLink>`
 
 在v5的时候，使用activeClassName指定选中类名，在v6需要将class类名写一个函数
 
@@ -7511,6 +7527,8 @@ const computedClassName = ({isActive}) => {
     return isActive ? 'activemq': ''
   }
 ```
+
+#### useRoutes路由表
 
 `useRoutes`根据路由表生成对应的路由规则
 
@@ -7564,73 +7582,419 @@ function App() {
 }
 ```
 
+#### 嵌套路由
 
+    在路由组件下，例如请求/home，渲染`<Home />`组件，通过`<Outlet />`展示二级路由组件信息
 
-沿用router v5方式去写
+路由表中添加children添加子级路由
 
-```jsx
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import App from './App.jsx'
-import './index.css'
-
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </React.StrictMode>,
-)
+```js
+const router = [
+  {
+    path: '/home',
+    element: <Home />,
+    children: [
+      { path: '/home/news', element: <News/> },
+      { path: '/home/message', element: <Message/> },
+    ]
+  },
+  {
+    path: '/about',
+    element: <About />
+  },
+  {
+    path: '/',
+    element: <Navigate to='/home' />
+  },
+  {
+    path: '*',
+    element: <NoMatch/>
+  },
+]
 ```
 
+`<Link/>` to 中v5需要写绝对路径 /home/news，在v6 可不要写 news或者./news
+
 ```jsx
-import { NavLink, Routes, Route, Navigate } from 'react-router-dom'
-import Home from './pages/home'
-import About from './pages/about'
-import './App.css'
+import { NavLink, Outlet } from 'react-router-dom'
+import { HomeWrapper } from './style'
+
+export default function Home(){
+  // const match = useMatch() // 传入url，判断当前url是否请求路由url是否一直
+  // console.log(match);
+  // const location = useLocation();
+  // console.log("🚀 ~ , location",location)
+  return (
+    <HomeWrapper>
+      <h3>Home view content</h3>
+      <ul className='tag'>
+        <li><NavLink to={`news`}>news</NavLink></li>
+        <li><NavLink to={`message`}>message</NavLink></li>
+      </ul>
+      {/* 二级路由出口 /home/xxxx */}
+      <Outlet />
+    </HomeWrapper>
+  )
+}
+```
+
+#### Params参数
+
+路由表配置动态参数
+
+```js
+const router = [
+    ... ...
+    {
+    path: '/users',
+    element: <Users />,
+    children: [
+      { path: '/users/:info', element: <User/> }
+    ]
+  },
+]
+```
+
+通过useParams获取params参数，当前匹配路由的 params 参数，类似5.x中的match.params
+
+```jsx
+import { useLocation, Link, useParams, Outlet, useMatch } from 'react-router-dom'
+
+export default function Users() {
+  const location = useLocation()
+  console.log(location);
+  return (
+    <div style={{background: 'pink'}}>
+      <h3>Users</h3>
+      <ul>
+        <li><Link to={`/users/abc`}>users/acb</Link></li>
+        <li><Link to={`/users/123`}>users/123</Link></li>
+        <li><Link to={`/users/props-v-state`}>props-v-state</Link></li>
+      </ul>
+      <Outlet/>
+    </div>
+  )
+}
+
+export function User() {
+  // 通过useParams获取路由动态参数
+  const match = useMatch('/users/:info')
+  console.log("🚀 ~ User ~ match:", match)
+  const { info } = useParams()
+  return <h3>{info}</h3>
+}
+```
+
+#### Search参数
+
+useSearchParams 获取Search即query 
+
+作用: 用于读取和修改当前位置的 URL 中的查询字符串。
+返回一个包含两个值的数组，内容分别为: 当前的seaech参数、更新search的函数.
+
+```jsx
+import { useLocation, Link, useParams, Outlet, useMatch, useSearchParams } from 'react-router-dom'
+
+export default function Users() {
+  const location = useLocation()
+  console.log(location);
+  return (
+    <div style={{background: 'pink'}}>
+      <h3>Users</h3>
+      <ul>
+        {/* 请求是获取query参数 */}
+        <li><Link to={`/users/abc?id=1&name=red`}>users/acb</Link></li>
+        <li><Link to={`/users/123?id=2&name=green`}>users/123</Link></li>
+        <li><Link to={`/users/props-v-state?id=3&name=blue`}>props-v-state</Link></li>
+      </ul>
+      <Outlet/>
+    </div>
+  )
+}
+
+export function User() {
+  // 通过useParams获取路由动态参数
+  const { info } = useParams()
+  
+  // 通过useSearchParams 获取Search即query
+  const [search, setSearch] = useSearchParams()
+  console.log("🚀 ~ search:", search.get('id'), search.get('name'))
+  return (<div>
+    <h3>{info}</h3>
+    <p>search id:{search.get('id')} name:{search.get('name')} </p>
+    {/* setSearch会修改url的query参数，同时页面会渲染 */}
+    <button onClick={() => setSearch('id=5&name=lol')}>更新search 参数</button>
+  </div>)
+}
+```
+
+![](./img/2023-09-04%2018.17.51.gif)
+
+#### State参数
+
+v5中传递state <Link to={{ path:'/a', state:{id, title} }} /> to传递一个对象
+
+v6中只写一个state参数 <Link to='/a', state={{ id, title }}  />
+
+通过useLocation().state 获取state对象
+
+```jsx
+import {useState} from 'react'
+import { useNavigate, Link, Outlet, useLocation } from "react-router-dom";
+
+export default function Message() {
+  const [arr/* , setArr */] = useState([
+    {id:1, content: 'message01'},
+    {id:2, content: 'message02'},
+    {id:3, content: 'message03'},
+  ])
+  return (
+    <div>
+      message
+      <ul>
+        {arr.map((item) =>
+            <li key={item.id} >
+             {/* 传递state参数 */}
+              <Link to='/home/message/detail'
+                state={{ 
+                  id: item.id,
+                  title: item.content
+                }}>
+                {`detail${item.id}`}
+              </Link>
+            </li>
+        )}
+      </ul>
+      {/* 展示三级路由 /home/message/detail */}
+      <Outlet />
+    </div>
+  )
+}
+
+export default function Detail() {
+  const state = useLocation().state || {} // 传递state
+  return (
+    <div>
+      <ul>
+        <li>Id: {state.id || null}</li>
+        <li>Title: {state.title || null}</li>
+        <li>Content: 变得更强</li>
+      </ul>
+    </div>
+  )
+}
+```
+
+#### useNavigate编程导航
+
+Navigate只要被渲染 就会触发路由跳转，replace=true为replace模式，如果为false为push模式
+
+```jsx
+import { useState, useEffect } from 'react'
+import { useNavigate, Navigate } from "react-router-dom"
+
+export default function About() {
+  const [sum, setSum] = useState(0)
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (sum === 2) navigate('/')
+  }, [sum])
+
+  const goDetail = () => {
+    navigate('/home/message/detail', {
+      replace: true,
+      state: { id: 999, title: '编程跳转' }
+    })
+  }
+
+  return (
+    <div>
+      <h3>about</h3> <br/>
+      {/* Navigate只要被渲染 就会触发路由跳转，replace=true为replace模式，如果为false为push模式 */}
+      {sum === 2? <Navigate to='/'/> :  <p>当前sum: {sum}</p>}
+      <button onClick={() => navigate('/')} >导航至/</button>
+      <button onClick={() => goDetail()} >导航至/home/message/detail</button>
+      <button onClick={() => setSum(2)} >sum值为2跳转 /</button>
+    </div>
+  )
+}
+
+```
+
+#### useInRouterContext
+
+如果组件在 `<Router>` 的上下文中呈现，则 `useInRouterContext` 钩子返回 `true` ，否则 `false`；就是被BrowserRouter组件包裹中App组件，如果是返回true
+
+```js
+<BrowserRouter>
+  <App />
+</BrowserRouter>
+
+function App() {
+  const rtCtx = useInRouterContext()
+  console.log("🚀 rtCtx:", rtCtx) // true app组件在路由环境下
+  
+  return <>app</>
+}
+```
+
+#### useNavigationType()
+
+1. 作用:返回当前的导航类型(用户是如何来到当前页面的)
+
+2. 返回值: POP、PUSH、REPLACE
+
+3. 备注:POP 是指在浏览器中直接打开了这个路由组件(刷新页面)
+
+```jsx
+import { useNavigationType } from 'react-router-dom'
+
+export default function News() {
+  // 比如 <Link to='/news' replace=false /> 
+  // replace=false navTyep为push，true此时为REPLACE， 页面刷新为pop
+  const navTyep = useNavigationType() 
+
+  console.log(navTyep); 
+  return (
+    <div style={{background: 'pink'}}>
+      <h3>news</h3>
+    </div>
+  )
+```
+
+#### useOutlet()
+
+    用来呈现当前组件中要渲杂的嵌套路由
+
+比如当前处于home组件，想输出home下的路由组件
+
+```jsx
+const result = useoutlet(,
+console.log(result)
+// 如果最套路由没有挂载，则result为nul1
+// 如果嵌套路由已经挂载，则展示眠套的路由对象
+```
+
+#### useResolvedPath()
+
+给定一个URL值，解析其中的: path、search、hash值.
+
+```js
+console.log(useResolvedPath('/news?id=001&type=plc#ok'));
+// 解析结果
+// {pathname: '/news', search: '?id=001&type=plc', hash: '#ok'}
+```
+
+#### createBrowserRouter 推荐
+
+通过`createBrowserRouter`创建路由对象
+
+```jsx
+import { createBrowserRouter, Navigate } from 'react-router-dom'
+import Layout from '../pages/Layout'
+import Home from '../pages/home'
+import Users, { User } from '../pages/users'
+import About from '../pages/about'
+import News from '../pages/home/news'
+import View from '../pages/home/view'
+import Message from '../pages/home/message'
+import Detail from '../pages/home/message/detail'
+import NoMatch from '../pages/no-match';
+
+// router路由对象 类似于vue-router
+const router = createBrowserRouter([
+  // 一级路由 / 或者 /home /user都在这个对象下
+  {
+    id: 'root',
+    path: "/",
+    loader: async () => { // loader属性，数据加载即在
+      const res = await Promise.resolve('ok')
+      return res
+      // return fetch(`/api/teams/${params.teamId}.json`);
+    },
+    Component: Layout,
+    children:[ // 二级路由
+      {
+        index: true, // 为true，当访问/ 渲染home组件， 注意定义index，不能添加children
+        Component: Home,
+      },
+      {
+        path: 'home',
+        Component: Home,
+        children: [
+          {
+            index: true,
+            Component: News
+          },
+          {
+            path: 'news',
+            Component: News
+          },
+          {
+            path: 'message', // /home/message
+            Component: Message,
+            children: [
+              {
+                index: true,
+                element: <Navigate to='/home/message/detail' state={{ id: 1, title: 'message01' }} />
+              },
+              {
+                path: 'detail', // /home/message/detail
+                Component: Detail,
+              }
+            ]
+          },
+          {
+            path: ':info', // 兜底的 当访问的 /home/abc /home/12 param={info: abc|12}
+            Component: View
+          }
+        ]
+      },
+      {
+        path: "users",
+        element: <Users/>,
+        children: [
+          {
+            path: ':userId',
+            element: <User />
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'about',
+    path: '/about',
+    element: <About/>
+  },
+  {
+    id: 'NoMatch',
+    path: '*',
+    element: <NoMatch/>
+  },
+])
+
+export default router
+```
+
+RouterProvider组件渲染路由
+
+```jsx
+import { RouterProvider } from 'react-router-dom'
+import router from './router'
 
 function App() {
   return (
     <>
       <h2>router V6</h2>
-      <AppWrapper>
-        <ul className='left'>
-          <li><NavLink to='/home'>Home</NavLink></li>
-          <li><NavLink to='/about'>about</NavLink></li>
-        </ul>
-
-        <div className='right'>
-          {/* 路由注册  v5中Switch变为 Routes, 必须使用Routes包裹 */}
-          <Routes>
-            <Route path='/home' element={<Home />} />
-            <Route path='/about' element={<About />} />
-            {/* v5中Redirect组件进行重定向，在v6中 Navigate */}
-            {/* <Redirect path='/' to='/home' /> */}
-            <Route path='/' element={<Navigate to='/home' />} />
-          </Routes>
-        </div>
-      </AppWrapper>
+      {/* 之前同 element = useRouter([...]) */}
+      <RouterProvider router={router} />
     </>
   )
 }
+
+export default App
 ```
-
-
-
-
-
-通过`createBrowserRouter`创建路由对象
-
-```js
-
-```
-
-
-
-
-
-
 
 ## Redux状态管理
 
