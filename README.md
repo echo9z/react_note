@@ -7715,7 +7715,7 @@ export default function Users() {
 export function User() {
   // 通过useParams获取路由动态参数
   const { info } = useParams()
-  
+
   // 通过useSearchParams 获取Search即query
   const [search, setSearch] = useSearchParams()
   console.log("🚀 ~ search:", search.get('id'), search.get('name'))
@@ -7818,7 +7818,6 @@ export default function About() {
     </div>
   )
 }
-
 ```
 
 #### useInRouterContext
@@ -7833,7 +7832,7 @@ export default function About() {
 function App() {
   const rtCtx = useInRouterContext()
   console.log("🚀 rtCtx:", rtCtx) // true app组件在路由环境下
-  
+
   return <>app</>
 }
 ```
@@ -9454,3 +9453,242 @@ state数据状态管理方案
 - 大部分需要共享的状态，都交给redux来管理和维护
 
 - 从服务器请求的数据 (包括请求的操作)，交给redux来维护
+
+
+
+### Zustand
+
+> [Zustand](https://links.jianshu.com/go?to=https%3A%2F%2Fgithub.com%2Fpmndrs%2Fzustand) 是由 [Jotai](https://links.jianshu.com/go?to=https%3A%2F%2Fjotai.org%2F) 和 [React springs](https://links.jianshu.com/go?to=https%3A%2F%2Freact-spring.dev%2F) 的开发人员构建的快速且可扩展的状态管理解决方案, Zustand 以简单被大家所知, 它使用 hooks 来管理状态无需样板代码
+
+**`"Zustand" 只是德语的"state"`**
+
+有很多的流行 React 状态管理工具, 但以下是您更喜欢使用 `Zustand` 的一些原因
+
+- 更少的样板代码
+- Zustand 只在 state 的值改变时渲染组件, 通常可以处理状态的改变而无需渲染代码
+- 状态管理通过简单定义的操作进行集中和更新, 在这方面和 Redux 类似, 但是又和 Redux 不太类似, Redux 开发必须创建 reducer、action、dispatch来处理状态, Zustand 让它变得更加容易
+- 使用 hooks 来管理 states, Hooks 在 react 中很流行, 因此是一个很受欢迎的状态管理库
+- Zustand 使用简单使用和简单实现的代码
+- 通过消除使用 `Context Provides` 从而使代码更短、更易读
+
+创建一个新的React应用并且安装 `Zustand` 依赖
+
+```bash
+pnpm create vite zustand --template react
+cd zustand
+npm install zustand
+```
+
+#### 基本示例
+
+需要定义一个 `store` 希望包含应用程序使用的所有状态和函数
+
+```js
+import { create } from 'zustand'
+import { devtools, persist, createJSONStorage } from 'zustand/middleware'
+
+const useBearStore = create(
+  devtools( // redux-devtools
+    persist( // windows.localStorage 持久化
+      (set, get) => ({ // set(newState object) get()返回之前state对象
+        bears: 0,
+        preincrement: () => set((state) => ({ bears: state.bears + 1 })),
+        predecrement: () => set(() => ({ bears: get().bears - 1 })),
+        removeAllBears: () => set({ bears: 0 }),
+        add: (payload) => set(state => ({ bears: state.bears + payload })),
+        sub: (payload) => set(state => ({ bears: state.bears - payload })),
+      }),
+      { 
+        name: "bears",
+        // 默认使用'localStorage'
+        storage: createJSONStorage(() => sessionStorage)
+      }
+    ),
+  )
+)
+export default useBearStore
+```
+
+在组件中获取store中state数据，更新 state
+
+```jsx
+import { useEffect } from 'react'
+import { useBear, useArticles } from './store'
+import './App.css'
+
+function App() {
+  const bears = useBear((state) => state.bears)
+  const preincrement = useBear((state) => state.preincrement)
+  const predecrement = useBear((state) => state.predecrement)
+  
+  const add = useBear((state) => state.add)
+  const sub = useBear((state) => state.sub)
+
+  return (
+    <>
+      <h1>zustand</h1>
+      <div className="card">
+        <p>bears is {bears}</p>
+        <button onClick={() => preincrement()}>+1</button>
+        <button onClick={() => predecrement()}>-1</button>
+        <button onClick={() => add(5)}> {/*更新 state*/}
+          add +5
+        </button>
+        <button onClick={() => sub(10)}>
+          sub -10
+        </button>
+      </div>
+    </>
+  )
+}
+
+export default App
+```
+
+访问存储状态
+
+定义上面的状态时, 使用 `set()` 方法; 假设我们在一个程序里, 我们需要存储 `其他地方` 的值添加到我们的状态, 为此, 将使用 `Zustand` 提供的方法 `get()` 代替,
+
+```js
+// 第二个参数 get
+const useStore = create((set,get) => ({
+  votes: 0,
+  action: () => {
+    // 使用 get()
+    const userVotes = get().votes
+    // ...
+  }
+}));
+```
+
+#### 处理异步数据
+
+`Zustand` 让存储异步数据变得容易, 这里, 只需要发出 `fetch` 请求和 `set()` 方法来设置我们的状态值
+
+这里使用immerjs库，需要安装`npm install immer`
+
+```jsx
+import { create } from 'zustand'
+import { devtools, persist, createJSONStorage } from 'zustand/middleware'
+import { immer } from 'zustand/middleware/immer'
+
+const useArticlesStore = create(
+  devtools(
+    persist( // windows.localStorage 持久化
+      immer((set) => ({
+        articles: [],
+        count: 0,
+        // 使用了immer，不需要通过set返回一个新state对象 set({ count: state.count+num })
+        increment: (num) => set((state) => { state.count += num }),
+        decrement: (num) => set((state) => { state.count -= num }),
+        // 添加异步操作
+        fetchArticle: async (pond) => {
+          const response = await fetch(pond)
+          const { data } = await response.json() 
+          set({ articles: data.list })
+        },
+      })),
+      { 
+        name: "art",
+        // 默认使用'localStorage'
+        storage: createJSONStorage(() => sessionStorage)
+      }
+    ),
+  )
+)
+export default useArticlesStore
+```
+
+组件中调用异步函数
+
+```jsx
+import { useEffect } from 'react'
+import { useBear, useArticles } from './store'
+import './App.css'
+
+function App() {
+  // article
+  const count = useArticles((state) => state.count)
+  const increment = useArticles((state) => state.increment)
+  const decrement = useArticles((state) => state.decrement)
+  const articles = useArticles((state) => state.articles)
+  const fetchArticle = useArticles((state) => state.fetchArticle)
+
+  useEffect(() => {
+    fetchArticle('https://www.echouu.com/api/articles/list?page=1&pageSize=5')
+  }, [])
+
+  return (
+    <>
+      <h1>zustand</h1>
+      <div className="card">
+        <p>count is {count}</p>
+        <button onClick={() => increment(1)}>+1</button>
+        <button onClick={() => decrement(1)}>-1</button>
+
+        <hr/>
+        <ul>
+          {articles.map((item) => <li key={item.id}>{item.title}</li>)}
+        </ul>
+      </div>
+    </>
+  )
+}
+
+export default App
+```
+
+#### zustand多个切片
+
+多个zustand 切片合并，比react-toolkit更简单的切片 具体看
+
+> https://docs.pmnd.rs/zustand/guides/slices-pattern
+
+创建不同store
+
+```js
+export const createFishSlice = (set) => ({
+  fishes: 0,
+  addFish: () => set((state) => ({ fishes: state.fishes + 1 })),
+})
+
+export const createBearSlice = (set) => ({
+  bears: 0,
+  addBear: () => set((state) => ({ bears: state.bears + 1 })),
+  eatFish: () => set((state) => ({ fishes: state.fishes - 1 })),
+})
+```
+
+将两个存储合并到一个存储中
+
+```js
+import { create } from 'zustand'
+import { createBearSlice } from './bearSlice'
+import { createFishSlice } from './fishSlice'
+
+export const useBoundStore = create((...a) => ({
+  ...createBearSlice(...a),
+  ...createFishSlice(...a),
+}))
+```
+
+在组件中使用
+
+```jsx
+import { useBoundStore } from './stores/useBoundStore'
+
+function App() {
+  const bears = useBoundStore((state) => state.bears)
+  const fishes = useBoundStore((state) => state.fishes)
+  const addBear = useBoundStore((state) => state.addBear)
+  return (
+    <div>
+      <h2>Number of bears: {bears}</h2>
+      <h2>Number of fishes: {fishes}</h2>
+      <button onClick={() => addBear()}>Add a bear</button>
+    </div>
+  )
+}
+
+export default App
+```
